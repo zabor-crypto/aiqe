@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# AIQE local state (never belongs in a repository)
+.aiqe/
+aiqe-local/
+
+# Local-only sanitisation material — private literals must never be committed
+tools/public-scan/private-*.txt

@@ -1,0 +1,33 @@
+# AIQE public sanitisation patterns
+#
+# Format:  CLASS_NAME:::EXTENDED_REGEX
+# Matching is case-insensitive. Lines starting with '#' are comments.
+#
+# RULE: this file is PUBLIC. It may contain only generic pattern CLASSES.
+# It must never contain literal private strategy names, project names, bucket
+# names, hostnames, or usernames -- a denylist that names its own secrets
+# publishes exactly what it exists to suppress. Literal private terms live in
+# a local-only file that is never committed (see README.md in this directory).
+#
+# RULE: no overbroad patterns. A rule that bans all version strings, all digits,
+# or all hex produces noise, gets disabled, and a disabled gate is not a gate.
+
+ABSOLUTE_HOME_PATH:::(/Users/|/home/)[A-Za-z0-9._-]+/
+PERSONAL_EMAIL:::[A-Za-z0-9._%+-]+@(gmail|googlemail|yahoo|outlook|hotmail|proton|protonmail|icloud|me)\.[A-Za-z]{2,}
+SSH_GIT_REMOTE:::git@[A-Za-z0-9.-]+:[A-Za-z0-9._/-]+
+INTERNAL_HOSTNAME:::[A-Za-z0-9-]+\.(local|internal|corp|lan|intranet)([^A-Za-z0-9]|$)
+CLOUD_BUCKET_URI:::(s3://|gs://|az://|abfss://)[a-z0-9][a-z0-9._-]+
+PRIVATE_KEY_BLOCK:::-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----
+GITHUB_TOKEN:::gh[pousr]_[A-Za-z0-9]{20,}
+AWS_ACCESS_KEY:::AKIA[0-9A-Z]{16}
+SLACK_TOKEN:::xox[baprs]-[A-Za-z0-9-]{10,}
+GENERIC_SECRET_ASSIGNMENT:::(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token|password)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{8,}
+CRYPTO_WALLET_EVM:::0x[0-9a-fA-F]{40}
+GIT_SHA_40:::[^0-9a-fA-F]([0-9a-f]{40})([^0-9a-fA-F]|$)
+BENCHMARK_ECONOMICS:::\$[[:space:]]?[0-9][0-9,]*(\.[0-9]+|[0-9])
+BENCHMARK_ECONOMICS_SUFFIXED:::\$[[:space:]]?[0-9]+(\.[0-9]+)?[kKmMbB]([^A-Za-z0-9]|$)
+INTERNAL_PHASE_ID:::(^|[^A-Za-z])OSS-(F?[0-9]{1,2}R?)([^A-Za-z0-9]|$)
+INTERNAL_AUTHORITY_ID:::AIQE_(OSS|CANONICAL)_[A-Z0-9_]+
+INTERNAL_ROLE_ID:::[A-Z_]+_(SUPERVISOR|IMPLEMENTER|ARCHITECT)([^A-Za-z0-9]|$)
+INTERNAL_CORRECTION_ID:::(^|[^A-Za-z])SC-B?[0-9]+([^A-Za-z0-9]|$)
+TRANSCRIPT_MARKER:::^(Human|Assistant|User|System):[[:space:]]

@@ -1,0 +1,48 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-scan:
+    name: public sanitisation scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run public scan
+        run: ./tools/public-scan/public-scan.sh
+
+  links:
+    name: markdown link check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check relative links resolve
+        run: |
+          set -uo pipefail
+          rc=0
+          while IFS= read -r -d '' file; do
+            dir=$(dirname "$file")
+            targets=$(grep -oE '\]\([^)#]+\)' "$file" \
+              | sed -E 's/^\]\(//; s/\)$//' \
+              | grep -vE '^(https?:|mailto:)' || true)
+            if [ -z "$targets" ]; then continue; fi
+            while IFS= read -r target; do
+              if [ -z "$target" ]; then continue; fi
+              if [ ! -e "$dir/$target" ]; then
+                echo "BROKEN LINK  $file -> $target"
+                rc=1
+              fi
+            done <<< "$targets"
+          done < <(find . -name '*.md' -not -path './.git/*' -print0)
+          if [ "$rc" -ne 0 ]; then
+            echo "Broken relative links found."
+            exit 1
+          fi
+          echo "All relative markdown links resolve."
