@@ -1616,7 +1616,7 @@
           "--no-renames"
         ]
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      merge in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_MERGE_IN_PROGRESS\n      a merge is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      merge in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_MERGE_IN_PROGRESS\n      A merge is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [
@@ -1737,7 +1737,7 @@
           "--no-renames"
         ]
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      rebase in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  FINDING      OPERATION_REBASE_IN_PROGRESS\n      a rebase is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  3 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      rebase in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  FINDING      OPERATION_REBASE_IN_PROGRESS\n      A rebase is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  3 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [
@@ -1857,7 +1857,7 @@
           "--no-renames"
         ]
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      cherry-pick in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_CHERRY_PICK_IN_PROGRESS\n      a cherry-pick is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      cherry-pick in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_CHERRY_PICK_IN_PROGRESS\n      A cherry-pick is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [

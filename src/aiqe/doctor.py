@@ -36,12 +36,12 @@ from .gitq import GitRunner, parse_status_porcelain_v2, parse_version
 #: Files whose presence in the Git directory marks an operation in progress.
 #: Each is a plain existence check inside the repository's own Git directory.
 _OPERATION_MARKERS = (
-    (b"MERGE_HEAD", f.OPERATION_MERGE_IN_PROGRESS, "a merge is in progress"),
-    (b"CHERRY_PICK_HEAD", f.OPERATION_CHERRY_PICK_IN_PROGRESS, "a cherry-pick is in progress"),
-    (b"REVERT_HEAD", f.OPERATION_REVERT_IN_PROGRESS, "a revert is in progress"),
-    (b"BISECT_LOG", f.OPERATION_BISECT_IN_PROGRESS, "a bisect is in progress"),
-    (b"rebase-merge", f.OPERATION_REBASE_IN_PROGRESS, "a rebase is in progress"),
-    (b"rebase-apply", f.OPERATION_REBASE_IN_PROGRESS, "a rebase is in progress"),
+    (b"MERGE_HEAD", f.OPERATION_MERGE_IN_PROGRESS, "A merge is in progress"),
+    (b"CHERRY_PICK_HEAD", f.OPERATION_CHERRY_PICK_IN_PROGRESS, "A cherry-pick is in progress"),
+    (b"REVERT_HEAD", f.OPERATION_REVERT_IN_PROGRESS, "A revert is in progress"),
+    (b"BISECT_LOG", f.OPERATION_BISECT_IN_PROGRESS, "A bisect is in progress"),
+    (b"rebase-merge", f.OPERATION_REBASE_IN_PROGRESS, "A rebase is in progress"),
+    (b"rebase-apply", f.OPERATION_REBASE_IN_PROGRESS, "A rebase is in progress"),
 )
 
 #: Claude Code permission entries that grant unconstrained shell access.
