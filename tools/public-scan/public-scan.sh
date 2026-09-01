@@ -34,9 +34,14 @@ cd "$root" || exit 2
 files=()
 while IFS= read -r -d '' f; do
   case "$f" in
-    ./.git/*) continue ;;
+    # In an ordinary worktree .git is a directory; in a linked worktree it is a
+    # pointer file. Neither is repository content.
+    ./.git|./.git/*) continue ;;
     ./tools/public-scan/patterns.txt) continue ;;
     ./tools/public-scan/private-literals.txt) continue ;;
+    # The positive control corpus necessarily contains the shapes the scanner
+    # looks for. self-test.sh scans it deliberately, in a temporary tree.
+    ./tools/public-scan/self-test-corpus.txt) continue ;;
   esac
   if LC_ALL=C grep -qI . "$f" 2>/dev/null; then
     files+=("$f")

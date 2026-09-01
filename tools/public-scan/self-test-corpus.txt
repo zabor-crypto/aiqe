@@ -1,0 +1,37 @@
+# Positive control corpus for the public sanitisation scanner.
+#
+# Every pattern class in patterns.txt must match at least one line in this
+# file. self-test.sh asserts exactly that, so a class added without a control
+# fails the self-test, and a class that stops matching after being tightened
+# fails it too.
+#
+# Every value here is a synthetic, non-functional placeholder. None is a real
+# credential, host, account or identifier.
+#
+# This file is excluded from the scan itself, for the same reason patterns.txt
+# is: a corpus of the shapes the scanner looks for necessarily contains them.
+# Human review covers it. Nothing may be added here that is not a deliberate
+# control.
+
+ABSOLUTE_HOME_PATH      /Users/example-person/projects/thing
+ABSOLUTE_HOME_PATH      /home/example-person/projects/thing
+PERSONAL_EMAIL          example.person@gmail.com
+SSH_GIT_REMOTE          git@github.example:owner/repository
+INTERNAL_HOSTNAME       build-box.internal is unreachable
+INTERNAL_HOSTNAME       trailing at end of line: workstation.local
+INTERNAL_HOSTNAME       before a sentence period: workstation.corp.
+CLOUD_BUCKET_URI        s3://example-bucket/prefix/object
+PRIVATE_KEY_BLOCK       -----BEGIN RSA PRIVATE KEY-----
+GITHUB_TOKEN            ghp_EXAMPLEEXAMPLEEXAMPLEEXAMPLE00
+AWS_ACCESS_KEY          AKIAIOSFODNN7EXAMPLE
+SLACK_TOKEN             xoxb-EXAMPLE-EXAMPLE-EXAMPLE
+GENERIC_SECRET_ASSIGNMENT   api_key = "example-placeholder-value"
+CRYPTO_WALLET_EVM       0x00000000000000000000000000000000000000ff
+GIT_SHA_40              commit 0123456789abcdef0123456789abcdef01234567 here
+BENCHMARK_ECONOMICS     saved $1,250.75 per run
+BENCHMARK_ECONOMICS_SUFFIXED    a budget of $5k for the quarter
+INTERNAL_PHASE_ID       phase OSS-7 is pending
+INTERNAL_AUTHORITY_ID   AIQE_CANONICAL_EXAMPLE_AUTHORITY
+INTERNAL_ROLE_ID        EXAMPLE_ROLE_SUPERVISOR signed off
+INTERNAL_CORRECTION_ID  correction SC-B9 applies
+Human: this line is a transcript marker

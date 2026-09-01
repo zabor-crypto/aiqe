@@ -18,6 +18,27 @@ exit 2   the scanner could not run
 
 It runs in CI on every push and pull request, and must be run locally before any push.
 
+## Testing the scanner itself
+
+```
+./tools/public-scan/self-test.sh
+```
+
+A gate that has never been shown to fail is not a gate. The self-test builds a temporary
+tree, scans a corpus of synthetic positive controls, and asserts that **every** declared
+pattern class fires. A class added without a control fails the self-test, and so does a
+class that was tightened until it no longer detects anything.
+
+It then scans a second tree of benign content and asserts a clean result. That half
+records the strings that previously produced false positives, so that a later
+"simplification" which reintroduces the noise is caught here rather than discovered by
+someone switching the gate off.
+
+The controls live in [`self-test-corpus.txt`](self-test-corpus.txt), which is excluded
+from the scan for the same reason `patterns.txt` is: a corpus of the shapes the scanner
+looks for necessarily contains them. Every value in it is a synthetic, non-functional
+placeholder.
+
 ## What it covers
 
 Every text file in the working tree — Markdown, JSON, YAML, shell, and SVG once SVG
@@ -47,6 +68,12 @@ It is covered by `.gitignore`. CI runs the public classes; a local run applies b
 **No overbroad rules.** Banning every version string, every digit, or every hex sequence
 produces noise, the noise gets ignored, the rule gets disabled, and a disabled gate is
 not a gate. Patterns are narrow on purpose.
+
+The corollary: a pattern may be **tightened** against a demonstrated false positive, and
+must never be widened into an ignore. A tightening is only accepted with the false
+positive recorded in `self-test.sh` and the class's positive control still firing. If a
+legitimate file trips a pattern, the answer is a narrower pattern or a different file —
+not a broader exception.
 
 ## What it does not prove
 
