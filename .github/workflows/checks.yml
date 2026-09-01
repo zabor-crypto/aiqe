@@ -10,11 +10,70 @@ permissions:
   contents: read
 
 jobs:
+  tests:
+    name: tests (${{ matrix.os }}, python ${{ matrix.python }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # macOS is the supported target for v1. Linux is exercised here so
+        # that the suite is genuinely run on it, but running green in CI is
+        # not the same thing as a supported release artifact, and this file
+        # does not make that claim.
+        os: [macos-latest, ubuntu-latest]
+        python: ["3.9", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Report toolchain
+        run: |
+          python --version
+          git --version
+      - name: Run the test suite
+        run: python -m unittest discover -s tests -t . --verbose
+
+  doctor-benchmark:
+    name: doctor fixtures and negative controls
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run the Doctor benchmark family
+        run: python bench/run-doctor-fixtures.py --output "${RUNNER_TEMP}/fresh-results.json"
+      - name: Compare the fresh run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/fresh-results.json"
+
+  install:
+    name: install from a clean environment
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install into an isolated virtual environment
+        run: |
+          python -m venv /tmp/aiqe-venv
+          /tmp/aiqe-venv/bin/python -m pip install --quiet --upgrade pip
+          /tmp/aiqe-venv/bin/python -m pip install --quiet .
+      - name: Run the installed entry point
+        run: |
+          /tmp/aiqe-venv/bin/aiqe --version
+          /tmp/aiqe-venv/bin/aiqe doctor
+          /tmp/aiqe-venv/bin/aiqe doctor --format json > /dev/null
+          echo "Installed console script works."
+
   public-scan:
     name: public sanitisation scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Test the scanner before trusting it
+        run: ./tools/public-scan/self-test.sh
       - name: Run public scan
         run: ./tools/public-scan/public-scan.sh
 

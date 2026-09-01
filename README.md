@@ -8,18 +8,51 @@ runs your project-native checks, and shows what remains unknown.
 
 ---
 
-**Status: architecture and benchmark protocol frozen. No installable artifact yet.**
+**Status: `doctor` is implemented and tested. The rest of the surface is still specification.**
 
-Nothing below is a claim about software that exists today. This repository currently
-contains the frozen product specification, the benchmark protocol, and the bootstrap
-tooling. Every command shown is marked as a design target until it is implemented and
-its behaviour is demonstrated by a retained artifact.
+`aiqe doctor` is real: it runs, it is covered by a deterministic test suite, and its
+safety contract is measured from outside the process rather than self-reported. Every
+other command below — `init`, `task`, `check`, `commit`, `receipt` — remains a design
+target, is not implemented, and is not stubbed. Nothing here is released and no version
+is tagged.
 
-`DESIGN TARGET — specified, not yet implemented.`
+The output below was produced by `aiqe doctor` against benchmark case
+`checkin_filter_configured`, a synthetic fixture built from nothing by
+[`bench/fixtures/doctor/builders.py`](bench/fixtures/doctor/builders.py). It is copied
+from the retained result artifact, not typed by hand.
 
 ```
-$ aiqe doctor
+AIQE DOCTOR
+
+  Repository      ordinary worktree · git 2.50.1
+  Git state       on a branch · 0 staged · ? unstaged · 0 untracked
+  Topology        single worktree · sparse checkout off
+  Operations      none in progress
+  AIQE config     absent
+  Agent surface   Claude Code absent · Codex absent
+  Commit policy   check-in filter configured · tracked .gitattributes
+
+  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN
+      The unstaged count is unknown: determining it would make Git run the
+      configured check-in filter, and Doctor executes nothing the repository
+      defines.
+
+  FINDING      CHECKIN_FILTER_CONFIGURED
+      A check-in filter driver is configured. Git runs it as a child process
+      when comparing worktree content, so Doctor does not make that
+      comparison.
+
+  FINDING      TRACKED_GITATTRIBUTES
+      A tracked .gitattributes file is present. It can bind paths to filter
+      drivers that change content on check-in.
+
+  1 unknown · 2 findings
 ```
+
+That `UNKNOWN` is the product working. The repository configures a check-in filter, and
+determining the unstaged count would make Git execute that filter as a child process.
+Doctor does not execute what a repository defines, so it does not ask the question, and
+it says so instead of printing a confident zero.
 
 macOS is the supported target for v1 · Linux support is a later proof obligation · Windows is out of scope for v1
 
@@ -27,6 +60,30 @@ No telemetry. No network calls. No model calls. No daemon. No background watcher
 AIQE never pushes.
 
 ---
+
+## Trying it
+
+AIQE is a Python package with no third-party dependencies. It is not published to any
+index yet, so install it from a clone:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install .
+```
+
+```bash
+.venv/bin/aiqe doctor
+```
+
+`aiqe doctor` works before `aiqe init`, on a repository it has never seen, and on a
+directory that is not a repository at all. It requires no configuration, writes nothing,
+and makes no network request.
+
+```bash
+.venv/bin/aiqe doctor --format json
+```
+
+Reference for the output, the finding codes and the exit status:
+[`docs/doctor.md`](docs/doctor.md).
 
 ## The 30-second problem
 
@@ -60,13 +117,18 @@ The demo is materialised alongside the first alpha, not before.
 AIQE is deterministic. It contains no model calls.
 
 ```
-doctor    inspect the environment before anything is changed
-init      write ./aiqe.toml
-task      declare an immutable owned scope for a unit of work
-check     run the validators bound to the applicable contracts
-commit    create a bounded completion commit, or refuse
+doctor    inspect the environment before anything is changed   IMPLEMENTED
+init      write ./aiqe.toml                                    design target
+task      declare an immutable owned scope for a unit of work  design target
+check     run the validators bound to the applicable contracts design target
+commit    create a bounded completion commit, or refuse        design target
 receipt   render what is proven, what is excluded, and what is unknown
+                                                               design target
 ```
+
+A design target is not registered as a command. Running `aiqe init` today exits 3 with
+`unknown command`, because a command that parses and does nothing advertises a
+capability that does not exist.
 
 The owned scope is fixed when a task starts and cannot widen. Checks run against that
 scope. The receipt reports one of three verdicts — `REVIEWABLE`, `INCOMPLETE`, or
@@ -162,7 +224,7 @@ install hooks or run in the background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | Specification and benchmark protocol frozen. No installable artifact. |
+| *(current)* | `doctor` implemented, tested, and benchmarked. Nothing released or tagged. |
 | `v0.1.0` | First installable alpha: `doctor`, `init`, `task`, `check`, `receipt` on macOS. Real tests in real CI. |
 | `v0.2.0` | `commit` with checked-content binding, all six contracts, benchmark fixtures and retained results. |
 | `v0.3.0` | Linux baseline actually run. Agent adapters. Demo and visual package materialised. |

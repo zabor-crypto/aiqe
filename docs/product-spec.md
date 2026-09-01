@@ -51,13 +51,17 @@ These bind every public surface — README, documentation, assets, and release n
 
 1. No claim may imply that software exists which does not.
 2. Any command block describing future behaviour is immediately preceded by
-   `DESIGN TARGET — specified, not yet implemented.`
+   `DESIGN TARGET — specified, not yet implemented.` A block showing behaviour that
+   exists carries the case identity of the retained artifact it was copied from, and is
+   never typed by hand.
 3. No benchmark number appears anywhere until it is generated from a retained result
    artifact. Prose observations never become published numbers.
 4. No fabricated terminal output, screenshots, or receipts. Terminal casts are rendered
    from real recorded output or they do not ship.
 5. No CI badge until CI runs a real test suite against a real implementation. A green
    badge on a documentation workflow reads as "tests pass" and is therefore misleading.
+   CI now runs a real suite; a badge still waits for a released artifact, because a
+   badge above the fold on an unreleased project reads as a maturity claim.
 6. No coverage, download, or star badges.
 7. Failed, unsupported, and not-run cases are always shown. Nothing is filtered out of a
    result view to make it look better.

@@ -5,9 +5,9 @@ specific about the few things that genuinely matter for this project.
 
 ## Before you start
 
-AIQE has no installable artifact yet. Until the first alpha, the useful contributions
-are to the specification, the benchmark protocol, and the documentation — not to an
-implementation that does not exist.
+AIQE has no released artifact yet. One command is implemented — `aiqe doctor` — and
+everything else in the frozen surface is still specification. Useful contributions are
+to Doctor, to the benchmark fixtures, to the specification, and to the documentation.
 
 The architecture and the benchmark protocol are **frozen**. That is deliberate: the
 product was specified before it was built so that the benchmark tests the design rather
@@ -16,15 +16,29 @@ not a preference.
 
 ## Development setup
 
-There is no build yet. The implementation language is deliberately unselected, so this
-repository intentionally contains no `src/`, no `tests/`, and no package manifest.
-
-To work on documentation, the benchmark protocol, or the bootstrap tooling, clone the
-repository and run the checks that CI runs:
+AIQE is a Python package with no third-party runtime dependencies and no third-party
+test dependencies. There is nothing to install in order to run the tests.
 
 ```
+python3 -m unittest discover -s tests -t . --verbose
+```
+
+To exercise the installed console script rather than the source tree:
+
+```
+python3 -m venv .venv && .venv/bin/pip install . && .venv/bin/aiqe doctor
+```
+
+The other checks CI runs:
+
+```
+python3 bench/run-doctor-fixtures.py
 ./tools/public-scan/public-scan.sh
 ```
+
+Please keep the dependency count at zero unless there is a measured reason not to. An
+assurance layer that drags in a dependency tree is harder to audit than the thing it is
+auditing.
 
 ## Test expectations
 

@@ -12,3 +12,13 @@ aiqe-local/
 
 # Local-only sanitisation material — private literals must never be committed
 tools/public-scan/private-*.txt
+
+# Python build and cache artifacts. Generated test artifacts never land here:
+# fixtures are built in system temporary directories, outside the repository.
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/

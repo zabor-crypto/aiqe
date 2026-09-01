@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "family": "DOCTOR_FIRST_CONTACT",
+  "note": "Expected outcomes are written from the frozen Doctor contract, not recorded from a run. When an observation disagrees with an expectation here, one of the two is wrong and the disagreement is adjudicated rather than overwritten.",
+  "zero_tolerance": [
+    "repository_mutations",
+    "repository_defined_executions",
+    "local_state_writes"
+  ],
+  "cases": [
+    {
+      "id": "normal_repository",
+      "description": "One commit, clean worktree. The baseline every other case is a deviation from.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "repository": { "detected": true, "kind": "worktree", "head": "branch" },
+          "working_state": { "determined": true, "staged": 0, "unstaged": 0, "untracked": 0 },
+          "aiqe": { "config_present": false }
+        }
+      }
+    },
+    {
+      "id": "no_aiqe_config",
+      "description": "Doctor runs before init: an absent aiqe.toml is a normal state, not a finding.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": { "aiqe": { "config_present": false } }
+      }
+    },
+    {
+      "id": "aiqe_config_present",
+      "description": "An aiqe.toml in the worktree root is detected without being read as authority.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "aiqe": { "config_present": true },
+          "working_state": { "determined": true, "untracked": 1 }
+        }
+      }
+    },
+    {
+      "id": "unborn_repository",
+      "description": "Initialised, staged, never committed. Doctor must not treat an unborn HEAD as a broken repository.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["REPOSITORY_UNBORN_HEAD"],
+        "report": {
+          "repository": { "detected": true, "head": "unborn" },
+          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+        }
+      }
+    },
+    {
+      "id": "non_repository",
+      "description": "An ordinary directory. Doctor produces a valid diagnostic, writes nothing, and does not initialise anything.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["REPOSITORY_ABSENT"],
+        "report": { "repository": { "detected": false, "kind": "none" } }
+      }
+    },
+    {
+      "id": "bare_repository",
+      "description": "A bare repository has no worktree, so no first-contact diagnosis applies. This is the case that distinguishes exit 3 from exit 0.",
+      "expect": {
+        "result": "UNSUPPORTED",
+        "exit_code": 3,
+        "findings": ["REPOSITORY_BARE"],
+        "report": { "repository": { "detected": true, "kind": "bare" } }
+      }
+    },
+    {
+      "id": "detached_head",
+      "description": "Checked out at a commit rather than a branch.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["HEAD_DETACHED"],
+        "report": { "repository": { "head": "detached" } }
+      }
+    },
+    {
+      "id": "tracked_modification",
+      "description": "One tracked file modified and not staged.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 0, "unstaged": 1, "untracked": 0 }
+        }
+      }
+    },
+    {
+      "id": "staged_modification",
+      "description": "One tracked file modified and staged.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+        }
+      }
+    },
+    {
+      "id": "staged_addition",
+      "description": "A new file added to the index.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+        }
+      }
+    },
+    {
+      "id": "staged_deletion",
+      "description": "A tracked file removed and the deletion staged.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+        }
+      }
+    },
+    {
+      "id": "untracked_file",
+      "description": "One untracked file.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 0, "unstaged": 0, "untracked": 1 }
+        }
+      }
+    },
+    {
+      "id": "mixed_working_state",
+      "description": "One path both staged and further modified, one path modified only, one untracked.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 1, "unstaged": 2, "untracked": 1 }
+        }
+      }
+    },
+    {
+      "id": "stat_dirty_repository",
+      "description": "Tracked content rewritten byte-identically with a newer timestamp. A plain git status rewrites the index here; Doctor must report a clean worktree and still write nothing.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": { "determined": true, "staged": 0, "unstaged": 0, "untracked": 0 }
+        }
+      }
+    },
+    {
+      "id": "merge_in_progress",
+      "description": "A conflicted merge. AIQE does not support a bounded completion commit mid-operation.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["OPERATION_MERGE_IN_PROGRESS", "UNMERGED_PATHS_PRESENT"],
+        "report": { "working_state": { "determined": true, "unmerged": 1 } }
+      }
+    },
+    {
+      "id": "rebase_in_progress",
+      "description": "A conflicted rebase. HEAD is detached for the duration, and Doctor reports both facts.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["HEAD_DETACHED", "OPERATION_REBASE_IN_PROGRESS", "UNMERGED_PATHS_PRESENT"],
+        "report": { "repository": { "head": "detached" } }
+      }
+    },
+    {
+      "id": "cherry_pick_in_progress",
+      "description": "A conflicted cherry-pick.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["OPERATION_CHERRY_PICK_IN_PROGRESS", "UNMERGED_PATHS_PRESENT"],
+        "report": { "working_state": { "determined": true, "unmerged": 1 } }
+      }
+    },
+    {
+      "id": "linked_worktree",
+      "description": "A linked worktree sharing a Git directory with the main worktree.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["LINKED_WORKTREE"],
+        "report": { "topology": { "linked_worktree": true } }
+      }
+    },
+    {
+      "id": "sparse_checkout",
+      "description": "Sparse checkout enabled, so the worktree does not contain every tracked path.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["SPARSE_CHECKOUT_ACTIVE"],
+        "report": { "topology": { "sparse_checkout": "on" } }
+      }
+    },
+    {
+      "id": "tracked_gitattributes",
+      "description": "A tracked .gitattributes can bind paths to content filters, so its presence is reported.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["TRACKED_GITATTRIBUTES"],
+        "report": { "commit_policy": { "tracked_gitattributes": true } }
+      }
+    },
+    {
+      "id": "local_hooks_path",
+      "description": "core.hooksPath set locally, pointing at an empty directory: the setting is reported, no hooks are.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["GIT_HOOKS_PATH_CONFIGURED"],
+        "report": {
+          "commit_policy": { "hooks_path_configured": true, "hooks_present": false }
+        }
+      }
+    },
+    {
+      "id": "installed_hook",
+      "description": "An executable pre-commit hook carrying a canary. Doctor reports it and must not run it.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["GIT_HOOKS_PRESENT"],
+        "report": { "commit_policy": { "hooks_present": true } }
+      }
+    },
+    {
+      "id": "commit_signing_configured",
+      "description": "commit.gpgSign set in the repository configuration.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["COMMIT_SIGNING_CONFIGURED"],
+        "report": { "commit_policy": { "signing_configured": true } }
+      }
+    },
+    {
+      "id": "config_include_present",
+      "description": "An include directive whose target sets core.hooksPath. Doctor reports the configuration as unresolved and must NOT report the included hooks path, because it does not follow the chain.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["GIT_CONFIG_INCLUDE_UNRESOLVED"],
+        "report": {
+          "commit_policy": { "config_include_present": true, "hooks_path_configured": false }
+        }
+      }
+    },
+    {
+      "id": "config_include_if_present",
+      "description": "A conditional include whose target enables commit signing. Doctor must not report signing as configured on the strength of an unfollowed chain.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["GIT_CONFIG_INCLUDE_UNRESOLVED"],
+        "report": {
+          "commit_policy": { "config_include_present": true, "signing_configured": false }
+        }
+      }
+    },
+    {
+      "id": "checkin_filter_configured",
+      "description": "A clean filter bound by .gitattributes, with a same-length modification. Determining the unstaged count would execute the repository's own command, so Doctor reports it as unknown and the canary stays unfired.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [
+          "CHECKIN_FILTER_CONFIGURED",
+          "TRACKED_GITATTRIBUTES",
+          "WORKING_STATE_UNSTAGED_UNKNOWN"
+        ],
+        "report": {
+          "working_state": { "determined": false, "staged": 0, "unstaged": null, "untracked": 0 },
+          "commit_policy": { "checkin_filter_configured": true }
+        }
+      }
+    },
+    {
+      "id": "fsmonitor_configured",
+      "description": "core.fsmonitor set to a canary script. Git runs it during an index refresh even under --no-optional-locks; Doctor overrides it per invocation, so the canary stays unfired.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["FSMONITOR_CONFIGURED"],
+        "report": {
+          "working_state": { "determined": true, "unstaged": 1, "untracked": 1 }
+        }
+      }
+    },
+    {
+      "id": "executable_alias_configured",
+      "description": "Shell-executing aliases shadowing the subcommand names Doctor uses. Aliases cannot shadow built-in subcommands, and the canary proves it.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["EXECUTABLE_ALIAS_CONFIGURED"],
+        "report": { "working_state": { "determined": true } }
+      }
+    },
+    {
+      "id": "claude_bounded",
+      "description": "Claude Code settings with constrained permission entries: present, and not claimed to be broad.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "agent_surface": { "claude_config_present": true, "claude_permissions": "present" }
+        }
+      }
+    },
+    {
+      "id": "claude_broad",
+      "description": "Claude Code settings granting unconstrained command execution.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["CLAUDE_PERMISSIONS_BROAD"],
+        "report": {
+          "agent_surface": { "claude_config_present": true, "claude_permissions": "broad" }
+        }
+      }
+    },
+    {
+      "id": "claude_unreadable",
+      "description": "A settings file that is not valid JSON. The permission surface is unknown, and unknown is reported rather than assumed absent.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["AGENT_CONFIG_UNREADABLE"],
+        "report": { "agent_surface": { "claude_permissions": "unknown" } }
+      }
+    },
+    {
+      "id": "codex_bounded",
+      "description": "Codex configuration with an approval policy and a workspace sandbox: present, and not claimed to be broad.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "agent_surface": { "codex_config_present": true, "codex_permissions": "present" }
+        }
+      }
+    },
+    {
+      "id": "codex_broad",
+      "description": "Codex configuration disabling both the approval and the sandbox boundary.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": ["CODEX_PERMISSIONS_BROAD"],
+        "report": {
+          "agent_surface": { "codex_config_present": true, "codex_permissions": "broad" }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiqe"
+description = "Quant engineering assurance layer. Deterministic, local, no model calls."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+dynamic = ["version"]
+
+# AIQE core has no third-party runtime dependencies, and no third-party test
+# dependencies. The test suite runs on the standard library `unittest` module.
+# This is deliberate: an assurance layer that drags in a dependency tree is
+# harder to audit than the thing it is auditing.
+dependencies = []
+
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+
+[project.scripts]
+aiqe = "aiqe.cli:main_entry"
+
+[tool.setuptools.dynamic]
+version = { attr = "aiqe.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,8 +1,12 @@
 # Architecture
 
 This document is the public statement of AIQE's frozen v1 architecture. It describes
-what the product does and where its guarantees stop. It is a specification: no
-implementation exists yet, and every command below is a design target.
+what the product does and where its guarantees stop.
+
+It remains a specification, with one exception: `aiqe doctor` is now implemented. Every
+other command below is a design target, is not registered by the command-line interface,
+and is not stubbed. Where this document describes behaviour that exists, it is marked;
+where it does not, it is a statement of intent.
 
 ## Product
 
@@ -38,6 +42,10 @@ aiqe commit  -m <message>
 aiqe receipt [--local] [--format json]
 ```
 
+`aiqe --version` and `aiqe doctor [--format json]` are implemented. The rest are design
+targets: invoking one exits 3 with `unknown command`, because a command that parses and
+does nothing advertises a capability the product has not built.
+
 Doctor runs before init. That ordering is intentional: nothing is written into a
 repository before the environment has been inspected.
 
@@ -72,7 +80,16 @@ aiqe receipt
   1  NOT_REVIEWABLE
   2  INCOMPLETE
   3  a valid receipt cannot be produced due to an unsupported or refused state
+
+aiqe doctor
+  0  a valid first-contact diagnostic was produced, findings included
+  3  a valid Doctor result could not be produced: an invalid invocation, or a
+     repository topology that cannot be diagnosed
 ```
+
+Doctor is the one implemented command. It never exits 1 or 2: those codes belong to
+commands that adjudicate completion, and Doctor adjudicates nothing. A finding is part
+of a valid diagnostic, not a process failure. Full reference: [`doctor.md`](doctor.md).
 
 Machine-readable reason codes carry the detail that the exit code deliberately does not:
 
@@ -241,5 +258,29 @@ Linux      a later proof obligation, tied to an actually advertised artifact
 Windows    out of scope for v1
 ```
 
-Runtime and distribution remain deliberately late-bound, which is why this repository
-contains no source or test directories yet.
+## Runtime
+
+The runtime is no longer late-bound. AIQE is implemented as a Python package with **no
+third-party runtime dependencies and no third-party test dependencies**; the test suite
+runs on the standard library `unittest` module.
+
+The choice follows from what the product has to be correct about. Doctor is a thin,
+careful layer over Git process invocation and filesystem inspection, and the hard parts
+are byte-safe path handling, NUL-delimited machine output, and provable zero-write
+behaviour — none of which any candidate runtime makes materially easier or harder. What
+differed was the cost of proving it: a dependency-free package that installs and tests
+without a build step keeps the auditable surface small, which matters more for an
+assurance layer than for most software.
+
+A single-file distribution remains available later by bundling, and is required by no
+frozen contract. Doctor is small enough that if this choice proves wrong, replacing it
+is a bounded rewrite rather than an architectural unwind — which is the property that
+made it safe to decide now.
+
+Directory layout follows from that choice:
+
+```
+src/aiqe/     the package
+tests/        the deterministic suite
+bench/        fixture builders, expected outcomes, retained results
+```

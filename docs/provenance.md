@@ -39,17 +39,29 @@ pathspec semantics, index and staging behaviour, configuration resolution includ
 
 ## Current status
 
-At bootstrap this repository contains specification, protocol, and tooling only.
-
 ```
 Documentation and specification   CONCEPT_ONLY_DERIVATION
                                   PUBLIC_DOCUMENTATION_REFERENCE
 Benchmark protocol and families   CLEAN_ROOM_REIMPLEMENTATION
-Bootstrap sanitisation tooling    CLEAN_ROOM_REIMPLEMENTATION
+Sanitisation tooling              CLEAN_ROOM_REIMPLEMENTATION
 Apache-2.0 licence text           DIRECT_PUBLIC_REUSE_ELIGIBLE
-Implementation source             does not exist yet
+Doctor implementation source      CLEAN_ROOM_REIMPLEMENTATION
+                                  PUBLIC_DOCUMENTATION_REFERENCE
+Test suite                        CLEAN_ROOM_REIMPLEMENTATION
+Benchmark fixtures and controls   SYNTHETIC_FIXTURE
 Third-party dependencies          none
 ```
+
+The Doctor implementation was written from the frozen public behavioural specification
+in this repository and from Git's published documentation. Its two most consequential
+design decisions — hardening every Git invocation, and declining to compare worktree
+content when a check-in filter is configured — were derived from behaviour observed
+directly against Git in synthetic fixtures, each of which is retained as a reproducing
+negative control in [`../bench/fixtures/doctor/controls.py`](../bench/fixtures/doctor/controls.py).
+
+Every benchmark fixture is constructed from nothing by code in this repository. None is
+a copy of any repository, and none contains real market data, real strategy material, or
+data derived from any private source.
 
 Because there are no third-party dependencies, there is no `NOTICE` file. One is created
 when the first such dependency lands, not before.
