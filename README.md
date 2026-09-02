@@ -34,8 +34,8 @@ AIQE DOCTOR
 
   UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN
       The unstaged count is unknown: determining it would make Git run the
-      configured check-in filter, and Doctor executes nothing the repository
-      defines.
+      check-in filter configured in this repository, and Doctor executes
+      nothing the repository defines.
 
   FINDING      CHECKIN_FILTER_CONFIGURED
       A check-in filter driver is configured. Git runs it as a child process
@@ -63,8 +63,8 @@ AIQE never pushes.
 
 ## Trying it
 
-AIQE is a Python package with no third-party dependencies. It is not published to any
-index yet, so install it from a clone:
+AIQE is a Python package with no third-party dependencies. It needs Python 3.11 or
+newer, and is not published to any index yet, so install it from a clone:
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install .

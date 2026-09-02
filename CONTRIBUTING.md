@@ -19,6 +19,9 @@ not a preference.
 AIQE is a Python package with no third-party runtime dependencies and no third-party
 test dependencies. There is nothing to install in order to run the tests.
 
+Python 3.11 is the support floor; 3.11 and 3.14 are the endpoints CI tests. Please do
+not use syntax or standard-library features newer than 3.11.
+
 ```
 python3 -m unittest discover -s tests -t . --verbose
 ```
@@ -33,8 +36,13 @@ The other checks CI runs:
 
 ```
 python3 bench/run-doctor-fixtures.py
+./tools/public-scan/self-test.sh
 ./tools/public-scan/public-scan.sh
 ```
+
+One case is restricted to Linux: the arbitrary-byte path fixture needs a filesystem
+that accepts non-UTF-8 filenames, and APFS does not. It is reported as skipped
+elsewhere, never dropped from the listing.
 
 Please keep the dependency count at zero unless there is a measured reason not to. An
 assurance layer that drags in a dependency tree is harder to audit than the thing it is

@@ -59,6 +59,11 @@ content when a check-in filter is configured — were derived from behaviour obs
 directly against Git in synthetic fixtures, each of which is retained as a reproducing
 negative control in [`../bench/fixtures/doctor/controls.py`](../bench/fixtures/doctor/controls.py).
 
+The external-configuration execution boundary was established the same way: adversarial
+fixtures were built, the landed implementation was measured against them, three of four
+executed their canary, and the defences were chosen from what the measurements showed
+rather than from what seemed likely. Each is retained as a reproducing control.
+
 Every benchmark fixture is constructed from nothing by code in this repository. None is
 a copy of any repository, and none contains real market data, real strategy material, or
 data derived from any private source.

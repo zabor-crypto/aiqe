@@ -262,7 +262,8 @@ Windows    out of scope for v1
 
 The runtime is no longer late-bound. AIQE is implemented as a Python package with **no
 third-party runtime dependencies and no third-party test dependencies**; the test suite
-runs on the standard library `unittest` module.
+runs on the standard library `unittest` module. Python 3.11 is the support floor, with
+3.11 and 3.14 as the tested endpoints.
 
 The choice follows from what the product has to be correct about. Doctor is a thin,
 careful layer over Git process invocation and filesystem inspection, and the hard parts

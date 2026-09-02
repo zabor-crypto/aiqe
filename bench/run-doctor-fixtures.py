@@ -70,9 +70,28 @@ def main(argv):
     definition = harness.load_cases()
     records = []
     failed = []
+    skipped = []
 
     for case in definition["cases"]:
         case_id = case["id"]
+
+        if not harness.case_applies(case):
+            skipped.append(case_id)
+            records.append(
+                {
+                    "case": case_id,
+                    "description": case["description"],
+                    "outcome": "SKIPPED_PLATFORM",
+                    "platform_required": case.get("platform"),
+                    "problems": [],
+                }
+            )
+            sys.stdout.write(
+                "%-42s SKIPPED (requires %s)\n" % (case_id, case.get("platform"))
+            )
+            sys.stdout.flush()
+            continue
+
         observed = harness.run_case(case_id)
         problems = harness.check_expectations(observed, case["expect"])
         if problems:
@@ -101,11 +120,12 @@ def main(argv):
                 "local_state_writes": observed["local_state_writes"],
                 "local_state_write_detail": observed["local_state_write_detail"],
                 "git_invocations": observed["git_invocations"],
+                "git_invocations_config_isolated": observed["git_invocations_config_isolated"],
                 "human_output": observed["human_output"],
             }
         )
         sys.stdout.write(
-            "%-30s %s\n" % (case_id, "PASS" if not problems else "FAIL")
+            "%-42s %s\n" % (case_id, "PASS" if not problems else "FAIL")
         )
         for problem in problems:
             sys.stdout.write("    %s\n" % (problem,))
@@ -133,15 +153,18 @@ def main(argv):
         "schema_version": 1,
         "family": definition["family"],
         "aiqe_version": __version__,
+        "platform": sys.platform,
         "cases_total": len(records),
         "cases_passed": sum(1 for record in records if record["outcome"] == "PASS"),
         "cases_failed": len(failed),
+        "cases_skipped_platform": len(skipped),
+        "cases_skipped_platform_ids": sorted(skipped),
         "totals": {
-            "repository_mutations": sum(r["repository_mutations"] for r in records),
+            "repository_mutations": sum(r.get("repository_mutations", 0) for r in records),
             "repository_defined_executions": sum(
-                r["repository_defined_executions"] for r in records
+                r.get("repository_defined_executions", 0) for r in records
             ),
-            "local_state_writes": sum(r["local_state_writes"] for r in records),
+            "local_state_writes": sum(r.get("local_state_writes", 0) for r in records),
             "network_requests": 0,
             "model_calls": 0,
         },
@@ -167,11 +190,13 @@ def main(argv):
         handle.write(json.dumps(document, indent=2, sort_keys=True) + "\n")
 
     sys.stdout.write(
-        "\n%d/%d cases passed. mutations=%d executions=%d state writes=%d\n"
+        "\n%d/%d applicable cases passed (%d skipped by platform). "
+        "mutations=%d executions=%d state writes=%d\n"
         "%d/%d negative controls reproduced their failure.\n"
         % (
             document["cases_passed"],
-            document["cases_total"],
+            document["cases_total"] - document["cases_skipped_platform"],
+            document["cases_skipped_platform"],
             document["totals"]["repository_mutations"],
             document["totals"]["repository_defined_executions"],
             document["totals"]["local_state_writes"],

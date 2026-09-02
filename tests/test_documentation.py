@@ -77,7 +77,13 @@ class ReadmeClaimTests(unittest.TestCase):
         artifact = os.path.join(support.ROOT, "bench", "results", "doctor", "results.json")
         with open(artifact) as handle:
             results = json.load(handle)
-        retained = {case["case"]: case["human_output"] for case in results["cases"]}
+        # A case skipped for platform reasons has no rendered output, and is
+        # present in the artifact precisely so that it is not hidden.
+        retained = {
+            case["case"]: case["human_output"]
+            for case in results["cases"]
+            if "human_output" in case
+        }
 
         readme = read(README)
         example = retained["checkin_filter_configured"]

@@ -10,7 +10,52 @@ makes the change, not at release time.
 
 ## [Unreleased]
 
+### Security
+
+- **Doctor no longer executes a filter driver defined outside the repository.**
+  A tracked `.gitattributes` can bind a path to a driver whose command lives in the
+  user's global configuration or behind a local `include`; reading only the
+  repository's own configuration and concluding no filter was present was wrong, and
+  measured canaries fired. Every invocation that reads the index or the worktree now
+  runs with system and global configuration switched off, and the comparison is refused
+  outright when repository configuration, an unfollowed include, or a repository
+  attributes binding makes execution safety unresolved.
+- **Doctor no longer descends into submodules.** A submodule's own configuration is
+  repository scope for that submodule, so isolating the superproject's does not reach
+  it, and `git status` ran the submodule's filter. `status` is now invoked with
+  `--ignore-submodules=dirty`, which prevents the descent while still reporting a
+  changed submodule pointer.
+- Two negative controls added for the above, both reproducing.
+
+### Changed
+
+- **Python 3.11 is the support floor** (`requires-python >=3.11`), with 3.11 and 3.14
+  as the tested endpoints. 3.9 is end of life and is no longer tested or advertised.
+- The unstaged count is now reported as `UNKNOWN` in more situations: an unfollowed
+  config include, or repository attributes binding any path to a filter driver. A
+  repository using Git LFS is now in that category. False unknown is preferred to
+  executing a repository-selected command.
+- Working-state counts exclude submodule worktree changes and disclose that they do.
+  They are computed under repository-scope configuration, so a custom global
+  `core.excludesFile` no longer applies to the untracked count.
+- `working_state.submodule_worktrees_excluded` added to the JSON output, and
+  `commit_policy` gained `attributes_bind_filter`, `attributes_readable` and
+  `submodules_present`. No finding code was added or removed.
+
 ### Added
+
+- **End-to-end arbitrary-byte path proof.** A real repository whose tracked, staged and
+  untracked paths are not valid UTF-8, exercised through the whole pipeline rather than
+  fed to a parser. Restricted to Linux because APFS refuses such filenames; CI runs it
+  with skipping turned into an error, so it cannot quietly stop happening.
+- Six adversarial fixtures for the external-configuration boundary, covering a global
+  filter driver, a global fsmonitor, a local include resolving to a filter, a fully
+  external attributes binding, an external binding with a local driver, and a
+  submodule-local driver.
+- Benchmark cases may declare a platform restriction; a case that does not apply is
+  reported as skipped with its restriction named, never dropped.
+
+### Added (doctor)
 
 - **`aiqe doctor` is implemented**: first-contact repository diagnosis in human and
   deterministic JSON form, working before `init`, on an unconfigured repository, and on

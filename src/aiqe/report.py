@@ -60,6 +60,9 @@ def render_json(report, aiqe_version):
             "unstaged": report.working_state["unstaged"],
             "untracked": report.working_state["untracked"],
             "unmerged": report.working_state["unmerged"],
+            "submodule_worktrees_excluded": report.working_state[
+                "submodule_worktrees_excluded"
+            ],
         },
         "aiqe": {"config_present": report.aiqe["config_present"]},
         "commit_policy": dict(report.commit_policy),
@@ -150,6 +153,10 @@ def _git_state_row(report):
         parts.append("%s %s" % (("?" if value is None else value), label))
     if state["unmerged"]:
         parts.append("%d unmerged" % state["unmerged"])
+    if state["submodule_worktrees_excluded"]:
+        # The qualification belongs next to the numbers it qualifies, not in a
+        # footnote: these counts do not include submodule worktree changes.
+        parts.append("submodule worktrees not counted")
     return _join(parts)
 
 

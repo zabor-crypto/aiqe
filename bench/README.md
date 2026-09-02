@@ -30,6 +30,12 @@ case disagrees with its expectation or any negative control stops reproducing.
 numbers rather than bytes, because the artifact records the Git version it was produced
 under and two correct machines legitimately differ there.
 
+A case may declare a platform restriction. The arbitrary-byte path case needs a
+filesystem that accepts non-UTF-8 filenames, which APFS does not provide, so it runs on
+Linux and is reported as `SKIPPED_PLATFORM` elsewhere — named in the results, never
+dropped from the listing. The comparison treats a case that one machine could run and
+the other could not as a platform difference rather than a disagreement.
+
 ## Negative controls
 
 Each control in [`fixtures/doctor/controls.py`](fixtures/doctor/controls.py) is a

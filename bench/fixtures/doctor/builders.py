@@ -19,6 +19,7 @@ is a prose claim, not evidence.
 
 import os
 import subprocess
+import sys
 
 #: A fixture that has not finished in this many seconds is a broken fixture.
 BUILD_TIMEOUT_SECONDS = 60
@@ -392,6 +393,202 @@ def build_codex_broad(case, env):
     return root
 
 
+# --- Adversarial external-configuration cases ------------------------------
+#
+# The defining property of this group: the repository *selects* an executable,
+# and the definition of that executable lives somewhere Doctor deliberately
+# does not read. Inspecting the repository's own configuration and concluding
+# "no filter here" is not enough, and these fixtures are what proved it.
+#
+# The global scope is real here, not simulated. The harness gives each case an
+# isolated GIT_CONFIG_GLOBAL, and these builders write into it, so Git sees
+# genuine global configuration while the developer's own stays untouched.
+
+
+def append_global_config(env, text):
+    with open(env["GIT_CONFIG_GLOBAL"], "a") as handle:
+        handle.write(text)
+
+
+def build_global_filter_canary(case, env):
+    """Filter driver defined in GLOBAL config; binding tracked in the repo.
+
+    The modification keeps the file's length, so Git cannot decide from stat
+    information alone and must read content through the driver to answer.
+    """
+    root = init_repo(case.repo_path, env)
+    marker = case.marker("global-filter")
+    canary(os.path.join(root, "cleanfilter.sh"), marker, body="exec cat")
+    write(os.path.join(root, ".gitattributes"), "*.dat filter=external\n")
+    write(os.path.join(root, "series.dat"), "aaaa\n")
+    commit_all(root, "base", env)
+    append_global_config(
+        env, '[filter "external"]\n\tclean = %s/cleanfilter.sh\n' % (root,)
+    )
+    write(os.path.join(root, "series.dat"), "bbbb\n")
+    return root
+
+
+def build_global_fsmonitor_canary(case, env):
+    """core.fsmonitor supplied by GLOBAL config rather than by the repository."""
+    root = base_repo(case.repo_path, env)
+    marker = case.marker("global-fsmonitor")
+    canary(os.path.join(root, "fsmonitor.sh"), marker)
+    append_global_config(env, "[core]\n\tfsmonitor = %s/fsmonitor.sh\n" % (root,))
+    write(os.path.join(root, "strategy.py"), "SIGNAL = 7\n")
+    return root
+
+
+def build_local_include_filter_canary(case, env):
+    """Local config includes a file that defines an executable filter driver.
+
+    Configuration isolation cannot help here: an include inside the
+    repository's own config is repository scope. Only refusing to compare
+    worktree content does.
+    """
+    root = init_repo(case.repo_path, env)
+    marker = case.marker("include-filter")
+    canary(os.path.join(root, "cleanfilter.sh"), marker, body="exec cat")
+    write(os.path.join(root, ".gitattributes"), "*.dat filter=included\n")
+    write(os.path.join(root, "series.dat"), "aaaa\n")
+    commit_all(root, "base", env)
+
+    included = os.path.join(case.root, "included-filter.cfg")
+    write(included, '[filter "included"]\n\tclean = %s/cleanfilter.sh\n' % (root,))
+    with open(os.path.join(root, ".git", "config"), "a") as handle:
+        handle.write("[include]\n\tpath = %s\n" % (included,))
+
+    write(os.path.join(root, "series.dat"), "bbbb\n")
+    return root
+
+
+def build_global_attributes_filter_canary(case, env):
+    """The BINDING lives outside the repository too, via core.attributesFile.
+
+    Doctor cannot see this binding at all, which is precisely why the defence
+    has to be configuration isolation rather than detection.
+    """
+    root = init_repo(case.repo_path, env)
+    marker = case.marker("global-attributes")
+    canary(os.path.join(root, "cleanfilter.sh"), marker, body="exec cat")
+    write(os.path.join(root, "series.dat"), "aaaa\n")
+    commit_all(root, "base", env)
+
+    attributes = os.path.join(case.root, "global-attributes")
+    write(attributes, "*.dat filter=externalattr\n")
+    append_global_config(
+        env,
+        "[core]\n\tattributesFile = %s\n" % (attributes,)
+        + '[filter "externalattr"]\n\tclean = %s/cleanfilter.sh\n' % (root,),
+    )
+    write(os.path.join(root, "series.dat"), "bbbb\n")
+    return root
+
+
+def build_external_attributes_local_filter_canary(case, env):
+    """Binding from the default external attributes path, driver defined locally.
+
+    Git reads $XDG_CONFIG_HOME/git/attributes whether or not any configuration
+    points at it, so isolation does not remove the binding. The driver is in
+    local config, which is what the static refusal is for.
+    """
+    root = init_repo(case.repo_path, env)
+    marker = case.marker("external-attributes")
+    canary(os.path.join(root, "cleanfilter.sh"), marker, body="exec cat")
+    write(os.path.join(root, "series.dat"), "aaaa\n")
+    commit_all(root, "base", env)
+
+    attributes = os.path.join(env["XDG_CONFIG_HOME"], "git", "attributes")
+    write(attributes, "*.dat filter=xdgattr\n")
+    git(root, "config", "filter.xdgattr.clean", "./cleanfilter.sh", env=env)
+    write(os.path.join(root, "series.dat"), "bbbb\n")
+    return root
+
+
+def build_submodule_filter_canary(case, env):
+    """A submodule whose OWN local config defines an executable filter.
+
+    A submodule's configuration is repository scope for that submodule, so the
+    superproject cannot isolate it away. An unguarded `git status` descends
+    into the submodule worktree and runs it.
+    """
+    submodule = os.path.join(case.root, "submodule")
+    init_repo(submodule, env)
+    marker = case.marker("submodule-filter")
+    canary(os.path.join(submodule, "cleanfilter.sh"), marker, body="exec cat")
+    write(os.path.join(submodule, ".gitattributes"), "*.dat filter=inner\n")
+    write(os.path.join(submodule, "series.dat"), "aaaa\n")
+    commit_all(submodule, "submodule base", env)
+
+    root = base_repo(case.repo_path, env)
+    git(root, "-c", "protocol.file.allow=always", "submodule", "--quiet",
+        "add", submodule, "vendor", env=env)
+    git(root, "commit", "--quiet", "--message", "add submodule", env=env)
+
+    checkout = os.path.join(root, "vendor")
+    git(checkout, "config", "filter.inner.clean", "./cleanfilter.sh", env=env)
+    write(os.path.join(checkout, "series.dat"), "bbbb\n")
+    return root
+
+
+# --- Arbitrary-byte path ---------------------------------------------------
+
+# Filenames are byte strings on POSIX. Only some filesystems additionally
+# require them to be well-formed text; APFS does, which is why this case is
+# restricted to Linux rather than skipped everywhere.
+NON_UTF8_TRACKED = b"tracked-\xe9\xff.dat"
+NON_UTF8_STAGED = b"staged-\xc3.dat"
+NON_UTF8_UNTRACKED = b"untracked-\xfe\xfe.dat"
+
+
+def build_non_utf8_path(case, env):
+    """A real repository containing paths that are not valid UTF-8.
+
+    Not synthetic bytes handed to a parser: Git actually records these names,
+    and Doctor reads them back through the whole pipeline. If any layer
+    decoded a path instead of carrying the bytes, this is where it would
+    raise.
+
+    A filesystem that refuses the name fails the build loudly. This proof must
+    not quietly degrade into a weaker one.
+    """
+    root = init_repo(case.repo_path, env)
+    encoded_root = os.fsencode(root)
+
+    try:
+        with open(os.path.join(encoded_root, NON_UTF8_TRACKED), "wb") as handle:
+            handle.write(b"aaaa\n")
+    except (OSError, UnicodeError) as exc:
+        raise RuntimeError(
+            "this filesystem refuses a non-UTF-8 filename (%s). The "
+            "arbitrary-byte path proof cannot be produced here, and must not "
+            "be silently downgraded to a parser-only test." % (exc,)
+        )
+
+    git(root, "add", "--all", env=env)
+    git(root, "commit", "--quiet", "--message", "byte paths", env=env)
+
+    # One modification, one staged addition, one untracked file - each named
+    # in bytes that no decoder would survive.
+    with open(os.path.join(encoded_root, NON_UTF8_TRACKED), "wb") as handle:
+        handle.write(b"bbbbbb\n")
+    with open(os.path.join(encoded_root, NON_UTF8_STAGED), "wb") as handle:
+        handle.write(b"staged\n")
+    git(root, "add", "--", os.path.join(encoded_root, NON_UTF8_STAGED), env=env)
+    with open(os.path.join(encoded_root, NON_UTF8_UNTRACKED), "wb") as handle:
+        handle.write(b"untracked\n")
+    return root
+
+
+def platform_supports(platform):
+    """Is a platform-restricted case applicable to the machine running it?"""
+    if platform is None:
+        return True
+    if platform == "linux":
+        return sys.platform.startswith("linux")
+    raise ValueError("unknown fixture platform restriction %r" % (platform,))
+
+
 #: Case identifier to builder. The expected outcome for each identifier lives
 #: in cases.json, so that expectations are data a reviewer can read rather
 #: than assertions buried in code.
@@ -429,4 +626,11 @@ BUILDERS = {
     "claude_unreadable": build_claude_unreadable,
     "codex_bounded": build_codex_bounded,
     "codex_broad": build_codex_broad,
+    "global_filter_canary": build_global_filter_canary,
+    "global_fsmonitor_canary": build_global_fsmonitor_canary,
+    "local_include_filter_canary": build_local_include_filter_canary,
+    "global_attributes_filter_canary": build_global_attributes_filter_canary,
+    "external_attributes_local_filter_canary": build_external_attributes_local_filter_canary,
+    "submodule_filter_canary": build_submodule_filter_canary,
+    "non_utf8_path": build_non_utf8_path,
 }

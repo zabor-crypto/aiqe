@@ -16,9 +16,20 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "repository": { "detected": true, "kind": "worktree", "head": "branch" },
-          "working_state": { "determined": true, "staged": 0, "unstaged": 0, "untracked": 0 },
-          "aiqe": { "config_present": false }
+          "repository": {
+            "detected": true,
+            "kind": "worktree",
+            "head": "branch"
+          },
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 0,
+            "untracked": 0
+          },
+          "aiqe": {
+            "config_present": false
+          }
         }
       }
     },
@@ -29,7 +40,11 @@
         "result": "PRODUCED",
         "exit_code": 0,
         "findings": [],
-        "report": { "aiqe": { "config_present": false } }
+        "report": {
+          "aiqe": {
+            "config_present": false
+          }
+        }
       }
     },
     {
@@ -40,8 +55,13 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "aiqe": { "config_present": true },
-          "working_state": { "determined": true, "untracked": 1 }
+          "aiqe": {
+            "config_present": true
+          },
+          "working_state": {
+            "determined": true,
+            "untracked": 1
+          }
         }
       }
     },
@@ -51,10 +71,20 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["REPOSITORY_UNBORN_HEAD"],
+        "findings": [
+          "REPOSITORY_UNBORN_HEAD"
+        ],
         "report": {
-          "repository": { "detected": true, "head": "unborn" },
-          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+          "repository": {
+            "detected": true,
+            "head": "unborn"
+          },
+          "working_state": {
+            "determined": true,
+            "staged": 1,
+            "unstaged": 0,
+            "untracked": 0
+          }
         }
       }
     },
@@ -64,8 +94,15 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["REPOSITORY_ABSENT"],
-        "report": { "repository": { "detected": false, "kind": "none" } }
+        "findings": [
+          "REPOSITORY_ABSENT"
+        ],
+        "report": {
+          "repository": {
+            "detected": false,
+            "kind": "none"
+          }
+        }
       }
     },
     {
@@ -74,8 +111,15 @@
       "expect": {
         "result": "UNSUPPORTED",
         "exit_code": 3,
-        "findings": ["REPOSITORY_BARE"],
-        "report": { "repository": { "detected": true, "kind": "bare" } }
+        "findings": [
+          "REPOSITORY_BARE"
+        ],
+        "report": {
+          "repository": {
+            "detected": true,
+            "kind": "bare"
+          }
+        }
       }
     },
     {
@@ -84,8 +128,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["HEAD_DETACHED"],
-        "report": { "repository": { "head": "detached" } }
+        "findings": [
+          "HEAD_DETACHED"
+        ],
+        "report": {
+          "repository": {
+            "head": "detached"
+          }
+        }
       }
     },
     {
@@ -96,7 +146,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 0, "unstaged": 1, "untracked": 0 }
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 1,
+            "untracked": 0
+          }
         }
       }
     },
@@ -108,7 +163,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+          "working_state": {
+            "determined": true,
+            "staged": 1,
+            "unstaged": 0,
+            "untracked": 0
+          }
         }
       }
     },
@@ -120,7 +180,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+          "working_state": {
+            "determined": true,
+            "staged": 1,
+            "unstaged": 0,
+            "untracked": 0
+          }
         }
       }
     },
@@ -132,7 +197,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 1, "unstaged": 0, "untracked": 0 }
+          "working_state": {
+            "determined": true,
+            "staged": 1,
+            "unstaged": 0,
+            "untracked": 0
+          }
         }
       }
     },
@@ -144,7 +214,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 0, "unstaged": 0, "untracked": 1 }
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 0,
+            "untracked": 1
+          }
         }
       }
     },
@@ -156,7 +231,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 1, "unstaged": 2, "untracked": 1 }
+          "working_state": {
+            "determined": true,
+            "staged": 1,
+            "unstaged": 2,
+            "untracked": 1
+          }
         }
       }
     },
@@ -168,7 +248,12 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "working_state": { "determined": true, "staged": 0, "unstaged": 0, "untracked": 0 }
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 0,
+            "untracked": 0
+          }
         }
       }
     },
@@ -178,8 +263,16 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["OPERATION_MERGE_IN_PROGRESS", "UNMERGED_PATHS_PRESENT"],
-        "report": { "working_state": { "determined": true, "unmerged": 1 } }
+        "findings": [
+          "OPERATION_MERGE_IN_PROGRESS",
+          "UNMERGED_PATHS_PRESENT"
+        ],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "unmerged": 1
+          }
+        }
       }
     },
     {
@@ -188,8 +281,16 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["HEAD_DETACHED", "OPERATION_REBASE_IN_PROGRESS", "UNMERGED_PATHS_PRESENT"],
-        "report": { "repository": { "head": "detached" } }
+        "findings": [
+          "HEAD_DETACHED",
+          "OPERATION_REBASE_IN_PROGRESS",
+          "UNMERGED_PATHS_PRESENT"
+        ],
+        "report": {
+          "repository": {
+            "head": "detached"
+          }
+        }
       }
     },
     {
@@ -198,8 +299,16 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["OPERATION_CHERRY_PICK_IN_PROGRESS", "UNMERGED_PATHS_PRESENT"],
-        "report": { "working_state": { "determined": true, "unmerged": 1 } }
+        "findings": [
+          "OPERATION_CHERRY_PICK_IN_PROGRESS",
+          "UNMERGED_PATHS_PRESENT"
+        ],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "unmerged": 1
+          }
+        }
       }
     },
     {
@@ -208,8 +317,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["LINKED_WORKTREE"],
-        "report": { "topology": { "linked_worktree": true } }
+        "findings": [
+          "LINKED_WORKTREE"
+        ],
+        "report": {
+          "topology": {
+            "linked_worktree": true
+          }
+        }
       }
     },
     {
@@ -218,8 +333,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["SPARSE_CHECKOUT_ACTIVE"],
-        "report": { "topology": { "sparse_checkout": "on" } }
+        "findings": [
+          "SPARSE_CHECKOUT_ACTIVE"
+        ],
+        "report": {
+          "topology": {
+            "sparse_checkout": "on"
+          }
+        }
       }
     },
     {
@@ -228,8 +349,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["TRACKED_GITATTRIBUTES"],
-        "report": { "commit_policy": { "tracked_gitattributes": true } }
+        "findings": [
+          "TRACKED_GITATTRIBUTES"
+        ],
+        "report": {
+          "commit_policy": {
+            "tracked_gitattributes": true
+          }
+        }
       }
     },
     {
@@ -238,9 +365,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["GIT_HOOKS_PATH_CONFIGURED"],
+        "findings": [
+          "GIT_HOOKS_PATH_CONFIGURED"
+        ],
         "report": {
-          "commit_policy": { "hooks_path_configured": true, "hooks_present": false }
+          "commit_policy": {
+            "hooks_path_configured": true,
+            "hooks_present": false
+          }
         }
       }
     },
@@ -250,8 +382,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["GIT_HOOKS_PRESENT"],
-        "report": { "commit_policy": { "hooks_present": true } }
+        "findings": [
+          "GIT_HOOKS_PRESENT"
+        ],
+        "report": {
+          "commit_policy": {
+            "hooks_present": true
+          }
+        }
       }
     },
     {
@@ -260,31 +398,59 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["COMMIT_SIGNING_CONFIGURED"],
-        "report": { "commit_policy": { "signing_configured": true } }
+        "findings": [
+          "COMMIT_SIGNING_CONFIGURED"
+        ],
+        "report": {
+          "commit_policy": {
+            "signing_configured": true
+          }
+        }
       }
     },
     {
       "id": "config_include_present",
-      "description": "An include directive whose target sets core.hooksPath. Doctor reports the configuration as unresolved and must NOT report the included hooks path, because it does not follow the chain.",
+      "description": "An include directive whose target sets core.hooksPath. Doctor reports the configuration as unresolved, must NOT report the included hooks path, and must not compare worktree content behind an unfollowed chain that could define an executable filter driver.",
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["GIT_CONFIG_INCLUDE_UNRESOLVED"],
+        "findings": [
+          "GIT_CONFIG_INCLUDE_UNRESOLVED",
+          "WORKING_STATE_UNSTAGED_UNKNOWN"
+        ],
         "report": {
-          "commit_policy": { "config_include_present": true, "hooks_path_configured": false }
+          "commit_policy": {
+            "config_include_present": true,
+            "hooks_path_configured": false
+          },
+          "working_state": {
+            "determined": false,
+            "unstaged": null,
+            "staged": 0
+          }
         }
       }
     },
     {
       "id": "config_include_if_present",
-      "description": "A conditional include whose target enables commit signing. Doctor must not report signing as configured on the strength of an unfollowed chain.",
+      "description": "A conditional include whose target enables commit signing. Doctor must not report signing as configured on the strength of an unfollowed chain, and must not compare worktree content behind one.",
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["GIT_CONFIG_INCLUDE_UNRESOLVED"],
+        "findings": [
+          "GIT_CONFIG_INCLUDE_UNRESOLVED",
+          "WORKING_STATE_UNSTAGED_UNKNOWN"
+        ],
         "report": {
-          "commit_policy": { "config_include_present": true, "signing_configured": false }
+          "commit_policy": {
+            "config_include_present": true,
+            "signing_configured": false
+          },
+          "working_state": {
+            "determined": false,
+            "unstaged": null,
+            "staged": 0
+          }
         }
       }
     },
@@ -300,8 +466,15 @@
           "WORKING_STATE_UNSTAGED_UNKNOWN"
         ],
         "report": {
-          "working_state": { "determined": false, "staged": 0, "unstaged": null, "untracked": 0 },
-          "commit_policy": { "checkin_filter_configured": true }
+          "working_state": {
+            "determined": false,
+            "staged": 0,
+            "unstaged": null,
+            "untracked": 0
+          },
+          "commit_policy": {
+            "checkin_filter_configured": true
+          }
         }
       }
     },
@@ -311,9 +484,15 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["FSMONITOR_CONFIGURED"],
+        "findings": [
+          "FSMONITOR_CONFIGURED"
+        ],
         "report": {
-          "working_state": { "determined": true, "unstaged": 1, "untracked": 1 }
+          "working_state": {
+            "determined": true,
+            "unstaged": 1,
+            "untracked": 1
+          }
         }
       }
     },
@@ -323,8 +502,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["EXECUTABLE_ALIAS_CONFIGURED"],
-        "report": { "working_state": { "determined": true } }
+        "findings": [
+          "EXECUTABLE_ALIAS_CONFIGURED"
+        ],
+        "report": {
+          "working_state": {
+            "determined": true
+          }
+        }
       }
     },
     {
@@ -335,7 +520,10 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "agent_surface": { "claude_config_present": true, "claude_permissions": "present" }
+          "agent_surface": {
+            "claude_config_present": true,
+            "claude_permissions": "present"
+          }
         }
       }
     },
@@ -345,9 +533,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["CLAUDE_PERMISSIONS_BROAD"],
+        "findings": [
+          "CLAUDE_PERMISSIONS_BROAD"
+        ],
         "report": {
-          "agent_surface": { "claude_config_present": true, "claude_permissions": "broad" }
+          "agent_surface": {
+            "claude_config_present": true,
+            "claude_permissions": "broad"
+          }
         }
       }
     },
@@ -357,8 +550,14 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["AGENT_CONFIG_UNREADABLE"],
-        "report": { "agent_surface": { "claude_permissions": "unknown" } }
+        "findings": [
+          "AGENT_CONFIG_UNREADABLE"
+        ],
+        "report": {
+          "agent_surface": {
+            "claude_permissions": "unknown"
+          }
+        }
       }
     },
     {
@@ -369,7 +568,10 @@
         "exit_code": 0,
         "findings": [],
         "report": {
-          "agent_surface": { "codex_config_present": true, "codex_permissions": "present" }
+          "agent_surface": {
+            "codex_config_present": true,
+            "codex_permissions": "present"
+          }
         }
       }
     },
@@ -379,11 +581,160 @@
       "expect": {
         "result": "PRODUCED",
         "exit_code": 0,
-        "findings": ["CODEX_PERMISSIONS_BROAD"],
+        "findings": [
+          "CODEX_PERMISSIONS_BROAD"
+        ],
         "report": {
-          "agent_surface": { "codex_config_present": true, "codex_permissions": "broad" }
+          "agent_surface": {
+            "codex_config_present": true,
+            "codex_permissions": "broad"
+          }
+        }
+      }
+    },
+    {
+      "id": "global_filter_canary",
+      "description": "The filter driver is defined in GLOBAL configuration and bound by a tracked .gitattributes. Doctor cannot see the definition, so it refuses the comparison on the strength of the binding alone, and the canary stays unfired.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [
+          "TRACKED_GITATTRIBUTES",
+          "WORKING_STATE_UNSTAGED_UNKNOWN"
+        ],
+        "report": {
+          "working_state": {
+            "determined": false,
+            "unstaged": null,
+            "staged": 0,
+            "untracked": 0
+          },
+          "commit_policy": {
+            "attributes_bind_filter": true,
+            "checkin_filter_configured": false
+          }
+        }
+      }
+    },
+    {
+      "id": "global_fsmonitor_canary",
+      "description": "core.fsmonitor supplied by GLOBAL configuration. The per-invocation override disables it whatever scope defines it, so the working state is still determined and the canary stays unfired.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 1,
+            "untracked": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "local_include_filter_canary",
+      "description": "A local include resolves to a file defining an executable filter driver, bound by tracked attributes. Configuration isolation cannot help - the include is repository scope - so the refusal is what keeps the canary unfired.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [
+          "GIT_CONFIG_INCLUDE_UNRESOLVED",
+          "TRACKED_GITATTRIBUTES",
+          "WORKING_STATE_UNSTAGED_UNKNOWN"
+        ],
+        "report": {
+          "working_state": {
+            "determined": false,
+            "unstaged": null,
+            "staged": 0,
+            "untracked": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "global_attributes_filter_canary",
+      "description": "Both the binding and the driver live outside the repository, via core.attributesFile. Doctor cannot detect this at all; configuration isolation is what prevents the execution, and the working state stays determined.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 1,
+            "untracked": 0
+          },
+          "commit_policy": {
+            "attributes_bind_filter": false
+          }
+        }
+      }
+    },
+    {
+      "id": "external_attributes_local_filter_canary",
+      "description": "The binding comes from the default external attributes path, which isolation does not remove, while the driver is defined in local config. The static refusal catches it.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [
+          "CHECKIN_FILTER_CONFIGURED",
+          "WORKING_STATE_UNSTAGED_UNKNOWN"
+        ],
+        "report": {
+          "working_state": {
+            "determined": false,
+            "unstaged": null,
+            "staged": 0
+          },
+          "commit_policy": {
+            "checkin_filter_configured": true
+          }
+        }
+      }
+    },
+    {
+      "id": "submodule_filter_canary",
+      "description": "A submodule's own local config defines an executable filter and its worktree is dirty. A submodule's config is repository scope for that submodule, so isolation cannot reach it; not descending is what keeps the canary unfired.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 0,
+            "untracked": 0,
+            "submodule_worktrees_excluded": true
+          },
+          "commit_policy": {
+            "submodules_present": true
+          }
+        }
+      }
+    },
+    {
+      "id": "non_utf8_path",
+      "description": "A real repository whose tracked, staged and untracked paths are not valid UTF-8. Doctor carries paths as bytes end to end; if any layer decoded one, this is where it would raise.",
+      "platform": "linux",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "staged": 1,
+            "unstaged": 1,
+            "untracked": 1
+          }
         }
       }
     }
-  ]
+  ],
+  "platform_restricted_cases": "A case may declare a platform restriction. It is reported as skipped with its restriction named on machines it does not apply to, and never dropped from the listing."
 }

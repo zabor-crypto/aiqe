@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "aiqe"
 description = "Quant engineering assurance layer. Deterministic, local, no model calls."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
 dynamic = ["version"]
 
@@ -14,6 +14,11 @@ dynamic = ["version"]
 # dependencies. The test suite runs on the standard library `unittest` module.
 # This is deliberate: an assurance layer that drags in a dependency tree is
 # harder to audit than the thing it is auditing.
+#
+# The 3.11 floor is a support boundary, not a claim that older interpreters
+# fail. 3.9 is end of life and 3.10 reaches it within the year, and an
+# unreleased product should not open by advertising a floor it intends to
+# raise before anyone depends on it.
 dependencies = []
 
 classifiers = [
@@ -22,6 +27,10 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Quality Assurance",
   "Topic :: Software Development :: Version Control :: Git",
 ]

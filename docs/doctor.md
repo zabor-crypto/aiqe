@@ -51,30 +51,80 @@ for the retained result.
 
 ## Why `git status` is not safe by default
 
-Two behaviours drive most of Doctor's implementation. Both were measured, not assumed,
-and both have a negative control that reproduces the failure on demand.
+Four behaviours drive most of Doctor's implementation. All were measured, not
+assumed, and each has a negative control that reproduces the failure on demand.
 
 **`git status` writes the index.** On a worktree that is stat-dirty but
-content-identical — a tracked file rewritten with the same bytes, or merely touched —
-a plain `git status` refreshes the cached stat information and rewrites `.git/index`.
-Content and modification time both change. `--no-optional-locks` suppresses that write
-while leaving the reported state correct, and Doctor passes it on every invocation.
+content-identical — a tracked file rewritten with the same bytes, or merely
+touched — a plain `git status` refreshes the cached stat information and
+rewrites `.git/index`. Content and modification time both change.
+`--no-optional-locks` suppresses that write while leaving the reported state
+correct, and Doctor passes it on every invocation.
 
-**`git status` executes repository-defined commands.** `core.fsmonitor` is run as a child
-process during the index refresh, and `--no-optional-locks` does not prevent it; a
-per-invocation `-c core.fsmonitor=false` override does, and Doctor passes that too.
+**`git status` executes repository-defined commands.** `core.fsmonitor` is run
+as a child process during the index refresh, and `--no-optional-locks` does not
+prevent it; a per-invocation `-c core.fsmonitor=false` override does, in every
+configuration scope, and Doctor passes that too.
 
-A check-in filter is the harder case. When `.gitattributes` binds a path to a configured
-`filter.<name>.clean` or `filter.<name>.process` driver, and the content changed without
-changing length, Git must read the file through that driver to answer at all. No flag
-prevents it. So Doctor does not ask: when a check-in filter driver is configured, the
-worktree comparison is skipped entirely, the staged and untracked counts are still
-reported — neither reads content through a filter — and the unstaged count is reported
-as `UNKNOWN`.
+**The command a repository selects need not be defined in the repository.** A
+tracked `.gitattributes` saying `*.dat filter=lfs` binds a path to a driver
+whose `clean` or `process` command may be defined in the user's global
+configuration, or in a file pulled in by a local `include`. Repository content
+selects; external configuration supplies the executable. Reading only the
+repository's own configuration and concluding "no filter here" is not enough —
+and it was not: the canaries fired.
 
-That is the intended behaviour. An assurance layer that executed a repository-defined
-command in order to fill in a number would have broken its own first-contact contract to
-look complete.
+**`git status` descends into submodules and runs their filters.** A submodule's
+own local configuration is repository scope for that submodule, so isolating
+the superproject's configuration does not reach it.
+
+## The two defences
+
+**Configuration isolation.** Every invocation that reads the index or the
+worktree — `status`, `diff-index`, `ls-files` — runs with system and global
+configuration switched off. Git cannot execute a definition that is not in
+scope. Discovery invocations are deliberately *not* isolated: they answer
+"which repository is this", and answering that differently from the user's own
+Git would be its own defect.
+
+**Static refusal.** Isolation cannot help once a definition is already in
+repository scope. Doctor therefore declines to compare worktree content, and
+reports the unstaged count as `UNKNOWN`, whenever any of these hold:
+
+```
+a filter driver is defined in the repository's own configuration
+the repository configuration includes a file Doctor will not follow
+repository attributes bind any path to a filter driver
+a repository attributes file is declared but could not be read
+```
+
+The third is deliberately broad. Doctor cannot see everywhere a driver might be
+defined, so the binding alone is treated as unsafe — a repository using Git LFS
+will report an unknown unstaged count rather than a number obtained by running
+`git-lfs`.
+
+Submodules are handled separately, because refusing there would cost more than
+it buys: `status` is invoked with `--ignore-submodules=dirty`, which prevents
+the descent while still reporting a changed submodule pointer. The counts then
+exclude submodule worktree changes, and say so.
+
+`UNKNOWN` is the correct product answer in all of these. A precise number
+obtained by running a repository's own command is not a better answer; it is
+the wrong answer to a different question.
+
+### What isolation costs
+
+Stated rather than hidden. A working-state count is computed under
+repository-scope configuration only, so:
+
+- a custom global `core.excludesFile` does not apply, and the untracked count
+  may exceed what plain `git status` reports;
+- a repository whose access depends on a global `safe.directory` entry yields
+  an unknown working state rather than a wrong one;
+- where a filter is bound entirely outside the repository — the binding in a
+  global attributes file as well as the driver — Doctor cannot detect the
+  binding at all. Isolation still prevents the execution, but the comparison is
+  then made on raw bytes, ignoring a filter the user's own Git would apply.
 
 ## The configuration boundary
 
@@ -233,7 +283,8 @@ git                     { available, version }
 repository              { detected, kind, head }
 topology                { linked_worktree, sparse_checkout }
 operations_in_progress  [ finding codes ]
-working_state           { determined, staged, unstaged, untracked, unmerged }
+working_state           { determined, staged, unstaged, untracked, unmerged,
+                          submodule_worktrees_excluded }
 aiqe                    { config_present }
 commit_policy           { ... booleans ... }
 agent_surface           { ... presence and permission categories ... }
@@ -255,31 +306,54 @@ categories.
 
 ## Known limitations
 
-**The unstaged count is unavailable when a check-in filter is configured.** This is a
-deliberate refusal, not a defect, and it is reported as `UNKNOWN` rather than guessed.
+**The unstaged count is unavailable whenever comparing content could execute
+something the repository selected.** This is a deliberate refusal, not a
+defect, and it is reported as `UNKNOWN` rather than guessed. A repository using
+Git LFS, or any other filter driver, falls in this category.
 
-**Effective Git configuration is not resolved.** Doctor reports the presence of an
-include chain and nothing about its contents. A repository whose real policy lives
-behind `includeIf` will show `GIT_CONFIG_INCLUDE_UNRESOLVED` and no policy findings.
+**Submodule worktree changes are not counted.** Counting them means descending
+into each submodule and running its filters. A changed submodule *pointer* is
+still reported, and the output says when the counts exclude submodule
+worktrees.
 
-**Configuration outside the repository is not inspected.** Global and system Git
-configuration can enable commit signing or a hooks path that Doctor does not report,
-because reading a user's wider environment is outside a first-contact boundary. Absence
-of a policy finding is not a claim that no policy applies.
+**Working-state counts use repository-scope configuration only.** A custom
+global `core.excludesFile` does not apply to the untracked count; a repository
+reachable only through a global `safe.directory` entry yields an unknown
+working state; and a filter bound entirely outside the repository is invisible
+to Doctor, so the comparison ignores it. See "What isolation costs" above.
 
-**Agent configuration detection is narrow.** It recognises the shapes described above
-and nothing else, and it only inspects repository-level files.
+**Effective Git configuration is not resolved.** Doctor reports the presence of
+an include chain and nothing about its contents. A repository whose real policy
+lives behind `includeIf` shows `GIT_CONFIG_INCLUDE_UNRESOLVED` and no policy
+findings.
 
-**The no-network proof is not kernel-level.** The package declares no third-party
-dependency and imports no network-capable standard library module; a full Doctor run
-executes with every socket entry point replaced by a trap, and nothing is called; and
-the only program AIQE core spawns is Git, through a single choke point, restricted to a
-frozen allowlist of local subcommands. No network namespace or packet filter is applied,
-because installing one to run a unit test would be a heavier dependency than the thing
-it verifies.
+**Configuration outside the repository is not reported.** Global and system Git
+configuration can enable commit signing or a hooks path that Doctor does not
+report. Absence of a policy finding is not a claim that no policy applies.
+Isolation prevents such configuration from *executing* during a Doctor run; it
+does not make Doctor a reporter of it.
 
-**Installing the package uses the network.** That is the installer's behaviour, not
-AIQE's runtime behaviour, and the two are not interchangeable.
+**Agent configuration detection is narrow.** It recognises the shapes described
+above and nothing else, and inspects repository-level files only.
 
-**macOS is the supported target.** The suite is also run on Linux in CI, which is
-evidence but not a release claim. Windows is out of scope for v1.
+**The no-network evidence is not kernel-level.** AIQE Doctor contains no
+network feature and no network code path, and made no network call in the
+retained test harness: the package declares no third-party dependency and
+imports no network-capable standard library module; a full run executes with
+every socket entry point replaced by a trap, and nothing is called; and the
+only program AIQE core spawns is Git, through a single choke point, restricted
+to a frozen allowlist of local subcommands. No network namespace or packet
+filter is applied, and no claim of operating-system-level impossibility is
+made.
+
+**Installing the package uses the network.** That is the installer's behaviour,
+not AIQE's runtime behaviour, and the two are not interchangeable.
+
+**Python 3.11 is the support floor**, and 3.11 and 3.14 are the tested
+endpoints. Versions between them are not claimed. This is a support boundary,
+not a claim that older interpreters fail.
+
+**macOS is the supported target.** The suite is also run on Linux in CI —
+which is where the arbitrary-byte path case can exist at all, since APFS
+refuses non-UTF-8 filenames — but that is portability evidence, not a Linux
+release claim. Windows is out of scope for v1.

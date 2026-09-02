@@ -6,8 +6,13 @@
 The comparison is on headline numbers, not bytes. The artifact records the Git
 version the run observed, and the rendered Doctor output quotes it, so two
 correct machines legitimately produce different bytes. What may not differ is
-how many cases there were, how many passed, how many negative controls
+how many cases there were, how many failed, how many negative controls
 reproduced their failure, and whether every zero-tolerance total is zero.
+
+Platform-restricted cases are compared only where both runs actually ran them.
+A case the retained run skipped and this run executed is a case gaining
+coverage, which is not a disagreement - but a case that ran in both and
+disagreed is.
 
 Exit status is 0 when the fresh run agrees with the retained artifact, and 1
 otherwise.
@@ -20,9 +25,11 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 RETAINED = os.path.join(HERE, "results", "doctor", "results.json")
 
+#: Numbers that must agree between any two correct runs, on any platform.
+#: `cases_passed` is deliberately absent: it legitimately differs when one run
+#: could execute a platform-restricted case and the other could not.
 HEADLINE_FIELDS = (
     "cases_total",
-    "cases_passed",
     "cases_failed",
     "negative_controls_total",
     "negative_controls_reproducing",
@@ -59,10 +66,17 @@ def main(argv):
             )
         )
     for case, outcome in sorted(fresh_cases.items()):
-        if outcome != retained_cases.get(case):
-            problems.append(
-                "%s: retained %r, fresh %r" % (case, retained_cases.get(case), outcome)
-            )
+        retained_outcome = retained_cases.get(case)
+        if outcome == retained_outcome:
+            continue
+        if "SKIPPED_PLATFORM" in (outcome, retained_outcome) and "FAIL" not in (
+            outcome,
+            retained_outcome,
+        ):
+            # One machine could run the case and the other could not. That is
+            # a platform difference, not a disagreement about behaviour.
+            continue
+        problems.append("%s: retained %r, fresh %r" % (case, retained_outcome, outcome))
 
     if problems:
         sys.stdout.write("Retained Doctor results disagree with a fresh run:\n")

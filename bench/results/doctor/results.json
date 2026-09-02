@@ -13,12 +13,15 @@
       },
       "case": "normal_repository",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "One commit, clean worktree. The baseline every other case is a deviation from.",
@@ -86,8 +89,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -111,6 +124,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -128,12 +142,15 @@
       },
       "case": "no_aiqe_config",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Doctor runs before init: an absent aiqe.toml is a normal state, not a finding.",
@@ -201,8 +218,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -226,6 +253,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -243,12 +271,15 @@
       },
       "case": "aiqe_config_present",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "An aiqe.toml in the worktree root is detected without being read as authority.",
@@ -316,8 +347,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     present\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -341,6 +382,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
@@ -358,12 +400,15 @@
       },
       "case": "unborn_repository",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Initialised, staged, never committed. Doctor must not treat an unborn HEAD as a broken repository.",
@@ -433,8 +478,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       no commits yet \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      REPOSITORY_UNBORN_HEAD\n      HEAD points at a branch that has no commits yet.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -458,6 +513,7 @@
       "working_state": {
         "determined": true,
         "staged": 1,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -475,12 +531,15 @@
       },
       "case": "non_repository",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "An ordinary directory. Doctor produces a valid diagnostic, writes nothing, and does not initialise anything.",
@@ -506,6 +565,10 @@
           "--is-inside-work-tree"
         ]
       ],
+      "git_invocations_config_isolated": [
+        false,
+        false
+      ],
       "human_output": "AIQE DOCTOR\n\n  Repository      none detected \u00b7 git 2.50.1\n\n  FINDING      REPOSITORY_ABSENT\n      No Git repository was found here. AIQE operates inside a Git worktree.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
@@ -528,6 +591,7 @@
       "working_state": {
         "determined": false,
         "staged": null,
+        "submodule_worktrees_excluded": false,
         "unmerged": null,
         "unstaged": null,
         "untracked": null
@@ -545,12 +609,15 @@
       },
       "case": "bare_repository",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A bare repository has no worktree, so no first-contact diagnosis applies. This is the case that distinguishes exit 3 from exit 0.",
@@ -576,6 +643,10 @@
           "--is-inside-work-tree"
         ]
       ],
+      "git_invocations_config_isolated": [
+        false,
+        false
+      ],
       "human_output": "AIQE DOCTOR\n\n  Repository      bare repository \u00b7 git 2.50.1\n\n  UNSUPPORTED  REPOSITORY_BARE\n      This is a bare repository. AIQE requires a worktree, so no first-contact\n      diagnosis applies.\n\n  1 unsupported\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
@@ -598,6 +669,7 @@
       "working_state": {
         "determined": false,
         "staged": null,
+        "submodule_worktrees_excluded": false,
         "unmerged": null,
         "unstaged": null,
         "untracked": null
@@ -615,12 +687,15 @@
       },
       "case": "detached_head",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Checked out at a commit rather than a branch.",
@@ -690,8 +765,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -715,6 +800,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -732,12 +818,15 @@
       },
       "case": "tracked_modification",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "One tracked file modified and not staged.",
@@ -805,8 +894,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -830,6 +929,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 1,
         "untracked": 0
@@ -847,12 +947,15 @@
       },
       "case": "staged_modification",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "One tracked file modified and staged.",
@@ -920,8 +1023,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -945,6 +1058,7 @@
       "working_state": {
         "determined": true,
         "staged": 1,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -962,12 +1076,15 @@
       },
       "case": "staged_addition",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A new file added to the index.",
@@ -1035,8 +1152,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -1060,6 +1187,7 @@
       "working_state": {
         "determined": true,
         "staged": 1,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -1077,12 +1205,15 @@
       },
       "case": "staged_deletion",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A tracked file removed and the deletion staged.",
@@ -1150,8 +1281,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -1175,6 +1316,7 @@
       "working_state": {
         "determined": true,
         "staged": 1,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -1192,12 +1334,15 @@
       },
       "case": "untracked_file",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "One untracked file.",
@@ -1265,8 +1410,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -1290,6 +1445,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
@@ -1307,12 +1463,15 @@
       },
       "case": "mixed_working_state",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "One path both staged and further modified, one path modified only, one untracked.",
@@ -1380,8 +1539,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 2 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -1405,6 +1574,7 @@
       "working_state": {
         "determined": true,
         "staged": 1,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 2,
         "untracked": 1
@@ -1422,12 +1592,15 @@
       },
       "case": "stat_dirty_repository",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Tracked content rewritten byte-identically with a newer timestamp. A plain git status rewrites the index here; Doctor must report a clean worktree and still write nothing.",
@@ -1495,8 +1668,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -1520,6 +1703,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -1537,12 +1721,15 @@
       },
       "case": "merge_in_progress",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A conflicted merge. AIQE does not support a bounded completion commit mid-operation.",
@@ -1613,8 +1800,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      merge in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_MERGE_IN_PROGRESS\n      A merge is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
       "local_state_write_detail": [],
@@ -1640,6 +1837,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 1,
         "unstaged": 0,
         "untracked": 0
@@ -1657,12 +1855,15 @@
       },
       "case": "rebase_in_progress",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A conflicted rebase. HEAD is detached for the duration, and Doctor reports both facts.",
@@ -1734,8 +1935,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      rebase in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  FINDING      OPERATION_REBASE_IN_PROGRESS\n      A rebase is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  3 findings\n",
       "local_state_write_detail": [],
@@ -1761,6 +1972,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 1,
         "unstaged": 0,
         "untracked": 0
@@ -1778,12 +1990,15 @@
       },
       "case": "cherry_pick_in_progress",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A conflicted cherry-pick.",
@@ -1854,8 +2069,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      cherry-pick in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_CHERRY_PICK_IN_PROGRESS\n      A cherry-pick is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
       "local_state_write_detail": [],
@@ -1881,6 +2106,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 1,
         "unstaged": 0,
         "untracked": 0
@@ -1898,12 +2124,15 @@
       },
       "case": "linked_worktree",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A linked worktree sharing a Git directory with the main worktree.",
@@ -1973,8 +2202,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      linked worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        linked worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      LINKED_WORKTREE\n      This is a linked worktree sharing a Git directory with another worktree.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -1998,6 +2237,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -2015,12 +2255,15 @@
       },
       "case": "sparse_checkout",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Sparse checkout enabled, so the worktree does not contain every tracked path.",
@@ -2090,8 +2333,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout on\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      SPARSE_CHECKOUT_ACTIVE\n      Sparse checkout is enabled, so the worktree does not contain every\n      tracked path.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -2115,6 +2368,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -2132,12 +2386,15 @@
       },
       "case": "tracked_gitattributes",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": true
       },
       "description": "A tracked .gitattributes can bind paths to content filters, so its presence is reported.",
@@ -2207,8 +2464,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -2232,6 +2499,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -2249,12 +2517,15 @@
       },
       "case": "local_hooks_path",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": true,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "core.hooksPath set locally, pointing at an empty directory: the setting is reported, no hooks are.",
@@ -2324,8 +2595,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   custom hooks path\n\n  FINDING      GIT_HOOKS_PATH_CONFIGURED\n      core.hooksPath is set in the repository configuration, so hooks are read\n      from a non-default location.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -2349,6 +2630,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -2366,12 +2648,15 @@
       },
       "case": "installed_hook",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": true,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "An executable pre-commit hook carrying a canary. Doctor reports it and must not run it.",
@@ -2441,8 +2726,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   hooks installed\n\n  FINDING      GIT_HOOKS_PRESENT\n      Executable Git hooks are installed. An active commit hook makes an AIQE\n      bounded commit unsupported, because AIQE will not bypass repository\n      governance to obtain one.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -2466,6 +2761,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -2483,12 +2779,15 @@
       },
       "case": "commit_signing_configured",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": true,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "commit.gpgSign set in the repository configuration.",
@@ -2558,8 +2857,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   signing configured\n\n  FINDING      COMMIT_SIGNING_CONFIGURED\n      Commit signing is configured in the repository configuration. Effective\n      signing policy is resolved later, not by Doctor.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -2583,6 +2892,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -2600,18 +2910,22 @@
       },
       "case": "config_include_present",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": true,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
-      "description": "An include directive whose target sets core.hooksPath. Doctor reports the configuration as unresolved and must NOT report the included hooks path, because it does not follow the chain.",
+      "description": "An include directive whose target sets core.hooksPath. Doctor reports the configuration as unresolved, must NOT report the included hooks path, and must not compare worktree content behind an unfollowed chain that could define an executable filter driver.",
       "exit_code": 0,
       "findings": [
-        "GIT_CONFIG_INCLUDE_UNRESOLVED"
+        "GIT_CONFIG_INCLUDE_UNRESOLVED",
+        "WORKING_STATE_UNSTAGED_UNKNOWN"
       ],
       "fired_canaries": [],
       "git_invocations": [
@@ -2671,14 +2985,34 @@
           "--no-optional-locks",
           "-c",
           "core.fsmonitor=false",
-          "status",
-          "--porcelain=v2",
+          "diff-index",
+          "--cached",
+          "--name-only",
           "-z",
-          "--untracked-files=normal",
-          "--no-renames"
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--others",
+          "--exclude-standard",
+          "-z"
         ]
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  1 unknown\n",
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  2 unknown\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -2698,10 +3032,11 @@
         "sparse_checkout": "off"
       },
       "working_state": {
-        "determined": true,
+        "determined": false,
         "staged": 0,
-        "unmerged": 0,
-        "unstaged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": null,
+        "unstaged": null,
         "untracked": 0
       }
     },
@@ -2717,18 +3052,22 @@
       },
       "case": "config_include_if_present",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": true,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
-      "description": "A conditional include whose target enables commit signing. Doctor must not report signing as configured on the strength of an unfollowed chain.",
+      "description": "A conditional include whose target enables commit signing. Doctor must not report signing as configured on the strength of an unfollowed chain, and must not compare worktree content behind one.",
       "exit_code": 0,
       "findings": [
-        "GIT_CONFIG_INCLUDE_UNRESOLVED"
+        "GIT_CONFIG_INCLUDE_UNRESOLVED",
+        "WORKING_STATE_UNSTAGED_UNKNOWN"
       ],
       "fired_canaries": [],
       "git_invocations": [
@@ -2788,14 +3127,34 @@
           "--no-optional-locks",
           "-c",
           "core.fsmonitor=false",
-          "status",
-          "--porcelain=v2",
+          "diff-index",
+          "--cached",
+          "--name-only",
           "-z",
-          "--untracked-files=normal",
-          "--no-renames"
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--others",
+          "--exclude-standard",
+          "-z"
         ]
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  1 unknown\n",
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  2 unknown\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -2815,10 +3174,11 @@
         "sparse_checkout": "off"
       },
       "working_state": {
-        "determined": true,
+        "determined": false,
         "staged": 0,
-        "unmerged": 0,
-        "unstaged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": null,
+        "unstaged": null,
         "untracked": 0
       }
     },
@@ -2834,12 +3194,15 @@
       },
       "case": "checkin_filter_configured",
       "commit_policy": {
+        "attributes_bind_filter": true,
+        "attributes_readable": true,
         "checkin_filter_configured": true,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": true
       },
       "description": "A clean filter bound by .gitattributes, with a same-length modification. Determining the unstaged count would execute the repository's own command, so Doctor reports it as unknown and the canary stays unfired.",
@@ -2924,7 +3287,17 @@
           "-z"
         ]
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured \u00b7 tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      configured check-in filter, and Doctor executes nothing the repository\n      defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 2 findings\n",
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured \u00b7 tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      check-in filter configured in this repository, and Doctor executes\n      nothing the repository defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 2 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -2946,6 +3319,7 @@
       "working_state": {
         "determined": false,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": null,
         "unstaged": null,
         "untracked": 0
@@ -2963,12 +3337,15 @@
       },
       "case": "fsmonitor_configured",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "core.fsmonitor set to a canary script. Git runs it during an index refresh even under --no-optional-locks; Doctor overrides it per invocation, so the canary stays unfired.",
@@ -3038,8 +3415,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      FSMONITOR_CONFIGURED\n      core.fsmonitor is configured. Git would run it as a child process during\n      an index refresh; Doctor disables it for its own Git invocations.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -3063,6 +3450,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 1,
         "untracked": 1
@@ -3080,12 +3468,15 @@
       },
       "case": "executable_alias_configured",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Shell-executing aliases shadowing the subcommand names Doctor uses. Aliases cannot shadow built-in subcommands, and the canary proves it.",
@@ -3155,8 +3546,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      EXECUTABLE_ALIAS_CONFIGURED\n      The repository configuration defines shell-executing Git aliases.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -3180,6 +3581,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 0
@@ -3197,12 +3599,15 @@
       },
       "case": "claude_bounded",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Claude Code settings with constrained permission entries: present, and not claimed to be broad.",
@@ -3270,8 +3675,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -3295,6 +3710,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
@@ -3312,12 +3728,15 @@
       },
       "case": "claude_broad",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Claude Code settings granting unconstrained command execution.",
@@ -3387,8 +3806,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present, unconstrained \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      CLAUDE_PERMISSIONS_BROAD\n      Claude Code repository settings grant unconstrained command execution.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -3412,6 +3841,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
@@ -3429,12 +3859,15 @@
       },
       "case": "claude_unreadable",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "A settings file that is not valid JSON. The permission surface is unknown, and unknown is reported rather than assumed absent.",
@@ -3504,8 +3937,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present, permissions unknown \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  UNKNOWN      AGENT_CONFIG_UNREADABLE\n      A Claude Code settings file is present but could not be parsed, so its\n      permission surface is unknown.\n\n  1 unknown\n",
       "local_state_write_detail": [],
@@ -3529,6 +3972,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
@@ -3546,12 +3990,15 @@
       },
       "case": "codex_bounded",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Codex configuration with an approval policy and a workspace sandbox: present, and not claimed to be broad.",
@@ -3619,8 +4066,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex present\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
@@ -3644,6 +4101,7 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
@@ -3661,12 +4119,15 @@
       },
       "case": "codex_broad",
       "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
         "checkin_filter_configured": false,
         "config_include_present": false,
         "hooks_path_configured": false,
         "hooks_present": false,
         "local_config_readable": true,
         "signing_configured": false,
+        "submodules_present": false,
         "tracked_gitattributes": false
       },
       "description": "Codex configuration disabling both the approval and the sandbox boundary.",
@@ -3736,8 +4197,18 @@
           "--porcelain=v2",
           "-z",
           "--untracked-files=normal",
-          "--no-renames"
+          "--no-renames",
+          "--ignore-submodules=dirty"
         ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ],
       "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex present, unconstrained\n  Commit policy   no local policy signals\n\n  FINDING      CODEX_PERMISSIONS_BROAD\n      Codex repository configuration disables the approval or sandbox\n      boundary.\n\n  1 finding\n",
       "local_state_write_detail": [],
@@ -3761,15 +4232,841 @@
       "working_state": {
         "determined": true,
         "staged": 0,
+        "submodule_worktrees_excluded": false,
         "unmerged": 0,
         "unstaged": 0,
         "untracked": 1
       }
+    },
+    {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "global_filter_canary",
+      "commit_policy": {
+        "attributes_bind_filter": true,
+        "attributes_readable": true,
+        "checkin_filter_configured": false,
+        "config_include_present": false,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": false,
+        "tracked_gitattributes": true
+      },
+      "description": "The filter driver is defined in GLOBAL configuration and bound by a tracked .gitattributes. Doctor cannot see the definition, so it refuses the comparison on the strength of the binding alone, and the canary stays unfired.",
+      "exit_code": 0,
+      "findings": [
+        "WORKING_STATE_UNSTAGED_UNKNOWN",
+        "TRACKED_GITATTRIBUTES"
+      ],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "diff-index",
+          "--cached",
+          "--name-only",
+          "-z",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--others",
+          "--exclude-standard",
+          "-z"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: repository attributes bind a path to a\n      filter driver, and the driver's command can be defined anywhere, so\n      comparing content could execute it.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 1 finding\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": false,
+        "staged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": null,
+        "unstaged": null,
+        "untracked": 0
+      }
+    },
+    {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "global_fsmonitor_canary",
+      "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
+        "checkin_filter_configured": false,
+        "config_include_present": false,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": false,
+        "tracked_gitattributes": false
+      },
+      "description": "core.fsmonitor supplied by GLOBAL configuration. The per-invocation override disables it whatever scope defines it, so the working state is still determined and the canary stays unfired.",
+      "exit_code": 0,
+      "findings": [],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "status",
+          "--porcelain=v2",
+          "-z",
+          "--untracked-files=normal",
+          "--no-renames",
+          "--ignore-submodules=dirty"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": true,
+        "staged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": 0,
+        "unstaged": 1,
+        "untracked": 1
+      }
+    },
+    {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "local_include_filter_canary",
+      "commit_policy": {
+        "attributes_bind_filter": true,
+        "attributes_readable": true,
+        "checkin_filter_configured": false,
+        "config_include_present": true,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": false,
+        "tracked_gitattributes": true
+      },
+      "description": "A local include resolves to a file defining an executable filter driver, bound by tracked attributes. Configuration isolation cannot help - the include is repository scope - so the refusal is what keeps the canary unfired.",
+      "exit_code": 0,
+      "findings": [
+        "GIT_CONFIG_INCLUDE_UNRESOLVED",
+        "WORKING_STATE_UNSTAGED_UNKNOWN",
+        "TRACKED_GITATTRIBUTES"
+      ],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "diff-index",
+          "--cached",
+          "--name-only",
+          "-z",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--others",
+          "--exclude-standard",
+          "-z"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes \u00b7 config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  2 unknown \u00b7 1 finding\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": false,
+        "staged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": null,
+        "unstaged": null,
+        "untracked": 0
+      }
+    },
+    {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "global_attributes_filter_canary",
+      "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
+        "checkin_filter_configured": false,
+        "config_include_present": false,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": false,
+        "tracked_gitattributes": false
+      },
+      "description": "Both the binding and the driver live outside the repository, via core.attributesFile. Doctor cannot detect this at all; configuration isolation is what prevents the execution, and the working state stays determined.",
+      "exit_code": 0,
+      "findings": [],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "status",
+          "--porcelain=v2",
+          "-z",
+          "--untracked-files=normal",
+          "--no-renames",
+          "--ignore-submodules=dirty"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": true,
+        "staged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": 0,
+        "unstaged": 1,
+        "untracked": 0
+      }
+    },
+    {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "external_attributes_local_filter_canary",
+      "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
+        "checkin_filter_configured": true,
+        "config_include_present": false,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": false,
+        "tracked_gitattributes": false
+      },
+      "description": "The binding comes from the default external attributes path, which isolation does not remove, while the driver is defined in local config. The static refusal catches it.",
+      "exit_code": 0,
+      "findings": [
+        "WORKING_STATE_UNSTAGED_UNKNOWN",
+        "CHECKIN_FILTER_CONFIGURED"
+      ],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "diff-index",
+          "--cached",
+          "--name-only",
+          "-z",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--others",
+          "--exclude-standard",
+          "-z"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      check-in filter configured in this repository, and Doctor executes\n      nothing the repository defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  1 unknown \u00b7 1 finding\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": false,
+        "staged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": null,
+        "unstaged": null,
+        "untracked": 0
+      }
+    },
+    {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "submodule_filter_canary",
+      "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
+        "checkin_filter_configured": false,
+        "config_include_present": false,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": true,
+        "tracked_gitattributes": false
+      },
+      "description": "A submodule's own local config defines an executable filter and its worktree is dirty. A submodule's config is repository scope for that submodule, so isolation cannot reach it; not descending is what keeps the canary unfired.",
+      "exit_code": 0,
+      "findings": [],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "status",
+          "--porcelain=v2",
+          "-z",
+          "--untracked-files=normal",
+          "--no-renames",
+          "--ignore-submodules=dirty"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 submodule worktrees not counted\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": true,
+        "staged": 0,
+        "submodule_worktrees_excluded": true,
+        "unmerged": 0,
+        "unstaged": 0,
+        "untracked": 0
+      }
+    },
+    {
+      "case": "non_utf8_path",
+      "description": "A real repository whose tracked, staged and untracked paths are not valid UTF-8. Doctor carries paths as bytes end to end; if any layer decoded one, this is where it would raise.",
+      "outcome": "SKIPPED_PLATFORM",
+      "platform_required": "linux",
+      "problems": []
     }
   ],
   "cases_failed": 0,
-  "cases_passed": 33,
-  "cases_total": 33,
+  "cases_passed": 39,
+  "cases_skipped_platform": 1,
+  "cases_skipped_platform_ids": [
+    "non_utf8_path"
+  ],
+  "cases_total": 40,
   "family": "DOCTOR_FIRST_CONTACT",
   "negative_controls": [
     {
@@ -3841,10 +5138,46 @@
       "repository_defined_executions": 0,
       "repository_mutation_detail": [],
       "repository_mutations": 0
+    },
+    {
+      "control": "NC_DOCTOR_GLOBAL_FILTER_EXECUTION",
+      "control_reproduces_failure": true,
+      "description": "A filter driver defined in the user's global configuration, bound by a tracked .gitattributes. Reading only the repository's own config and concluding no filter is present is wrong: `git status` runs the external driver. This is why the working-state invocations isolate system and global configuration, and why a binding alone is enough to refuse the comparison.",
+      "detects": "repository_defined_execution",
+      "fired_canaries": [
+        "global-filter"
+      ],
+      "fixture": "global_filter_canary",
+      "invariant": "DOCTOR_REPOSITORY_DEFINED_EXECUTIONS = 0",
+      "naive_returncode": 0,
+      "naive_stdout_bytes": 124,
+      "naive_stdout_retained": false,
+      "naive_workflow": "naive_status_locked_only",
+      "repository_defined_executions": 1,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0
+    },
+    {
+      "control": "NC_DOCTOR_SUBMODULE_FILTER_EXECUTION",
+      "control_reproduces_failure": true,
+      "description": "A submodule whose own local configuration defines a filter driver. `git status` descends into the submodule worktree and runs it, and isolating the superproject's configuration does not prevent it, because the submodule's config is repository scope for the submodule. This is why status is invoked with --ignore-submodules=dirty.",
+      "detects": "repository_defined_execution",
+      "fired_canaries": [
+        "submodule-filter"
+      ],
+      "fixture": "submodule_filter_canary",
+      "invariant": "DOCTOR_REPOSITORY_DEFINED_EXECUTIONS = 0",
+      "naive_returncode": 0,
+      "naive_stdout_bytes": 120,
+      "naive_stdout_retained": false,
+      "naive_workflow": "naive_status_isolated_only",
+      "repository_defined_executions": 1,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0
     }
   ],
-  "negative_controls_reproducing": 4,
-  "negative_controls_total": 4,
+  "negative_controls_reproducing": 6,
+  "negative_controls_total": 6,
   "other_families": {
     "CHANGE_INTEGRITY": "NOT_RUN",
     "COMPLETION_EVIDENCE_TRUTH": "NOT_RUN",
@@ -3852,6 +5185,7 @@
     "NUMERICAL_INTEGRITY_ROUTING": "NOT_RUN",
     "PRODUCT_FRICTION": "NOT_RUN"
   },
+  "platform": "darwin",
   "schema_version": 1,
   "totals": {
     "local_state_writes": 0,

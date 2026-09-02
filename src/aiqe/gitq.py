@@ -30,10 +30,40 @@ the negative controls in the test suite, because a Git command that is widely
     same-size file actually changed. No Git flag prevents it: to answer the
     question at all, Git must read the content through the filter.
 
-The second half of fact 2 is not something this module can defend against, so
-it does not pretend to. Doctor inspects the configuration statically first and
-simply declines to ask the question when asking it would execute something.
-See `doctor.working_state`.
+3.  The command that defines a filter driver need not live in the repository.
+
+    A tracked `.gitattributes` can bind a path to a driver whose `clean` or
+    `process` command is defined in the user's global configuration, or in a
+    file pulled in by a local `include`. Repository content selects; external
+    configuration supplies the executable. Inspecting only the repository's
+    own configuration and concluding "no filter here" is therefore wrong, and
+    it was: the canaries fired.
+
+4.  `git status` descends into submodules and runs *their* filters.
+
+    A submodule's own local configuration is repository scope for that
+    submodule, so no amount of isolation in the superproject suppresses it.
+    `--ignore-submodules=dirty` prevents the descent while still reporting a
+    changed submodule pointer.
+
+Two defences follow, and between them they are the whole mechanism:
+
+    Configuration isolation. Every invocation that reads the index or the
+    worktree runs with system and global configuration switched off, so an
+    externally defined driver has no command to run. Git cannot execute a
+    definition that is not in scope.
+
+    Static refusal. Isolation cannot help when the definition is already in
+    repository scope - a local `filter.<name>.clean`, an `include` whose
+    target Doctor will not follow, or an attributes file binding a filter at
+    all. There Doctor declines to compare worktree content and reports the
+    unstaged count as unknown. See `doctor._filter_execution_risk`.
+
+Isolation has a cost, and it is stated rather than hidden: a working-state
+count is computed under repository-scope configuration only. A custom global
+`core.excludesFile` does not apply to the untracked count, and a repository
+whose access depends on a global `safe.directory` entry yields an unknown
+working state rather than a wrong one.
 """
 
 import os
@@ -56,6 +86,26 @@ ALLOWED_SUBCOMMANDS = frozenset(
         "diff-index",
     }
 )
+
+#: Subcommands that read the index or the worktree, and therefore run with
+#: system and global configuration switched off. Discovery subcommands are
+#: deliberately not in this set: they answer "which repository is this", and
+#: answering it differently from the user's own Git would be its own defect.
+CONFIG_ISOLATED_SUBCOMMANDS = frozenset({"status", "diff-index", "ls-files"})
+
+#: Configuration isolation for those subcommands. `GIT_CONFIG_SYSTEM` and
+#: `GIT_CONFIG_GLOBAL` pointing at the null device is the documented way to
+#: read no configuration from those scopes; `GIT_CONFIG_NOSYSTEM` is kept as
+#: well because it predates them by a decade.
+#:
+#: This writes nothing. The mutation harness proves the repository, its
+#: configuration and the isolated home directory are byte-identical after a
+#: Doctor run.
+_CONFIG_ISOLATION = {
+    "GIT_CONFIG_NOSYSTEM": "1",
+    "GIT_CONFIG_SYSTEM": os.devnull,
+    "GIT_CONFIG_GLOBAL": os.devnull,
+}
 
 #: Hardening applied to every invocation, ahead of the subcommand.
 #:
@@ -147,10 +197,16 @@ class GitRunner(object):
         self._base_env = os.environ if env is None else env
         #: Every invocation this runner made, in order, as tuples of str.
         self.invocations = []
+        #: Whether each invocation ran with system and global configuration
+        #: switched off. Parallel to `invocations`, so a test can assert that
+        #: the isolation was actually applied and not merely documented.
+        self.config_isolated = []
 
-    def _env(self):
+    def _env(self, isolate_config):
         env = dict(self._base_env)
         env.update(_ENV_OVERRIDES)
+        if isolate_config:
+            env.update(_CONFIG_ISOLATION)
         return env
 
     def run(self, *args):
@@ -175,13 +231,15 @@ class GitRunner(object):
             argv.extend(_HARDENING)
             argv.extend(args)
 
+        isolate_config = subcommand in CONFIG_ISOLATED_SUBCOMMANDS
         self.invocations.append(tuple(argv))
+        self.config_isolated.append(isolate_config)
 
         try:
             proc = subprocess.Popen(
                 argv,
                 cwd=self.cwd,
-                env=self._env(),
+                env=self._env(isolate_config),
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

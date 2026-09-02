@@ -15,12 +15,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macOS is the supported target for v1. Linux is exercised here so
-        # that the suite is genuinely run on it, but running green in CI is
-        # not the same thing as a supported release artifact, and this file
-        # does not make that claim.
+        # macOS is the supported target for v1. Linux is exercised here so the
+        # suite is genuinely run on it - and it is the only place the
+        # arbitrary-byte path case can exist at all - but running green in CI
+        # is not a supported release artifact, and this file makes no such
+        # claim.
+        #
+        # 3.11 is the support floor. 3.14 is the current stable interpreter.
+        # The endpoints are tested; the versions between them are not claimed.
         os: [macos-latest, ubuntu-latest]
-        python: ["3.9", "3.13"]
+        python: ["3.11", "3.14"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -34,38 +38,95 @@ jobs:
       - name: Run the test suite
         run: python -m unittest discover -s tests -t . --verbose
 
-  doctor-benchmark:
-    name: doctor fixtures and negative controls
-    runs-on: macos-latest
+  non-utf8-e2e:
+    name: linux arbitrary-byte path (must not skip)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.14"
+      - name: Confirm the filesystem accepts a non-UTF-8 filename
+        run: |
+          python - <<'PY'
+          import os, sys, tempfile
+          directory = os.fsencode(tempfile.mkdtemp())
+          path = os.path.join(directory, b"probe-\xe9\xff.dat")
+          try:
+              with open(path, "wb") as handle:
+                  handle.write(b"x")
+          except (OSError, UnicodeError) as exc:
+              sys.exit(
+                  "STOP: this Linux filesystem refuses a non-UTF-8 filename (%s). "
+                  "The arbitrary-byte path proof cannot be produced here and must "
+                  "not be downgraded to a parser-only test." % (exc,)
+              )
+          print("filesystem accepts non-UTF-8 filenames:", os.listdir(directory))
+          PY
+      - name: Run the end-to-end byte-path case, refusing to skip
+        env:
+          AIQE_REQUIRE_NON_UTF8: "1"
+        run: python -m unittest tests.test_non_utf8_paths --verbose
+
+  doctor-benchmark:
+    name: doctor fixtures and controls (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
       - name: Run the Doctor benchmark family
         run: python bench/run-doctor-fixtures.py --output "${RUNNER_TEMP}/fresh-results.json"
       - name: Compare the fresh run against the retained artifact
         run: python bench/compare-results.py "${RUNNER_TEMP}/fresh-results.json"
 
   install:
-    name: install from a clean environment
-    runs-on: macos-latest
+    name: install from a clean environment (${{ matrix.os }}, python ${{ matrix.python }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        python: ["3.11", "3.14"]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python }}
       - name: Install into an isolated virtual environment
         run: |
-          python -m venv /tmp/aiqe-venv
-          /tmp/aiqe-venv/bin/python -m pip install --quiet --upgrade pip
-          /tmp/aiqe-venv/bin/python -m pip install --quiet .
+          python -m venv "${RUNNER_TEMP}/aiqe-venv"
+          "${RUNNER_TEMP}/aiqe-venv/bin/python" -m pip install --quiet --upgrade pip
+          "${RUNNER_TEMP}/aiqe-venv/bin/python" -m pip install --quiet .
       - name: Run the installed entry point
         run: |
-          /tmp/aiqe-venv/bin/aiqe --version
-          /tmp/aiqe-venv/bin/aiqe doctor
-          /tmp/aiqe-venv/bin/aiqe doctor --format json > /dev/null
+          "${RUNNER_TEMP}/aiqe-venv/bin/python" --version
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" --version
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" doctor
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" doctor --format json > /dev/null
           echo "Installed console script works."
+      - name: Confirm no third-party dependency was installed
+        run: |
+          "${RUNNER_TEMP}/aiqe-venv/bin/python" - <<'PY'
+          import subprocess, sys
+          frozen = subprocess.run(
+              [sys.executable, "-m", "pip", "list", "--format=freeze"],
+              stdout=subprocess.PIPE, check=True,
+          ).stdout.decode()
+          names = {
+              line.split("==")[0].lower()
+              for line in frozen.splitlines() if line.strip()
+          }
+          unexpected = names - {"aiqe", "pip", "setuptools", "wheel"}
+          if unexpected:
+              sys.exit("unexpected dependencies installed: %s" % sorted(unexpected))
+          print("no third-party dependency:", sorted(names))
+          PY
 
   public-scan:
     name: public sanitisation scan

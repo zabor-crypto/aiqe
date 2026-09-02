@@ -18,12 +18,25 @@ Those are not self-reported. The mutation and network harnesses in the test
 suite measure them from outside this process, and the negative controls show
 what a naive diagnostic implementation would have done instead.
 
-The one place where honesty costs a feature is `working_state`. A configured
-check-in filter cannot be prevented from running when Git is asked to compare
-worktree content against the index, so Doctor does not ask, and reports the
-unstaged count as unknown. That is the intended behaviour, not a gap: an
-assurance layer that executed a repository-defined command in order to fill in
-a number would have broken its own first-contact contract to look complete.
+The one place where honesty costs a feature is `working_state`. A check-in
+filter cannot be prevented from running when Git is asked to compare worktree
+content against the index, so Doctor does not always ask. Two defences decide
+whether it asks at all, and they were chosen by measuring what actually
+executes rather than by reasoning about what ought to:
+
+    Configuration isolation, in `gitq`. Every index- or worktree-reading
+    invocation runs with system and global configuration switched off, so a
+    driver defined outside the repository has no command to run.
+
+    Static refusal, in `_filter_execution_risk` below. Isolation cannot help
+    once a definition is already in repository scope, so where repository
+    configuration or repository attributes make execution safety unresolved,
+    Doctor declines to compare worktree content and reports the unstaged count
+    as unknown.
+
+An unknown is the intended answer there, not a gap: an assurance layer that
+executed a repository-defined command in order to fill in a number would have
+broken its own first-contact contract to look complete.
 """
 
 import json
@@ -84,6 +97,10 @@ class Report(object):
             "untracked": None,
             "unmerged": None,
             "determined": False,
+            # Set when the repository has submodules. Their worktree
+            # dirtiness is not counted, because counting it means descending
+            # into them and running their filters.
+            "submodule_worktrees_excluded": False,
         }
         self.topology = {
             "linked_worktree": False,
@@ -99,6 +116,15 @@ class Report(object):
             "tracked_gitattributes": False,
             "config_include_present": False,
             "local_config_readable": True,
+            # Repository attributes bind at least one path to a filter
+            # driver. The driver's command may be defined anywhere, including
+            # outside the repository, so the binding alone makes a worktree
+            # comparison unsafe.
+            "attributes_bind_filter": False,
+            # A repository attributes file is declared but could not be read,
+            # so whether it binds a filter is unresolved.
+            "attributes_readable": True,
+            "submodules_present": False,
         }
         self.agent_surface = {
             "claude_config_present": False,
@@ -525,7 +551,11 @@ def _inspect_commit_policy(report, config, tracked):
             "aliases.",
         )
 
-    if tracked is not None and _has_gitattributes(tracked):
+    if tracked is not None and _has_submodules(tracked):
+        policy["submodules_present"] = True
+
+    attribute_files = _attribute_files(report, tracked)
+    if attribute_files:
         policy["tracked_gitattributes"] = True
         report.add(
             f.TRACKED_GITATTRIBUTES,
@@ -533,6 +563,10 @@ def _inspect_commit_policy(report, config, tracked):
             "A tracked .gitattributes file is present. It can bind paths to "
             "filter drivers that change content on check-in.",
         )
+
+    binds, readable = _attributes_bind_filter(report, attribute_files)
+    policy["attributes_bind_filter"] = binds
+    policy["attributes_readable"] = readable
 
 
 def _hooks_present(report, hooks_path):
@@ -596,21 +630,136 @@ def _has_gitattributes(tracked):
     return False
 
 
+def _has_submodules(tracked):
+    for path in tracked:
+        if path.rsplit(b"/", 1)[-1] == b".gitmodules":
+            return True
+    return False
+
+
+def _attribute_files(report, tracked):
+    """Attributes files Doctor can see, as absolute byte paths.
+
+    Only repository-scope sources: tracked `.gitattributes` at any depth, and
+    the repository's own `info/attributes`. Attributes configured outside the
+    repository are deliberately not sought - Doctor does not read a user's
+    wider environment - and configuration isolation is what stops a driver
+    bound there from executing.
+    """
+    paths = []
+    if tracked is not None and report._worktree is not None:
+        for path in tracked:
+            if path.rsplit(b"/", 1)[-1] == b".gitattributes":
+                paths.append(os.path.join(report._worktree, path))
+    for base in (report._git_dir, report._common_dir):
+        if base is None:
+            continue
+        candidate = os.path.join(base, b"info", b"attributes")
+        if os.path.isfile(candidate) and candidate not in paths:
+            paths.append(candidate)
+    return paths
+
+
+def _attributes_bind_filter(report, attribute_files):
+    """Does any visible attributes file assign a filter driver to a path?
+
+    Returns (binds, readable). Reading these files executes nothing: an
+    attributes file is data, and Doctor treats it as data.
+
+    The question matters because the binding and the driver definition live
+    in different places. A tracked `.gitattributes` saying `*.dat filter=lfs`
+    is enough to make a worktree comparison run whatever `filter.lfs.clean`
+    happens to be, wherever it is defined. Doctor cannot see every place it
+    could be defined, so the binding alone is treated as unsafe.
+
+    A tracked attributes file that is not present in the worktree - under a
+    sparse checkout, for example - leaves the question unresolved, which is
+    reported as unreadable rather than assumed benign.
+    """
+    binds = False
+    readable = True
+
+    for path in attribute_files:
+        try:
+            with open(path, "rb") as handle:
+                raw = handle.read()
+        except OSError:
+            readable = False
+            continue
+        if _attribute_text_binds_filter(raw.decode("utf-8", "replace")):
+            binds = True
+
+    return binds, readable
+
+
+def _attribute_text_binds_filter(text):
+    """True when an attributes file assigns a filter driver to any pattern.
+
+    `-filter` and `!filter` unset the attribute rather than selecting a
+    driver, so they do not count. Anything of the form `filter=<name>` does.
+    """
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        for token in line.split():
+            if token.startswith("filter="):
+                return True
+    return False
+
+
 # --- Working state ---------------------------------------------------------
+
+
+def _filter_execution_risk(report):
+    """Why comparing worktree content here could execute something, or None.
+
+    Configuration isolation removes the risk that comes from outside the
+    repository. What remains is the risk that is already inside it, and this
+    is the list of ways that happens. Each returns the sentence Doctor will
+    show, because "unknown" without a reason is not a diagnosis.
+    """
+    policy = report.commit_policy
+
+    if policy["checkin_filter_configured"]:
+        return (
+            "determining it would make Git run the check-in filter configured "
+            "in this repository, and Doctor executes nothing the repository "
+            "defines"
+        )
+    if policy["config_include_present"]:
+        return (
+            "the repository configuration includes another file that Doctor "
+            "does not follow, so whether it defines an executable filter "
+            "driver is unresolved"
+        )
+    if policy["attributes_bind_filter"]:
+        return (
+            "repository attributes bind a path to a filter driver, and the "
+            "driver's command can be defined anywhere, so comparing content "
+            "could execute it"
+        )
+    if not policy["attributes_readable"]:
+        return (
+            "a repository attributes file could not be read, so whether it "
+            "binds an executable filter driver is unresolved"
+        )
+    return None
 
 
 def _inspect_working_state(report, runner):
     """Count staged, unstaged and untracked paths without executing anything.
 
-    When a check-in filter driver is configured, the worktree comparison is
-    not made at all. Staged and untracked counts are still available, because
-    neither reads worktree content through a filter, and the unstaged count is
-    reported as unknown.
+    When comparing worktree content could execute something the repository
+    selected, the comparison is not made at all. Staged and untracked counts
+    are still available - neither reads worktree content through a filter -
+    and the unstaged count is reported as unknown.
     """
     state = report.working_state
 
-    if report.commit_policy["checkin_filter_configured"]:
-        _working_state_without_content_comparison(report, runner)
+    risk = _filter_execution_risk(report)
+    if risk is not None:
+        _working_state_without_content_comparison(report, runner, risk)
         return
 
     result = runner.run(
@@ -619,6 +768,12 @@ def _inspect_working_state(report, runner):
         "-z",
         "--untracked-files=normal",
         "--no-renames",
+        # A submodule's own configuration is repository scope for that
+        # submodule, so isolating the superproject's does not protect it:
+        # descending into one runs its filters. "dirty" prevents the descent
+        # while still reporting a changed submodule pointer, which "all"
+        # would also hide.
+        "--ignore-submodules=dirty",
     )
     if not result.ok:
         report.add(
@@ -641,6 +796,7 @@ def _inspect_working_state(report, runner):
 
     state.update(counts)
     state["determined"] = True
+    state["submodule_worktrees_excluded"] = report.commit_policy["submodules_present"]
 
     if counts["unmerged"]:
         report.add(
@@ -650,7 +806,7 @@ def _inspect_working_state(report, runner):
         )
 
 
-def _working_state_without_content_comparison(report, runner):
+def _working_state_without_content_comparison(report, runner, reason):
     state = report.working_state
 
     if report.repository["head"] == "unborn":
@@ -669,9 +825,7 @@ def _working_state_without_content_comparison(report, runner):
     report.add(
         f.WORKING_STATE_UNSTAGED_UNKNOWN,
         f.UNKNOWN,
-        "The unstaged count is unknown: determining it would make Git run "
-        "the configured check-in filter, and Doctor executes nothing the "
-        "repository defines.",
+        "The unstaged count is unknown: " + reason + ".",
     )
 
 

@@ -21,6 +21,13 @@ ADVERSARIAL = (
     "checkin_filter_configured",
     "installed_hook",
     "executable_alias_configured",
+    # Definitions that live outside the repository, or inside a nested one.
+    "global_filter_canary",
+    "global_fsmonitor_canary",
+    "local_include_filter_canary",
+    "global_attributes_filter_canary",
+    "external_attributes_local_filter_canary",
+    "submodule_filter_canary",
 )
 
 
@@ -81,7 +88,12 @@ class HardeningTests(unittest.TestCase):
         # A representative slice rather than every case: the full argument
         # vectors for all cases are already asserted by the fixture suite,
         # and rebuilding every fixture a second time buys nothing.
-        for case_id in ("normal_repository", "unborn_repository", "checkin_filter_configured"):
+        for case_id in (
+            "normal_repository",
+            "unborn_repository",
+            "checkin_filter_configured",
+            "global_attributes_filter_canary",
+        ):
             observed = support.harness.run_case(case_id)
             for invocation in observed["git_invocations"]:
                 self.assertTrue(invocation[0].endswith("git"), invocation)

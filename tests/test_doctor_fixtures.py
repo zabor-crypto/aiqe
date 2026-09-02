@@ -23,6 +23,10 @@ from aiqe import findings
 
 def _make_test(case):
     def test(self):
+        if not support.harness.case_applies(case):
+            self.skipTest(
+                "case %s requires platform %r" % (case["id"], case.get("platform"))
+            )
         observed = support.harness.run_case(case["id"])
         problems = support.harness.check_expectations(observed, case["expect"])
         if problems:
@@ -61,6 +65,17 @@ def _make_test(case):
                 findings.ALL_CODES,
                 "finding code %r is not declared in aiqe.findings" % (code,),
             )
+
+        isolated_subcommands = support.harness.gitq_isolated_subcommands()
+        for argv, isolated in zip(
+            observed["git_invocations"], observed["git_invocations_config_isolated"]
+        ):
+            if set(argv) & set(isolated_subcommands):
+                self.assertTrue(
+                    isolated,
+                    "an invocation reading the index or worktree ran without "
+                    "configuration isolation: %s" % (argv,),
+                )
 
     test.__name__ = "test_" + case["id"]
     test.__doc__ = case["description"]
@@ -104,6 +119,13 @@ class FixtureCoverageTests(unittest.TestCase):
             "config_include_present",
             "config_include_if_present",
             "checkin_filter_configured",
+            "global_filter_canary",
+            "global_fsmonitor_canary",
+            "local_include_filter_canary",
+            "global_attributes_filter_canary",
+            "external_attributes_local_filter_canary",
+            "submodule_filter_canary",
+            "non_utf8_path",
             "claude_bounded",
             "claude_broad",
             "codex_bounded",

@@ -48,6 +48,17 @@ def load_cases():
         return json.load(handle)
 
 
+def case_applies(case):
+    """Is this case runnable on the machine executing it?
+
+    A case that does not apply is reported as skipped, with its platform
+    restriction named. It is never dropped from the listing: a benchmark that
+    silently omits a case reports a smaller problem than it was asked to
+    measure.
+    """
+    return builders.platform_supports(case.get("platform"))
+
+
 class Case(object):
     """One fixture, its isolated directories and its isolated environment."""
 
@@ -236,6 +247,7 @@ def run_case(case_id, keep=False):
             "repository_defined_executions": len(case.fired()),
             "fired_canaries": case.fired(),
             "git_invocations": [list(invocation) for invocation in report.runner.invocations],
+            "git_invocations_config_isolated": list(report.runner.config_isolated),
             "human_output": human,
             "json_output": json.loads(machine),
         }
@@ -276,7 +288,23 @@ def check_expectations(observed, expected):
     if observed["repository_defined_executions"] != 0:
         problems.append("repository-defined executions: %s" % (observed["fired_canaries"],))
 
+    for argv, isolated in zip(
+        observed["git_invocations"], observed["git_invocations_config_isolated"]
+    ):
+        subcommands = set(argv) & set(gitq_isolated_subcommands())
+        if subcommands and not isolated:
+            problems.append(
+                "invocation reading the index or worktree ran without "
+                "configuration isolation: %s" % (argv,)
+            )
+
     return problems
+
+
+def gitq_isolated_subcommands():
+    from aiqe.gitq import CONFIG_ISOLATED_SUBCOMMANDS
+
+    return CONFIG_ISOLATED_SUBCOMMANDS
 
 
 def run_control(control_id, keep=False):
