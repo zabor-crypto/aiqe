@@ -87,6 +87,7 @@ class DependencyProofTests(unittest.TestCase):
             "import sys\n"
             "baseline = set(sys.modules)\n"
             "import aiqe.cli, aiqe.doctor, aiqe.report, aiqe.gitq, aiqe.gitconfig\n"
+            "import aiqe.task, aiqe.taskstate, aiqe.scope, aiqe.textsafe\n"
             "added = set(sys.modules) - baseline\n"
             "print(','.join(sorted(added)))\n"
         )

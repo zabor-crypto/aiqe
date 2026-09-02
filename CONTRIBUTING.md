@@ -36,12 +36,13 @@ The other checks CI runs:
 
 ```
 python3 bench/run-doctor-fixtures.py
+python3 bench/run-task-fixtures.py
 ./tools/public-scan/self-test.sh
 ./tools/public-scan/public-scan.sh
 ```
 
-One case is restricted to Linux: the arbitrary-byte path fixture needs a filesystem
-that accepts non-UTF-8 filenames, and APFS does not. It is reported as skipped
+Two cases are restricted to Linux: the arbitrary-byte path fixtures need a filesystem
+that accepts non-UTF-8 filenames, and APFS does not. They are reported as skipped
 elsewhere, never dropped from the listing.
 
 Please keep the dependency count at zero unless there is a measured reason not to. An

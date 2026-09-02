@@ -8,13 +8,12 @@ runs your project-native checks, and shows what remains unknown.
 
 ---
 
-**Status: `doctor` is implemented and tested. The rest of the surface is still specification.**
+**Status: `doctor` and `task` are implemented and tested. The rest of the surface is still specification.**
 
-`aiqe doctor` is real: it runs, it is covered by a deterministic test suite, and its
-safety contract is measured from outside the process rather than self-reported. Every
-other command below — `init`, `task`, `check`, `commit`, `receipt` — remains a design
-target, is not implemented, and is not stubbed. Nothing here is released and no version
-is tagged.
+`aiqe doctor` and `aiqe task` are real: they run, they are covered by a deterministic
+test suite, and their safety contracts are measured from outside the process rather than
+self-reported. `init`, `check`, `commit` and `receipt` remain design targets, are not
+implemented, and are not stubbed. Nothing here is released and no version is tagged.
 
 The output below was produced by `aiqe doctor` against benchmark case
 `checkin_filter_configured`, a synthetic fixture built from nothing by
@@ -91,6 +90,32 @@ and makes no network request.
 Reference for the output, the finding codes and the exit status:
 [`docs/doctor.md`](docs/doctor.md).
 
+### A bounded unit of work
+
+Declare what a piece of work owns, before doing it:
+
+```bash
+.venv/bin/aiqe task start --own src/strategy.py --own tests/test_strategy.py
+```
+
+```bash
+.venv/bin/aiqe task
+```
+
+```bash
+.venv/bin/aiqe task end
+```
+
+Owning `src` owns `src/anything`, and does not own `srcfoo`. A declared path is
+literal — `--own '*'` declares a file named `*`, not a pattern — and it need not exist
+yet, because declaring `src/new_module.py` before writing it is the normal case. Task
+state lives in the worktree's own Git directory, so two linked worktrees hold two
+independent tasks, and starting a task changes nothing else in the repository: staged
+work you never mentioned is byte-identical afterwards.
+
+Reference for the scope rules, the state schema and the exit status:
+[`docs/task.md`](docs/task.md).
+
 ## The 30-second problem
 
 An agent edits your backtest. It reports that the tests pass.
@@ -124,8 +149,8 @@ AIQE is deterministic. It contains no model calls.
 
 ```
 doctor    inspect the environment before anything is changed   IMPLEMENTED
+task      declare an immutable owned scope for a unit of work  IMPLEMENTED
 init      write ./aiqe.toml                                    design target
-task      declare an immutable owned scope for a unit of work  design target
 check     run the validators bound to the applicable contracts design target
 commit    create a bounded completion commit, or refuse        design target
 receipt   render what is proven, what is excluded, and what is unknown
@@ -136,8 +161,8 @@ A design target is not registered as a command. Running `aiqe init` today exits 
 `unknown command`, because a command that parses and does nothing advertises a
 capability that does not exist.
 
-The owned scope is fixed when a task starts and cannot widen. Checks run against that
-scope. The receipt reports one of three verdicts — `REVIEWABLE`, `INCOMPLETE`, or
+The owned scope is fixed when a task starts and cannot widen — that part exists today.
+Checks run against that scope. The receipt reports one of three verdicts — `REVIEWABLE`, `INCOMPLETE`, or
 `NOT_REVIEWABLE` — and never invents a fourth, softer one.
 
 Full command surface and exit semantics: [`docs/architecture.md`](docs/architecture.md).
@@ -230,7 +255,7 @@ install hooks or run in the background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | `doctor` implemented, tested, and benchmarked. Nothing released or tagged. |
+| *(current)* | `doctor` and `task` implemented, tested, and benchmarked. Nothing released or tagged. |
 | `v0.1.0` | First installable alpha: `doctor`, `init`, `task`, `check`, `receipt` on macOS. Real tests in real CI. |
 | `v0.2.0` | `commit` with checked-content binding, all six contracts, benchmark fixtures and retained results. |
 | `v0.3.0` | Linux baseline actually run. Agent adapters. Demo and visual package materialised. |

@@ -3,9 +3,9 @@
 This document is the public statement of AIQE's frozen v1 architecture. It describes
 what the product does and where its guarantees stop.
 
-It remains a specification, with one exception: `aiqe doctor` is now implemented. Every
-other command below is a design target, is not registered by the command-line interface,
-and is not stubbed. Where this document describes behaviour that exists, it is marked;
+It remains a specification, with two exceptions: `aiqe doctor` and `aiqe task` are now
+implemented. Every other command below is a design target, is not registered by the
+command-line interface, and is not stubbed. Where this document describes behaviour that exists, it is marked;
 where it does not, it is a statement of intent.
 
 ## Product
@@ -42,9 +42,14 @@ aiqe commit  -m <message>
 aiqe receipt [--local] [--format json]
 ```
 
-`aiqe --version` and `aiqe doctor [--format json]` are implemented. The rest are design
-targets: invoking one exits 3 with `unknown command`, because a command that parses and
-does nothing advertises a capability the product has not built.
+`aiqe --version`, `aiqe doctor [--format json]` and the three `aiqe task` forms are
+implemented. The rest are design targets: invoking one exits 3 with `unknown command`,
+because a command that parses and does nothing advertises a capability the product has
+not built.
+
+The task boundary answers which repository paths a unit of work owns, and deliberately
+nothing else — not whether checks passed, whether evidence is fresh, or whether the work
+is reviewable. Reference: [`task.md`](task.md).
 
 Doctor runs before init. That ordering is intentional: nothing is written into a
 repository before the environment has been inspected.
@@ -285,3 +290,8 @@ src/aiqe/     the package
 tests/        the deterministic suite
 bench/        fixture builders, expected outcomes, retained results
 ```
+
+Task state is repository-local and worktree-specific, in
+`<worktree git directory>/aiqe/`. Not `$HOME`, not an XDG directory, not the tracked
+worktree, and deliberately not the *common* Git directory, which linked worktrees share.
+Nothing AIQE writes goes anywhere Git owns.

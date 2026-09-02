@@ -10,6 +10,40 @@ makes the change, not at release time.
 
 ## [Unreleased]
 
+### Added
+
+- **`aiqe task` is implemented**: `task start --own <path>... [--label <text>]`,
+  `task`, and `task end`. One active task per worktree, working before `aiqe init`,
+  which still does not exist.
+- Owned scope with **component-prefix** semantics: owning `foo` owns `foo/bar` and not
+  `foobar`. Declared paths are literal data — glob characters, pathspec magic and
+  arguments that look like flags are all just filenames — and never reach Git as a
+  pathspec.
+- Scope is a declaration, not an observation: an owned path need not exist yet.
+- Owned paths round-trip as raw bytes, stored base64-encoded in the record and proven
+  end to end on Linux with a path that is not valid UTF-8.
+- A documented deterministic owned-scope digest binding the exact path bytes, component
+  boundaries and canonical ordering.
+- Task state in `<worktree git directory>/aiqe/`, so two linked worktrees hold two
+  independent tasks. Atomic writes with fsync and rename; an exclusive `flock` over
+  start and end, so two concurrent starts produce one winner and one refusal.
+- Terminal-safe rendering of owned paths and labels: a filename containing a newline or
+  an escape sequence cannot forge an output row or repaint the terminal, and the stored
+  value is untouched.
+- Task benchmark family under `bench/fixtures/task/`, with 18 cases and three negative
+  controls — pathspec expansion, shared worktree state, and a lost start race — all
+  reproducing.
+- Reference documentation for the task surface and its local state schema:
+  [`docs/task.md`](docs/task.md).
+
+### Changed
+
+- Benchmark fixtures are now a package tree, with the measurement primitives and the
+  fixture-construction helpers shared between families rather than duplicated. Doctor
+  results are unchanged.
+- `bench/compare-results.py` selects the retained artifact from the family the fresh run
+  names.
+
 ### Security
 
 - **Doctor no longer inherits command-scope Git configuration.** Git reads
@@ -121,10 +155,10 @@ makes the change, not at release time.
 
 ### Notes
 
-- No version has been released and no tag has been created. `doctor` is implemented;
-  `init`, `task`, `check`, `commit` and `receipt` remain design targets and are not
+- No version has been released and no tag has been created. `doctor` and `task` are
+  implemented; `init`, `check`, `commit` and `receipt` remain design targets and are not
   stubbed.
-- Only the Doctor benchmark family has results. Every other family remains `NOT_RUN`,
-  and no aggregate benchmark completion is claimed.
+- The Doctor and Task benchmark families have results. `check`, `receipt` and bounded
+  commit remain `NOT_RUN`, and no aggregate benchmark completion is claimed.
 - macOS is the supported target. The suite is also run on Linux in CI, which is evidence
   but not a release claim.

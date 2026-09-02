@@ -52,9 +52,10 @@ class InvalidInvocationTests(unittest.TestCase):
         """A frozen future command must not parse into a silent no-op.
 
         A command that accepts its arguments and does nothing advertises a
-        capability the product has not built.
+        capability the product has not built. `task` left this list when it
+        acquired an implementation.
         """
-        for command in ("init", "task", "check", "commit", "receipt"):
+        for command in ("init", "check", "commit", "receipt"):
             status, out, err = run([command])
             self.assertEqual(status, exits.UNSUPPORTED, command)
             self.assertEqual(out, "", command)

@@ -96,12 +96,15 @@ Git would be its own defect.
 
 Silencing the configuration *files* is not the whole job. Git also reads
 configuration from the process environment, at command scope, and it outranks
-every file:
+every file. The documented mechanism is:
 
 ```
 GIT_CONFIG_COUNT with GIT_CONFIG_KEY_<n> / GIT_CONFIG_VALUE_<n>
-GIT_CONFIG_PARAMETERS
 ```
+
+`GIT_CONFIG_PARAMETERS` is handled alongside it because it was measured to do
+the same thing on the Git versions tested here, not because it is part of the
+documented environment interface.
 
 An inherited `filter.<name>.clean` set that way is executed exactly as if it
 had been written in a config file, and pointing `GIT_CONFIG_GLOBAL` at the null

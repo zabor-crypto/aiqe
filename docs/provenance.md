@@ -47,6 +47,8 @@ Sanitisation tooling              CLEAN_ROOM_REIMPLEMENTATION
 Apache-2.0 licence text           DIRECT_PUBLIC_REUSE_ELIGIBLE
 Doctor implementation source      CLEAN_ROOM_REIMPLEMENTATION
                                   PUBLIC_DOCUMENTATION_REFERENCE
+Task implementation source        CLEAN_ROOM_REIMPLEMENTATION
+                                  PUBLIC_DOCUMENTATION_REFERENCE
 Test suite                        CLEAN_ROOM_REIMPLEMENTATION
 Benchmark fixtures and controls   SYNTHETIC_FIXTURE
 Third-party dependencies          none

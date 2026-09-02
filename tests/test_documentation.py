@@ -14,6 +14,7 @@ from . import support
 from aiqe import findings
 
 DOCTOR_REFERENCE = os.path.join(support.ROOT, "docs", "doctor.md")
+TASK_REFERENCE = os.path.join(support.ROOT, "docs", "task.md")
 README = os.path.join(support.ROOT, "README.md")
 
 
@@ -55,6 +56,43 @@ class FindingCodeCoverageTests(unittest.TestCase):
         self.assertEqual(stale, [], "docs/doctor.md documents codes that do not exist")
 
 
+class TaskReferenceTests(unittest.TestCase):
+    def test_every_scope_reason_code_is_documented(self):
+        """A user who meets a refusal must be able to look it up."""
+        from aiqe import scope
+
+        reference = read(TASK_REFERENCE)
+        codes = [
+            value
+            for name, value in vars(scope).items()
+            if name.startswith("OWNERSHIP_") and isinstance(value, str)
+        ]
+        self.assertTrue(codes)
+        undocumented = sorted(code for code in codes if code not in reference)
+        self.assertEqual(undocumented, [], "reason codes missing from docs/task.md")
+
+    def test_state_schema_is_marked_internal(self):
+        """It is documented for auditability, not offered as an API."""
+        reference = read(TASK_REFERENCE)
+        self.assertIn("LOCAL INTERNAL STATE SCHEMA", reference)
+        self.assertIn("not a public integration surface", reference)
+
+    def test_every_record_field_is_documented(self):
+        reference = read(TASK_REFERENCE)
+        for field in (
+            "schema_version",
+            "task_id",
+            "aiqe_version",
+            "started_at",
+            "start_head_state",
+            "start_head_sha",
+            "owned_scope",
+            "owned_scope_digest",
+            "label",
+        ):
+            self.assertIn(field, reference, field)
+
+
 class ReadmeClaimTests(unittest.TestCase):
     def test_readme_does_not_claim_doctor_is_unimplemented(self):
         readme = read(README)
@@ -64,6 +102,18 @@ class ReadmeClaimTests(unittest.TestCase):
     def test_readme_marks_unimplemented_commands_as_design_targets(self):
         readme = read(README)
         self.assertIn("design target", readme.lower())
+
+    def test_readme_does_not_mark_implemented_commands_as_design_targets(self):
+        """`task` left the design-target list when it acquired an implementation."""
+        readme = read(README)
+        for line in readme.splitlines():
+            lowered = line.lower()
+            if "design target" not in lowered:
+                continue
+            self.assertFalse(
+                lowered.strip().startswith(("doctor ", "task ")),
+                "an implemented command is still marked a design target: %r" % (line,),
+            )
 
     def test_readme_example_output_matches_the_retained_artifact(self):
         """A README terminal block must be copied from a retained result.

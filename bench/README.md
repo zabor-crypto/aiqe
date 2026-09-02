@@ -5,18 +5,22 @@ surface — the fixture builders and the retained results.
 
 ```
 protocol/           the method, the families, and the release gates      PRESENT
+fixtures/           shared measurement and fixture-construction helpers  PRESENT
 fixtures/doctor/    deterministic builders, controls, expected outcomes  PRESENT
+fixtures/task/      deterministic builders, controls, expected outcomes  PRESENT
 results/doctor/     retained result artifact                             PRESENT
+results/task/       retained result artifact                             PRESENT
 ```
 
-Nothing is present here for a surface that does not exist. `doctor` is implemented, so
-its family is materialised; the other families have no fixtures because there is nothing
-to point them at.
+Nothing is present here for a surface that does not exist. `doctor` and `task` are
+implemented, so their families are materialised; `check`, `receipt` and bounded commit
+have no fixtures because there is nothing to point them at.
 
-## Running the Doctor family
+## Running a family
 
 ```
 python3 bench/run-doctor-fixtures.py
+python3 bench/run-task-fixtures.py
 ```
 
 Every case is built from nothing in an isolated temporary directory, with an isolated
@@ -26,8 +30,12 @@ harness and compared against the expectation recorded in
 [`results/doctor/results.json`](results/doctor/results.json) and exits non-zero if any
 case disagrees with its expectation or any negative control stops reproducing.
 
-`compare-results.py` checks a fresh run against the retained artifact on headline
-numbers rather than bytes, because the artifact records the Git version it was produced
+The Task family drives the real command-line entry point as subprocesses. Concurrency,
+crash-atomicity and byte-preserving argv cannot be measured in-process, and putting every
+case through the same door means no case is proven against a path the user does not take.
+
+`compare-results.py` selects the retained artifact from the family the fresh run names,
+and checks it on headline numbers rather than bytes, because the artifact records the Git version it was produced
 under and two correct machines legitimately differ there.
 
 A case may declare a platform restriction. The arbitrary-byte path case needs a
@@ -49,8 +57,10 @@ that passes.
 
 ```
 Doctor family         RUN       (results retained here)
-Change integrity      NOT_RUN   (no implementation exists)
-Completion / evidence NOT_RUN   (no implementation exists)
+Task scope family     RUN       (results retained here)
+Check                 NOT_RUN   (no implementation exists)
+Receipt               NOT_RUN   (no implementation exists)
+Bounded commit        NOT_RUN   (no implementation exists)
 Numerical routing     NOT_RUN   (no implementation exists)
 Product friction      NOT_RUN   (no implementation exists)
 Context efficiency    NOT_RUN   (deferred; methodology not yet defensible)
@@ -60,8 +70,8 @@ Linux baseline        exercised in CI, not a release claim
 Windows               out of scope for v1
 ```
 
-Only the Doctor family has moved off `NOT_RUN`, and only for the cases that exist. No
-aggregate benchmark completion is claimed.
+Only the Doctor and Task families have moved off `NOT_RUN`, and only for the cases that
+exist. No aggregate benchmark completion is claimed.
 
 The provisional macOS baseline was observed during protocol development. It is **not**
 published as an authority and no number from it appears in the README, because the

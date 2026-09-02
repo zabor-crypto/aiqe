@@ -32,10 +32,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
 sys.path.insert(0, os.path.join(ROOT, "src"))
-sys.path.insert(0, os.path.join(HERE, "fixtures", "doctor"))
+sys.path.insert(0, HERE)
 
-import controls  # noqa: E402
-import harness  # noqa: E402
+from fixtures.doctor import controls  # noqa: E402
+from fixtures.doctor import harness  # noqa: E402
 
 RESULTS_DIRECTORY = os.path.join(HERE, "results", "doctor")
 RESULTS_FILE = os.path.join(RESULTS_DIRECTORY, "results.json")

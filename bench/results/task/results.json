@@ -1,0 +1,508 @@
+{
+  "aiqe_version": "0.0.0.dev0",
+  "cases": [
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "simple_file_scope",
+      "description": "One file declared, shown, and ended. The shape every other case is a deviation from.",
+      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "directory_component_scope",
+      "description": "A directory scope. Owning 'src' owns everything under it by component, which the membership tests pin down separately.",
+      "digest_while_active": "sha256:06052847344cabe113bebcde29ce63d5e92ba3ec3caaa2898d467671a3300297",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "nonexistent_future_path",
+      "declared_path_exists": false,
+      "description": "Declaring a path that does not exist yet - the normal case when the task is about to create it. Scope is a declaration, not an observation.",
+      "digest_while_active": "sha256:3a746521682e2b63bbd74539768f9a3bdc2cc3c6c81d5de8bf987585fdd6ec88",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/new_module.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "duplicate_scope",
+      "description": "The same path declared twice is one scope, and its digest equals the single-declaration digest.",
+      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "overlapping_scopes",
+      "description": "'src' and 'src/strategy.py' both stay. The narrower declaration was written on purpose and does not disappear into the wider one.",
+      "digest_while_active": "sha256:1edb39494c73b3ce38941446f30e83866bd29ea0fc2d7d6195fdcc8c950b14e6",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src",
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "trailing_separator",
+      "description": "'src/', './src' and 'src//' are three spellings of one path. They collapse to one root with the plain directory digest.",
+      "digest_while_active": "sha256:06052847344cabe113bebcde29ce63d5e92ba3ec3caaa2898d467671a3300297",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "literal_metacharacter_names",
+      "description": "Every declared name here is a filename, not a pattern: glob characters, pathspec magic, and arguments that look like flags. Nothing expands.",
+      "digest_while_active": "sha256:9a88843e9e48a9d52ec85becdd2ec14612162a99dce1af4cfbab9c6b61a2311b",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "*",
+        "--help",
+        "-a",
+        ":(glob)vendor",
+        ":(top)",
+        "?",
+        "[abc]"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "whitespace_names",
+      "description": "Names containing a space, a tab and a newline. Stored literally, rendered escaped, and the newline does not become a second output row.",
+      "digest_while_active": "sha256:1c45725bd613b8d6dbe26aaf38d620de701582ead74173e941c0f4f8fc3f77e6",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "newline\\nname",
+        "space name",
+        "tab\\tname"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "subdirectory_invocation",
+      "description": "'--own ../src/strategy.py' typed from tests/ means the same scope as declaring it from the root, and produces the same digest.",
+      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "exit_codes": [
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_rejections": false,
+      "aiqe_state_changes": 0,
+      "case": "scope_rejections",
+      "description": "Absolute paths, parent escapes, the repository root, the Git administrative directory, and '..' after a named component. All refused, and none leaves a task behind.",
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "rejection_exit_codes": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "foreign_staged_preserved",
+      "description": "A repository with staged work it did not ask AIQE about. The index is byte-identical across start, status and end.",
+      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "staged_paths": [
+        "foreign.txt"
+      ],
+      "staged_unchanged": true,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "repository_defined_execution",
+      "description": "A repository pointing at commands every way it can - clean filter, fsmonitor, shell aliases, an executable hook. Declaring a task runs none of them.",
+      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "aiqe_state_changes": 4,
+      "b_survives_a_end": [
+        "src/b.py"
+      ],
+      "case": "linked_worktree_isolation",
+      "description": "Two linked worktrees hold two independent tasks. Ending one does not touch the other, and the main worktree has no task at all.",
+      "exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "main_worktree_has_no_task": true,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "task_ids_differ": true,
+      "terminal_safe": true,
+      "worktree_a_owned": [
+        "src/a.py"
+      ],
+      "worktree_b_owned": [
+        "src/b.py"
+      ]
+    },
+    {
+      "aiqe_state_changes": 3,
+      "case": "concurrent_start",
+      "description": "Two real processes racing to start a task in one worktree. One wins, one is refused, and exactly one valid record exists.",
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "tests/test_strategy.py"
+      ],
+      "problems": [],
+      "refusals": 1,
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "successes": 1,
+      "unexpected_exits": 0,
+      "valid_active_records": 1
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 1,
+      "case": "interrupted_write",
+      "description": "A process killed mid-write leaves a temporary file that was never renamed. It is not a task: status says so, and the next start succeeds.",
+      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "status_before_recovery_shows_no_task": true,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "corrupt_record_recovery",
+      "description": "An active record that cannot be read is unknown, not unsupported: status and start exit 2. 'task end' discards it, and that is the documented way out.",
+      "exit_codes": [
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "aiqe_state_changes": 0,
+      "case": "unsafe_state_location",
+      "description": "A symlink planted where AIQE's private state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
+      "exit_codes": [
+        3
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "wrote_through_symlink": false
+    },
+    {
+      "case": "non_utf8_owned_path",
+      "description": "An owned path whose bytes are not valid UTF-8, declared through the real entry point with byte-preserving argv. The stored bytes equal the bytes typed.",
+      "outcome": "SKIPPED_PLATFORM",
+      "platform_required": "linux",
+      "problems": []
+    }
+  ],
+  "cases_failed": 0,
+  "cases_passed": 17,
+  "cases_skipped_platform": 1,
+  "cases_skipped_platform_ids": [
+    "non_utf8_owned_path"
+  ],
+  "cases_total": 18,
+  "family": "TASK_SCOPE_CORE",
+  "negative_controls": [
+    {
+      "aiqe_owned": [
+        "*"
+      ],
+      "aiqe_start_exit": 0,
+      "control": "NC_TASK_PATHSPEC_EXPANSION",
+      "control_reproduces_failure": true,
+      "description": "Ownership handled as a Git pathspec. A file legally named '*' is a pattern matching every tracked path, so a declaration that names one file silently covers the repository. AIQE treats a declared path as literal data that never reaches Git as a pattern.",
+      "invariant": "OWNERSHIP_PATHS_ARE_LITERAL",
+      "naive_matched": [
+        "*",
+        "alpha.py",
+        "beta.py"
+      ],
+      "naive_matched_count": 3
+    },
+    {
+      "aiqe_b_sees_a_task": false,
+      "control": "NC_TASK_SHARED_WORKTREE_STATE",
+      "control_reproduces_failure": true,
+      "description": "Task state in the common Git directory. Linked worktrees share it, so a task started in one worktree is the active task in the other. AIQE stores task state in the worktree's own Git directory.",
+      "invariant": "WORKTREE_A_TASK != WORKTREE_B_TASK",
+      "naive_b_sees_a_task": true
+    },
+    {
+      "aiqe_refusals": 1,
+      "aiqe_successes": 1,
+      "control": "NC_TASK_LOST_START_RACE",
+      "control_reproduces_failure": true,
+      "description": "Check-then-write task creation. Two concurrent starts both find no active task, both proceed, and the second overwrites the first - so a user believes they own a scope they do not. AIQE takes a lock instead of looking first.",
+      "invariant": "CONCURRENT_START_WINNERS = 1",
+      "naive_successes": 2
+    }
+  ],
+  "negative_controls_reproducing": 3,
+  "negative_controls_total": 3,
+  "other_families": {
+    "BOUNDED_COMMIT": "NOT_RUN",
+    "CHECK": "NOT_RUN",
+    "RECEIPT": "NOT_RUN"
+  },
+  "platform": "darwin",
+  "schema_version": 1,
+  "totals": {
+    "local_state_writes": 0,
+    "model_calls": 0,
+    "network_requests": 0,
+    "repository_defined_executions": 0,
+    "repository_mutations": 0
+  }
+}

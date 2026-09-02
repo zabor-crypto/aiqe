@@ -3,6 +3,9 @@
 
     python3 bench/compare-results.py <fresh-results.json>
 
+The fresh run names its own family, and is compared against that family's
+retained artifact.
+
 The comparison is on headline numbers, not bytes. The artifact records the Git
 version the run observed, and the rendered Doctor output quotes it, so two
 correct machines legitimately produce different bytes. What may not differ is
@@ -23,7 +26,13 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RETAINED = os.path.join(HERE, "results", "doctor", "results.json")
+
+#: Which retained artifact a fresh run should be compared against. The fresh
+#: run names its own family, so the caller does not have to.
+RETAINED_BY_FAMILY = {
+    "DOCTOR_FIRST_CONTACT": os.path.join(HERE, "results", "doctor", "results.json"),
+    "TASK_SCOPE_CORE": os.path.join(HERE, "results", "task", "results.json"),
+}
 
 #: Numbers that must agree between any two correct runs, on any platform.
 #: `cases_passed` is deliberately absent: it legitimately differs when one run
@@ -43,7 +52,15 @@ def main(argv):
 
     with open(argv[0]) as handle:
         fresh = json.load(handle)
-    with open(RETAINED) as handle:
+
+    family = fresh.get("family")
+    if family not in RETAINED_BY_FAMILY:
+        sys.stderr.write(
+            "unknown benchmark family %r; known families: %s\n"
+            % (family, sorted(RETAINED_BY_FAMILY))
+        )
+        return 2
+    with open(RETAINED_BY_FAMILY[family]) as handle:
         retained = json.load(handle)
 
     problems = [
@@ -79,12 +96,12 @@ def main(argv):
         problems.append("%s: retained %r, fresh %r" % (case, retained_outcome, outcome))
 
     if problems:
-        sys.stdout.write("Retained Doctor results disagree with a fresh run:\n")
+        sys.stdout.write("Retained %s results disagree with a fresh run:\n" % (family,))
         for problem in problems:
             sys.stdout.write("  " + problem + "\n")
         return 1
 
-    sys.stdout.write("Retained Doctor results agree with a fresh run.\n")
+    sys.stdout.write("Retained %s results agree with a fresh run.\n" % (family,))
     return 0
 
 

@@ -39,7 +39,7 @@ jobs:
         run: python -m unittest discover -s tests -t . --verbose
 
   non-utf8-e2e:
-    name: linux arbitrary-byte path (must not skip)
+    name: linux arbitrary-byte paths (must not skip)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,13 +63,15 @@ jobs:
               )
           print("filesystem accepts non-UTF-8 filenames:", os.listdir(directory))
           PY
-      - name: Run the end-to-end byte-path case, refusing to skip
+      - name: Run the end-to-end byte-path cases, refusing to skip
         env:
           AIQE_REQUIRE_NON_UTF8: "1"
-        run: python -m unittest tests.test_non_utf8_paths --verbose
+        run: |
+          python -m unittest tests.test_non_utf8_paths --verbose
+          python -m unittest tests.test_task_non_utf8 --verbose
 
-  doctor-benchmark:
-    name: doctor fixtures and controls (${{ matrix.os }})
+  benchmark:
+    name: benchmark families and controls (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -81,9 +83,13 @@ jobs:
         with:
           python-version: "3.14"
       - name: Run the Doctor benchmark family
-        run: python bench/run-doctor-fixtures.py --output "${RUNNER_TEMP}/fresh-results.json"
-      - name: Compare the fresh run against the retained artifact
-        run: python bench/compare-results.py "${RUNNER_TEMP}/fresh-results.json"
+        run: python bench/run-doctor-fixtures.py --output "${RUNNER_TEMP}/doctor.json"
+      - name: Compare the Doctor run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/doctor.json"
+      - name: Run the Task benchmark family
+        run: python bench/run-task-fixtures.py --output "${RUNNER_TEMP}/task.json"
+      - name: Compare the Task run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/task.json"
 
   install:
     name: install from a clean environment (${{ matrix.os }}, python ${{ matrix.python }})
@@ -109,6 +115,10 @@ jobs:
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" --version
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" doctor
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" doctor --format json > /dev/null
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task start --own README.md --label "install proof"
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task end
           echo "Installed console script works."
       - name: Confirm no third-party dependency was installed
         run: |
