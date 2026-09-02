@@ -26,6 +26,12 @@ makes the change, not at release time.
   `--ignore-submodules=dirty`, which prevents the descent while still reporting a
   changed submodule pointer.
 - Two negative controls added for the above, both reproducing.
+- **Doctor disables Git background maintenance per invocation** (`gc.auto=0`,
+  `maintenance.auto=false`). Maintenance outlives the command that starts it and
+  writes into the repository afterwards; "nothing changed, except by a process we
+  started" is not the zero-write contract. Fixture construction disables it too, and
+  the harness now refuses to measure a repository that is not quiescent - a lingering
+  lock file fails loudly instead of reading as a Doctor mutation.
 
 ### Changed
 

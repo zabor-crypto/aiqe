@@ -66,6 +66,12 @@ as a child process during the index refresh, and `--no-optional-locks` does not
 prevent it; a per-invocation `-c core.fsmonitor=false` override does, in every
 configuration scope, and Doctor passes that too.
 
+**Git can write after the command has returned.** Background maintenance
+outlives the invocation that started it, creating and later removing
+`.git/objects/maintenance.lock` and potentially repacking. Doctor disables it
+per invocation with `gc.auto=0` and `maintenance.auto=false`: "nothing changed,
+except by a process we started" is not the contract.
+
 **The command a repository selects need not be defined in the repository.** A
 tracked `.gitattributes` saying `*.dat filter=lfs` binds a path to a driver
 whose `clean` or `process` command may be defined in the user's global

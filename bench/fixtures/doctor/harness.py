@@ -32,6 +32,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CASES_FILE = os.path.join(HERE, "cases.json")
@@ -117,6 +118,51 @@ class Case(object):
 
     def is_state_path(self, relative):
         return relative.split(os.sep, 1)[0] == "state"
+
+
+#: How long to wait for a fixture to go quiet before giving up on it.
+QUIESCE_TIMEOUT_SECONDS = 5.0
+
+
+def wait_until_quiescent(root, skip):
+    """Fail unless the fixture has stopped changing on its own.
+
+    Git can start background maintenance after a write, and that process
+    outlives the command that started it. If its lock file disappears during a
+    measurement window, the harness sees a repository file vanish and blames
+    Doctor for it. That false reading was observed before fixture construction
+    disabled background maintenance.
+
+    Belt as well as braces: measuring a repository that is still moving
+    produces a confident number about the wrong thing, so a fixture that will
+    not settle raises rather than being measured.
+    """
+    deadline = time.time() + QUIESCE_TIMEOUT_SECONDS
+    while True:
+        locks = _lock_files(root, skip)
+        if not locks:
+            return
+        if time.time() > deadline:
+            raise RuntimeError(
+                "fixture did not become quiescent: lock files still present "
+                "after %.0fs: %s. Something is still writing to this "
+                "repository, and measuring it would attribute that to Doctor."
+                % (QUIESCE_TIMEOUT_SECONDS, sorted(locks))
+            )
+        time.sleep(0.05)
+
+
+def _lock_files(root, skip):
+    found = []
+    skip = os.path.abspath(skip)
+    for directory, subdirectories, filenames in os.walk(root):
+        if os.path.abspath(directory) == skip:
+            subdirectories[:] = []
+            continue
+        for name in filenames:
+            if name.endswith(".lock"):
+                found.append(os.path.relpath(os.path.join(directory, name), root))
+    return found
 
 
 def snapshot(root, skip):
@@ -208,6 +254,7 @@ def run_case(case_id, keep=False):
         env = case.env()
         target = builder(case, env)
 
+        wait_until_quiescent(root, case.canaries)
         before = snapshot(root, case.canaries)
         report = inspect(target, env=env)
         human = render_human(report)
@@ -329,6 +376,7 @@ def run_control(control_id, keep=False):
         env = case.env()
         target = builder(case, env)
 
+        wait_until_quiescent(root, case.canaries)
         before = snapshot(root, case.canaries)
         proc = control["naive"](target, env)
         after = snapshot(root, case.canaries)

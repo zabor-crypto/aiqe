@@ -109,13 +109,27 @@ _CONFIG_ISOLATION = {
 
 #: Hardening applied to every invocation, ahead of the subcommand.
 #:
-#: `--no-optional-locks`  suppresses the opportunistic index write.
-#: `core.fsmonitor=false` suppresses the fsmonitor child process.
+#: `--no-optional-locks`   suppresses the opportunistic index write.
+#: `core.fsmonitor=false`  suppresses the fsmonitor child process.
+#: `gc.auto=0` and
+#: `maintenance.auto=false` suppress background maintenance, which would
+#:                          otherwise write into the repository after the
+#:                          command has already returned. "Nothing changed,
+#:                          except by a process we started" is not the
+#:                          contract.
 #:
 #: `-c` sets configuration for one invocation only. It writes nothing: the
 #: mutation harness proves that the repository configuration file is
 #: byte-identical afterwards.
-_HARDENING = ("--no-optional-locks", "-c", "core.fsmonitor=false")
+_HARDENING = (
+    "--no-optional-locks",
+    "-c",
+    "core.fsmonitor=false",
+    "-c",
+    "gc.auto=0",
+    "-c",
+    "maintenance.auto=false",
+)
 
 #: Environment overrides. AIQE does not suppress the user's own Git
 #: configuration: a diagnostic that reports counts the user cannot reproduce

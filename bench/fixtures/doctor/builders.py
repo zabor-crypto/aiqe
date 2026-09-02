@@ -25,6 +25,18 @@ import sys
 BUILD_TIMEOUT_SECONDS = 60
 
 
+#: Applied to every fixture-construction invocation.
+#:
+#: Git may start background maintenance after a write, and that process
+#: outlives the command: it creates `.git/objects/maintenance.lock` and
+#: removes it when it finishes. If it finishes during a measurement window,
+#: the harness sees a repository file disappear and attributes it to Doctor.
+#: That is a false reading, and it was observed. Fixtures are built quiescent
+#: instead, so a repository that changes during measurement means something
+#: real changed it.
+_NO_BACKGROUND_MAINTENANCE = ("-c", "gc.auto=0", "-c", "maintenance.auto=false")
+
+
 def git(cwd, *args, **kwargs):
     """Run Git while building a fixture.
 
@@ -34,7 +46,7 @@ def git(cwd, *args, **kwargs):
     check = kwargs.pop("check", True)
     env = kwargs.pop("env", None)
     proc = subprocess.run(
-        ("git",) + args,
+        ("git",) + _NO_BACKGROUND_MAINTENANCE + args,
         cwd=cwd,
         env=env,
         stdin=subprocess.DEVNULL,
