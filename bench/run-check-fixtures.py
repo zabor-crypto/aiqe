@@ -131,6 +131,12 @@ def main(argv):
             ),
             "local_state_writes": sum(r.get("local_state_writes", 0) for r in records),
             "precommit_reviewable_verdicts": len(reviewable),
+            "raw_terminal_control_bytes": sum(
+                value
+                for record in records
+                for key, value in record.items()
+                if key.endswith("_control_bytes") and isinstance(value, int)
+            ),
             "network_requests": 0,
             "model_calls": 0,
         },
@@ -152,7 +158,8 @@ def main(argv):
     sys.stdout.write(
         "\n%d/%d applicable cases passed (%d skipped by platform).\n"
         "AIQE core repository writes=%d unconsented validator executions=%d "
-        "local state writes=%d pre-commit REVIEWABLE verdicts=%d\n"
+        "local state writes=%d pre-commit REVIEWABLE verdicts=%d "
+        "raw terminal control bytes=%d\n"
         "%d/%d negative controls reproduced their failure.\n"
         % (
             document["cases_passed"],
@@ -162,6 +169,7 @@ def main(argv):
             document["totals"]["unconsented_validator_executions"],
             document["totals"]["local_state_writes"],
             document["totals"]["precommit_reviewable_verdicts"],
+            document["totals"]["raw_terminal_control_bytes"],
             document["negative_controls_reproducing"],
             document["negative_controls_total"],
         )

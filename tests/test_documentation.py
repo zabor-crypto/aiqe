@@ -238,6 +238,23 @@ class CheckReferenceTests(unittest.TestCase):
         self.assertIn("never read whole and", reference)
         self.assertIn(validators.RETENTION_POLICY, reference)
 
+    def test_the_local_state_trust_boundary_is_documented(self):
+        """A refusal a user meets must be explainable from the reference."""
+        from aiqe import taskstate
+
+        reference = read(CHECK_REFERENCE)
+        self.assertIn(taskstate.LOCAL_STATE_UNSAFE, reference)
+        self.assertIn("not a symlink", reference)
+        self.assertIn("owned by this user", reference)
+        self.assertIn("does not repair", reference.lower())
+        for refusal in ("chmod", "chown"):
+            self.assertIn(refusal, reference, refusal)
+
+    def test_the_terminal_safety_rule_is_documented(self):
+        reference = read(CHECK_REFERENCE)
+        self.assertIn("escape, never strip", reference.lower())
+        self.assertIn("never over the escaped text", reference)
+
     def test_the_local_state_modes_are_documented(self):
         reference = read(CHECK_REFERENCE)
         for line in ("task.json  0600", "check.json 0600", "consents.json  0600"):
@@ -300,6 +317,22 @@ class SecurityPolicyTests(unittest.TestCase):
         policy = read(self.SECURITY)
         self.assertIn("owner-only regardless of your umask", policy)
         self.assertIn("0600", policy)
+
+    def test_the_local_state_trust_boundary_is_stated(self):
+        from aiqe import taskstate
+
+        policy = read(self.SECURITY)
+        self.assertIn("did not create is not trusted", policy)
+        self.assertIn(taskstate.LOCAL_STATE_UNSAFE, policy)
+        self.assertIn("does not repair it", policy)
+
+    def test_the_terminal_boundary_is_stated(self):
+        policy = read(self.SECURITY)
+        self.assertIn("never stripped", policy)
+        self.assertIn("escaped, never", policy)
+        self.assertIn(
+            "digest is taken over the argument vector AIQE will execute", policy
+        )
 
     def test_the_unimplemented_commit_boundary_is_marked_as_intent(self):
         policy = read(self.SECURITY)

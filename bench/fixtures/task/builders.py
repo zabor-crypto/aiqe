@@ -495,7 +495,15 @@ def _seed_state_directory(case, env, root, filename, contents):
     taskstate.ensure_salt(env)
     directory = state_directory(root, env)
     taskstate.ensure_state_directory(os.path.basename(directory), env)
-    write(os.path.join(directory, filename), contents)
+    # Written at the mode AIQE writes its own state with. These fixtures model
+    # AIQE's own record having become corrupt, superseded or half-written -
+    # not somebody else's file appearing in its state area, which is a
+    # different case with its own fixtures.
+    write(
+        os.path.join(directory, filename),
+        contents,
+        mode=taskstate.PRIVATE_FILE_MODE,
+    )
     return root
 
 

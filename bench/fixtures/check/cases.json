@@ -1472,16 +1472,179 @@
         }
       },
       "id": "detached_child_escapes_the_process_group"
+    },
+    {
+      "description": "AIQE's state root already exists, mode 0777. AIQE creates its own state 0700 and does not trust state it did not create: the operation refuses, no validator runs, and the mode is left exactly as it was found. AIQE does not chmod its way out of a trust problem.",
+      "expect": {
+        "aiqe_core_repository_mutations": 0,
+        "check_exit": 3,
+        "executions": 0,
+        "mode_unchanged": true,
+        "refusal_named": true,
+        "start_exit": 3,
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0
+      },
+      "id": "unsafe_state_root_mode"
+    },
+    {
+      "description": "The worktree's own state directory is opened to the group after a valid task start. Every later operation refuses: the evidence and the consent record live in there, and a directory the group can write is a directory the group can replace them in.",
+      "expect": {
+        "aiqe_core_repository_mutations": 0,
+        "check_exit": 3,
+        "executions": 0,
+        "mode_unchanged": true,
+        "receipt_exit": 3,
+        "start_exit": 0,
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0
+      },
+      "id": "unsafe_derived_state_directory_mode"
+    },
+    {
+      "description": "Genuine recorded consent, in a file mode 0644. This is the component the trust boundary exists for: a consent store somebody else can write is a list of commands they can have executed as this user. It is refused rather than read - and refused even with --allow, because AIQE will not write evidence into a state area it has just decided it cannot trust.",
+      "expect": {
+        "aiqe_core_repository_mutations": 0,
+        "check_exit": 3,
+        "check_with_allow_exit": 3,
+        "consent_was_recorded": true,
+        "executions": 0,
+        "mode_unchanged": true,
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0
+      },
+      "id": "unsafe_consent_file_mode"
+    },
+    {
+      "description": "A symlink where the consent store belongs, pointing at a file outside the state area. AIQE refuses, does not follow it to see what is there, and does not replace it - and the target is byte-identical afterwards. Writing through a hostile symlink to 'fix' it would be doing the attacker's work.",
+      "expect": {
+        "aiqe_core_repository_mutations": 0,
+        "check_exit": 3,
+        "executions": 0,
+        "symlink_still_a_symlink": true,
+        "target_unchanged": true,
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0
+      },
+      "id": "state_symlink_refused"
+    },
+    {
+      "description": "The other half of the boundary: ordinary state, created and then reused, keeps working. Run under umask(0) so the modes observed are AIQE's doing rather than the environment's - 0700 directories and 0600 files, on a second run over state that already existed.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "end_exit": 0,
+        "executions": 2,
+        "first_check_exit": 0,
+        "receipt_exit": 2,
+        "second_check_exit": 0,
+        "state_modes": {
+          "check.json": "0600",
+          "root": "0700",
+          "salt": "0600",
+          "task.json": "0600",
+          "task.lock": "0600",
+          "worktree": "0700"
+        },
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0
+      },
+      "id": "safe_existing_state_still_works"
+    },
+    {
+      "description": "A real pseudo-terminal, and an argument vector aimed at it: a screen clear, a cursor home, a carriage return, and a second prompt of the attacker's own. Zero raw control bytes reach the terminal - the argv is rendered escaped, on the line AIQE put it on - the real warning is intact, and the real prompt is still there. Answered no: nothing runs, nothing is recorded.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "consents_recorded": 0,
+        "declined_reason_shown": true,
+        "end_exit": 0,
+        "escaped_form_shown": true,
+        "executions": 0,
+        "pty_exit": 2,
+        "raw_carriage_returns": 0,
+        "raw_control_bytes": 0,
+        "raw_escape_sequences": 0,
+        "real_prompt_present": true,
+        "unconsented_validator_executions": 0,
+        "warning_intact": true
+      },
+      "id": "malicious_consent_denied"
+    },
+    {
+      "description": "The same hostile argv, answered yes. The validator runs once, and the consent is recorded against the digest of the argument vector AIQE will actually execute - not the escaped text it printed. If it bound the rendering, two different commands could share one consent, which is the mechanism inverted. Changing a semantic field still ends it.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "consent_is_not_over_display_text": true,
+        "consent_matches_raw_definition_digest": true,
+        "consents_recorded": 1,
+        "digests_agree": true,
+        "drifted_exit": 2,
+        "end_exit": 0,
+        "escaped_form_shown": true,
+        "executions_added_by_drifted_run": 0,
+        "executions_after_accept": 1,
+        "pty_exit": 0,
+        "raw_carriage_returns": 0,
+        "raw_control_bytes": 0,
+        "raw_escape_sequences": 0,
+        "real_prompt_present": true,
+        "unconsented_validator_executions": 0,
+        "warning_intact": true
+      },
+      "id": "malicious_consent_accepted"
+    },
+    {
+      "description": "A validator that fails while printing a screen clear, a carriage return, a bell, a colour change, the word PASS and a prompt of its own. The outcome is FAIL - what a validator says about itself is not evidence - and no raw control byte reaches any human surface. The local evidence keeps the output, escaped and faithful; the default receipt keeps none of it. Rendering is made safe without stripping the record.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "changed_owned_count": 1,
+        "check_exit": 1,
+        "check_human_control_bytes": 0,
+        "classification": [
+          1,
+          0,
+          0
+        ],
+        "completion": "NOT_REVIEWABLE",
+        "coverage_states": {
+          "CAUSALITY": "CONTRACT_FAILED"
+        },
+        "default_receipt_control_bytes": 0,
+        "default_receipt_holds_no_validator_output": true,
+        "end_exit": 0,
+        "json_holds_no_raw_escape": true,
+        "json_retains_the_escape_faithfully": true,
+        "json_retains_the_output_itself": true,
+        "local_receipt_shows_escaped_form": true,
+        "reasons": [
+          "CONTRACT_FAILED",
+          "REQUIRED_VALIDATOR_FAILED"
+        ],
+        "receipt_commit": "NONE",
+        "receipt_evidence": "CURRENT",
+        "receipt_local_control_bytes": 0,
+        "receipt_verdict": "NOT_REVIEWABLE",
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0,
+        "validator_outcomes": {
+          "causality": "FAIL"
+        }
+      },
+      "id": "malicious_validator_output"
     }
   ],
   "family": "CHECK_RECEIPT_EVIDENCE",
-  "note": "Expected outcomes are written from the frozen OSS-6C contract, not recorded from a run. Every repository change is attributed to one cause - an authorised `aiqe init` write, a fixture validator's declared side effect, the scenario's own declared action, or AIQE core - and only the last is zero-tolerance. Validators announce themselves with a marker outside every snapshot root, so unconsented executions are counted rather than argued. No pre-commit state may produce a REVIEWABLE verdict. Validator output is bounded as it is read, so a validator that emits far more than the retention budget is measured rather than avoided. Consent is proved through a real pseudo-terminal driving the real CLI, because the decision under test is whether AIQE asks at all. A canary named with the `observed.` prefix records an observation rather than a validator execution, and is never counted as an unconsented one.",
+  "note": "Expected outcomes are written from the frozen OSS-6C contract, not recorded from a run. Every repository change is attributed to one cause - an authorised `aiqe init` write, a fixture validator's declared side effect, the scenario's own declared action, or AIQE core - and only the last is zero-tolerance. Validators announce themselves with a marker outside every snapshot root, so unconsented executions are counted rather than argued. No pre-commit state may produce a REVIEWABLE verdict. Validator output is bounded as it is read, so a validator that emits far more than the retention budget is measured rather than avoided. Consent is proved through a real pseudo-terminal driving the real CLI, because the decision under test is whether AIQE asks at all. A canary named with the `observed.` prefix records an observation rather than a validator execution, and is never counted as an unconsented one. AIQE-managed local state that already exists is validated before it is read or written - a real directory or regular file, owned by this user, 0700 or 0600 - and anything else refuses rather than being repaired. Repository-controlled text reaching a human surface is escaped, never stripped: any observation counting control bytes in such a surface is a zero-tolerance quantity.",
   "platform_restricted_cases": "A case may declare a platform restriction. It is reported as skipped with its restriction named on machines it does not apply to, and never dropped from the listing.",
   "schema_version": 1,
   "zero_tolerance": [
     "aiqe_core_repository_mutations",
     "unconsented_validator_executions",
     "local_state_writes",
-    "precommit_reviewable_verdicts"
+    "precommit_reviewable_verdicts",
+    "raw_terminal_control_bytes"
   ]
 }

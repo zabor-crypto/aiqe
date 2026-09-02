@@ -32,9 +32,39 @@ no active task and leaves the filesystem exactly as it found it.
 
 Two failure modes are handled deliberately.
 
-**Unsafe state location.** If a path in the state directory already exists as
-something other than the expected kind - a symlink, a directory where a file
-belongs - AIQE refuses rather than following it.
+**Unsafe state location.** AIQE creates its own state private - directories
+0700, files 0600 - but creating it privately is only half the job. State that
+is *already there* is state somebody else may have put there, and AIQE has no
+way to tell a file it wrote last week from one that was placed for it to find.
+
+So every AIQE-managed component that is actually used is validated before it
+is read or written:
+
+```
+directories   a real directory, not a symlink, owned by this user,
+              with no group or world permission bits
+files         a regular file, not a symlink, owned by this user, mode 0600
+```
+
+Anything else is `LOCAL_STATE_UNSAFE`, and the operation refuses - exit 3, no
+validator executed, and recorded consent not trusted. Consent is the reason
+this matters most: a `consents.json` somebody else can write is a list of
+commands somebody else can get executed as you, and reading it under the
+assumption that AIQE wrote it would be the whole authorization boundary
+undone by a file mode.
+
+AIQE does not repair what it finds. It does not `chmod`, does not `chown`,
+does not replace the file, and does not follow the symlink to see what is on
+the other side - every one of those is an action taken on a path AIQE has
+already decided it cannot trust, and a tool that "fixes" a hostile symlink by
+writing through it has done the attacker's work. The user is told what is
+wrong and left to decide.
+
+This is deliberately not a general local-security framework. It validates
+AIQE's own managed components and nothing else: the parent directories above
+`$XDG_STATE_HOME`, the home directory, and the rest of the machine are the
+operating system's business, and pretending otherwise would be a claim AIQE
+cannot keep.
 
 **A crash mid-write.** Every state transition is a write to a temporary file
 in the same directory, an fsync, and an atomic rename. A reader sees either
@@ -67,6 +97,9 @@ SALT_BYTES = 32
 #: between a state directory listing and a list of the repositories on this
 #: machine.
 SALT_MODE = 0o600
+
+#: Every AIQE-managed local state file, created and required at this mode.
+PRIVATE_FILE_MODE = 0o600
 STATE_DIRECTORY_MODE = 0o700
 
 STATE_ROOT_NAME = "aiqe"
@@ -79,6 +112,10 @@ LOCK_NAME = "task.lock"
 #: because some other process is wedged is its own kind of failure.
 LOCK_TIMEOUT_SECONDS = 5.0
 _LOCK_POLL_SECONDS = 0.02
+
+#: An AIQE-managed component that already exists but is outside the trust
+#: boundary above: wrong kind, wrong owner, or readable by anyone else.
+LOCAL_STATE_UNSAFE = "LOCAL_STATE_UNSAFE"
 
 STATE_DIRECTORY_UNSAFE = "STATE_DIRECTORY_UNSAFE"
 STATE_UNREADABLE = "STATE_UNREADABLE"
@@ -128,7 +165,12 @@ def state_root(env=None):
                 "locate machine-local state",
             )
         base = os.path.join(home, ".local", "state")
-    return os.path.join(base, STATE_ROOT_NAME)
+    root = os.path.join(base, STATE_ROOT_NAME)
+    # Validated on every resolution rather than only before a write. This is
+    # the one path every other component hangs off, and a read is exactly the
+    # operation an unsafe root would be used to influence.
+    _require_directory(root, "state root")
+    return root
 
 
 def salt_path(env=None):
@@ -143,14 +185,14 @@ def read_salt(env=None):
     written to.
     """
     path = salt_path(env)
+    if not _require_regular_file(path, "machine-local salt"):
+        return None
     try:
         with open(path, "rb") as handle:
             salt = handle.read()
-    except FileNotFoundError:
-        return None
     except OSError as exc:
         raise StateError(
-            STATE_DIRECTORY_UNSAFE,
+            STATE_UNREADABLE,
             "the AIQE machine-local salt could not be read: %s" % (exc.strerror,),
         )
     if len(salt) != SALT_BYTES:
@@ -242,7 +284,9 @@ def _canonical(path_bytes):
 
 
 def worktree_state_directory(key, env=None):
-    return os.path.join(state_root(env), key)
+    directory = os.path.join(state_root(env), key)
+    _require_directory(directory, "state directory for this worktree")
+    return directory
 
 
 def active_task_path(state_directory):
@@ -252,40 +296,112 @@ def active_task_path(state_directory):
 # --- Filesystem safety -----------------------------------------------------
 
 
-def _require_directory(path):
+def _inspect(path, what):
+    """`lstat` an AIQE-managed component, or None if it is not there.
+
+    `lstat`, never `stat`: a symlink is refused as a symlink. Following one to
+    find out what it points at is already acting on a path AIQE has decided it
+    cannot trust.
+    """
     try:
-        stat = os.lstat(path)
+        return os.lstat(path)
     except FileNotFoundError:
-        return False
+        return None
     except OSError as exc:
         raise StateError(
-            STATE_DIRECTORY_UNSAFE,
-            "AIQE state directory cannot be inspected: %s" % (exc.strerror,),
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s could not be inspected: %s. AIQE will not use local "
+            "state it cannot check." % (what, exc.strerror),
+        )
+
+
+def _require_owner(stat, what):
+    """The component must belong to whoever is running AIQE.
+
+    A state file owned by someone else is a state file someone else can
+    rewrite, and recorded consent is a list of commands that would then be
+    executed as this user.
+    """
+    if not hasattr(os, "getuid"):
+        return
+    if stat.st_uid != os.getuid():
+        raise StateError(
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s is owned by another user (uid %d). AIQE will not "
+            "read or write local state it does not own, and will not change "
+            "its ownership." % (what, stat.st_uid),
+        )
+
+
+def _require_directory(path, what="state directory"):
+    """A real, private, owned directory - or nothing at all.
+
+    Returns whether it exists. Raises `StateError` when it exists and is
+    outside the trust boundary.
+    """
+    stat = _inspect(path, what)
+    if stat is None:
+        return False
+
+    if stat_module.S_ISLNK(stat.st_mode):
+        raise StateError(
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s is a symbolic link. AIQE does not follow a link out "
+            "of its own state area, and does not replace it." % (what,),
         )
     if not stat_module.S_ISDIR(stat.st_mode):
         raise StateError(
-            STATE_DIRECTORY_UNSAFE,
-            "AIQE state location exists but is not a directory; refusing to "
-            "write through it",
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s exists but is not a directory; refusing to write "
+            "through it." % (what,),
+        )
+    _require_owner(stat, what)
+
+    mode = stat_module.S_IMODE(stat.st_mode)
+    if mode & 0o077:
+        raise StateError(
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s is mode %04o, which grants access beyond its owner. "
+            "AIQE creates it 0700 and will not silently tighten one it did "
+            "not create - `chmod 700` it, or remove it." % (what, mode),
         )
     return True
 
 
-def _require_regular_file(path):
-    try:
-        stat = os.lstat(path)
-    except FileNotFoundError:
+def _require_regular_file(path, what="local state file"):
+    """A real, private, owned regular file - or nothing at all.
+
+    Returns whether it exists. Raises `StateError` when it exists and is
+    outside the trust boundary.
+    """
+    stat = _inspect(path, what)
+    if stat is None:
         return False
-    except OSError as exc:
+
+    if stat_module.S_ISLNK(stat.st_mode):
         raise StateError(
-            STATE_DIRECTORY_UNSAFE,
-            "AIQE task record cannot be inspected: %s" % (exc.strerror,),
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s is a symbolic link. AIQE does not write through a "
+            "link out of its own state area, and does not replace it."
+            % (what,),
         )
     if not stat_module.S_ISREG(stat.st_mode):
         raise StateError(
-            STATE_DIRECTORY_UNSAFE,
-            "AIQE task record exists but is not a regular file; refusing to "
-            "write through it",
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s exists but is not a regular file; refusing to write "
+            "through it." % (what,),
+        )
+    _require_owner(stat, what)
+
+    mode = stat_module.S_IMODE(stat.st_mode)
+    if mode != PRIVATE_FILE_MODE:
+        raise StateError(
+            LOCAL_STATE_UNSAFE,
+            "the AIQE %s is mode %04o, and AIQE only reads or writes local "
+            "state at mode %04o. It will not change the mode for you: a "
+            "record anyone else can write is not evidence, and recorded "
+            "consent anyone else can write is a list of commands they can "
+            "have run as you." % (what, mode, PRIVATE_FILE_MODE),
         )
     return True
 
@@ -322,7 +438,7 @@ def read_active(state_directory):
     if state_directory is None:
         return None
     path = active_task_path(state_directory)
-    if not _require_regular_file(path):
+    if not _require_regular_file(path, "task record"):
         return None
     try:
         with open(path, "rb") as handle:
@@ -361,7 +477,7 @@ def write_active(state_directory, record):
     """Replace the active task record atomically."""
     _ensure_directory(state_directory)
     path = active_task_path(state_directory)
-    _require_regular_file(path)
+    _require_regular_file(path, "task record")
     payload = (json.dumps(record, indent=2, sort_keys=True) + "\n").encode("utf-8")
     _atomic_replace(state_directory, path, payload)
 
@@ -406,7 +522,7 @@ def write_local_file(state_directory, name, payload):
     """
     _ensure_directory(state_directory)
     path = os.path.join(state_directory, name)
-    _require_regular_file(path)
+    _require_regular_file(path, name)
     _atomic_replace(state_directory, path, payload, name)
     return path
 
@@ -416,7 +532,7 @@ def read_local_file(state_directory, name):
     if state_directory is None:
         return None
     path = os.path.join(state_directory, name)
-    if not _require_regular_file(path):
+    if not _require_regular_file(path, name):
         return None
     try:
         with open(path, "rb") as handle:
@@ -429,10 +545,16 @@ def read_local_file(state_directory, name):
 
 
 def remove_local_file(state_directory, name):
-    """Remove one machine-local state file. Returns whether it was there."""
+    """Remove one machine-local state file. Returns whether it was there.
+
+    Validated first, and for the same reason as everywhere else: removing a
+    symlink AIQE found in its state area removes the link, but acting on
+    unvalidated state at all is the habit worth not having.
+    """
     if state_directory is None:
         return False
     path = os.path.join(state_directory, name)
+    _require_regular_file(path, name)
     try:
         os.unlink(path)
     except FileNotFoundError:
@@ -448,7 +570,14 @@ def remove_local_file(state_directory, name):
 
 def _atomic_replace(directory, path, payload, name=ACTIVE_TASK_NAME):
     temporary = os.path.join(directory, ".%s.tmp.%d" % (name, os.getpid()))
-    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    # `O_EXCL` as well as `O_CREAT`: a temporary name that already exists is
+    # something AIQE did not create, and truncating through it would be
+    # writing to a path it has not validated. A leftover from a crashed
+    # process of the same pid is cleared first, deliberately and by name.
+    _clear_stale_temporary(temporary)
+    descriptor = os.open(
+        temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, PRIVATE_FILE_MODE
+    )
     try:
         os.write(descriptor, payload)
         # Durable before it is visible: a rename that beats its own contents to
@@ -458,6 +587,27 @@ def _atomic_replace(directory, path, payload, name=ACTIVE_TASK_NAME):
         os.close(descriptor)
     os.replace(temporary, path)
     _sync_directory(directory)
+
+
+def _clear_stale_temporary(path):
+    """Remove a leftover temporary of AIQE's own naming, if it is safe to.
+
+    Its name contains this process's pid, so anything at that path is either
+    debris from a crash of a previous process that had the same pid, or
+    something placed there. The first is removable; the second is refused by
+    the same rules as every other component rather than written through.
+    """
+    if _require_regular_file(path, "temporary state file"):
+        try:
+            os.unlink(path)
+        except FileNotFoundError:
+            pass
+        except OSError as exc:
+            raise StateError(
+                LOCAL_STATE_UNSAFE,
+                "a leftover AIQE temporary file could not be removed: %s"
+                % (exc.strerror,),
+            )
 
 
 def _sync_directory(directory):
@@ -494,7 +644,8 @@ class TaskLock(object):
     def __enter__(self):
         _ensure_directory(self._state_directory)
         path = os.path.join(self._state_directory, LOCK_NAME)
-        self._descriptor = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+        _require_regular_file(path, LOCK_NAME)
+        self._descriptor = os.open(path, os.O_RDWR | os.O_CREAT, PRIVATE_FILE_MODE)
         deadline = time.time() + self._timeout
         while True:
             try:

@@ -77,6 +77,29 @@ makes the change, not at release time.
 
 ### Changed
 
+- **Pre-existing AIQE local state is validated before it is used.** Creating state
+  privately is half the job; state that is already there may have been placed. Every
+  AIQE-managed component — the state root, the per-worktree directory, the salt, the
+  task record, the check evidence, the consent record, the lock — must be a real
+  directory or regular file, not a symlink, owned by this user, and 0700 or 0600.
+  Anything else is `LOCAL_STATE_UNSAFE`: exit 3, no validator executed, recorded consent
+  not trusted, and the refusal stands even with `--allow`. AIQE does not `chmod`,
+  `chown`, replace or follow what it finds. Adversarial fixtures cover a world-writable
+  root, a group-readable worktree directory, a 0644 consent store, a symlinked consent
+  store, a foreign owner, and ordinary state continuing to work under `umask(0)`.
+- **Repository-controlled text is escaped on every human surface.** A validator's
+  identifier, argument vector and output are written by anyone who can land a commit,
+  and all three are printed back to a person. The configuration grammar refuses what it
+  can — an identifier containing a newline or an escape never reaches a renderer — and
+  the rest goes through the escaping AIQE already used for repository paths, now applied
+  to the consent prompt, `aiqe check`, `aiqe receipt --local` and every configuration
+  refusal message including rejected TOML key names. Escaped, never stripped: a prompt
+  that removed part of the command it is asking about would stop describing what is
+  being consented to. The definition digest is still taken over the real argument
+  vector, never over the displayed text. Fixtures drive a real pseudo-terminal with an
+  argv carrying `ESC[2J` and a second prompt of its own, and a validator that fails
+  while printing a screen clear and the word `PASS`; raw terminal control bytes reaching
+  a human surface is a new zero-tolerance benchmark quantity.
 - **Validator output is bounded while it is read**, not buffered whole and truncated
   afterwards. Both pipes are drained incrementally into a fixed-size tail through one
   deadline-bounded loop, so peak memory is the retention budget plus one read buffer per

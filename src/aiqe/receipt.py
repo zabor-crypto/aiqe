@@ -191,7 +191,21 @@ def run(cwd, local=False, env=None):
                 ],
             )
 
-    stored = evidence_module.read(state_directory, record["task_id"])
+    try:
+        stored = evidence_module.read(state_directory, record["task_id"])
+    except taskstate.StateError as error:
+        # The same refusal as everywhere else: AIQE will not read local state
+        # it cannot trust, and a receipt built on it would be worse than none.
+        return _refusal(
+            error.code,
+            exits.UNSUPPORTED,
+            [
+                "aiqe: " + error.message,
+                "AIQE will not repair local state it did not create. Fix or "
+                "remove it, then ask for the receipt again.",
+            ],
+        )
+
     definitions = (
         {
             validator.id: validators_module.definition_digest(validator)
@@ -533,9 +547,16 @@ def _render_local(document):
         lines.append("")
         lines.append("  Contracts")
         for entry in detail["coverage"]:
-            names = ", ".join(entry.get("required_validators") or []) or "none"
+            names = (
+                ", ".join(
+                    display_text(name)
+                    for name in entry.get("required_validators") or []
+                )
+                or "none"
+            )
             lines.append(
-                "      %-22s %-14s %s" % (entry["contract"], entry["state"], names)
+                "      %-22s %-14s %s"
+                % (display_text(entry["contract"]), entry["state"], names)
             )
 
     if detail["validators"]:

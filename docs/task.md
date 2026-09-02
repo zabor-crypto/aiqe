@@ -315,6 +315,24 @@ invalidated in this slice because HEAD later changed — evidence freshness
 belongs to `check`, and enforcing it here would be inventing a completion rule
 ahead of the evidence.
 
+## Local state AIQE did not create
+
+AIQE creates its own state private — directories 0700, files 0600 — and validates every
+AIQE-managed component that already exists before reading or writing it:
+
+```
+directories   a real directory, not a symlink, owned by this user,
+              with no group or world permission bits
+files         a regular file, not a symlink, owned by this user, mode 0600
+```
+
+Anything else is `LOCAL_STATE_UNSAFE` and the operation refuses with exit 3. AIQE does
+not `chmod`, `chown`, replace or follow what it finds: every one of those acts on a path
+it has already decided it cannot trust. Only AIQE's own components are validated — the
+directories above `$XDG_STATE_HOME` are the operating system's business.
+
+Reference: [`check.md`](check.md#state-aiqe-did-not-create).
+
 ## Atomicity and concurrency
 
 Every state transition is a write to a temporary file in the same directory,

@@ -53,6 +53,7 @@ import tomllib
 
 from . import contracts as contracts_module
 from . import patterns as patterns_module
+from .textsafe import display_text
 
 #: The only configuration schema this build interprets.
 SCHEMA_VERSION = 1
@@ -421,7 +422,7 @@ def _parse_validators(blocks):
                 "both address it by name." % (identifier,),
             )
         identifiers.add(identifier)
-        where = "[[validator]] %s" % (identifier,)
+        where = "[[validator]] %s" % (display_text(identifier),)
 
         argv = _parse_argv(block, where)
         required = _parse_required(block, where)
@@ -537,6 +538,11 @@ def _refuse_unknown(table, allowed, where):
     A permissive reader turns `requred = true` into an optional validator and
     a `qaunt = true` surface into an unclassified one. Both are green results
     that mean nothing, and neither produces a message anybody sees.
+
+    The rejected key is named back to the user, and a TOML quoted key can
+    contain any character at all - including the ones a terminal acts on. It
+    goes through the same escaping as every other repository-controlled string
+    AIQE prints.
     """
     unknown = sorted(key for key in table if key not in allowed)
     if unknown:
@@ -544,5 +550,9 @@ def _refuse_unknown(table, allowed, where):
             CONFIG_UNKNOWN_FIELD,
             "%s declares unknown field%s %s. AIQE refuses configuration it "
             "does not understand rather than ignoring it."
-            % (where, "" if len(unknown) == 1 else "s", ", ".join(unknown)),
+            % (
+                where,
+                "" if len(unknown) == 1 else "s",
+                ", ".join(display_text(key) for key in unknown),
+            ),
         )

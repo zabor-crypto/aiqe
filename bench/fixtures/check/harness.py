@@ -237,6 +237,15 @@ def check_expectations(observed, expected):
         problems.append(
             "the default receipt disclosed: %s" % (observed["default_receipt_leaks"],)
         )
+    for key, value in sorted(observed.items()):
+        # Any scenario that counts control bytes in a human surface is
+        # counting a zero-tolerance quantity, whether or not it remembered to
+        # write the expectation down.
+        if key.endswith("_control_bytes") and value:
+            problems.append(
+                "%s: %r raw terminal control bytes reached a human surface"
+                % (key, value)
+            )
     if observed.get("receipt_verdict") == "REVIEWABLE":
         problems.append(
             "a pre-commit receipt returned REVIEWABLE, which no pre-commit "

@@ -214,6 +214,196 @@ class PermissiveUmaskTests(LocalStateTestCase):
         self.assertEqual(self.mode(path), 0o600)
 
 
+class LocalStateTrustTests(LocalStateTestCase):
+    """State AIQE finds is not state AIQE wrote.
+
+    Creating its own files privately is half the job. The other half is
+    refusing to read or write an AIQE-managed component that is already there
+    in a condition AIQE would never have created - and refusing without
+    repairing it, because every repair is an action taken on a path AIQE has
+    just decided it cannot trust.
+    """
+
+    def setUp(self):
+        LocalStateTestCase.setUp(self)
+        previous = os.umask(0)
+        self.addCleanup(os.umask, previous)
+
+    def aiqe_root(self):
+        return os.path.join(self.env["XDG_STATE_HOME"], "aiqe")
+
+    def refusal(self, argv=None):
+        status, _out, err = self.run_cli(argv or ["task", "start", "--own", builders.OWNED_TEXT])
+        return status, err
+
+    # --- directories ------------------------------------------------------
+
+    def test_a_group_writable_state_root_is_refused(self):
+        os.makedirs(self.aiqe_root())
+        os.chmod(self.aiqe_root(), 0o777)
+
+        status, err = self.refusal()
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("beyond its owner", err)
+        self.assertEqual(
+            self.mode(self.aiqe_root()), 0o777, "AIQE changed the mode instead"
+        )
+
+    def test_a_group_readable_state_root_is_refused(self):
+        """0750 is not a compromise position. It is still not private."""
+        os.makedirs(self.aiqe_root())
+        os.chmod(self.aiqe_root(), 0o750)
+        self.assertEqual(self.refusal()[0], exits.UNSUPPORTED)
+
+    def test_a_symlinked_state_root_is_refused_and_not_followed(self):
+        elsewhere = os.path.join(self.root, "elsewhere")
+        os.makedirs(elsewhere, 0o700)
+        os.makedirs(self.env["XDG_STATE_HOME"], exist_ok=True)
+        os.symlink(elsewhere, self.aiqe_root())
+
+        status, err = self.refusal()
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("symbolic link", err)
+        self.assertEqual(os.listdir(elsewhere), [], "AIQE wrote through the link")
+        self.assertTrue(os.path.islink(self.aiqe_root()))
+
+    def test_a_file_where_the_state_root_belongs_is_refused(self):
+        os.makedirs(self.env["XDG_STATE_HOME"], exist_ok=True)
+        with open(self.aiqe_root(), "w") as handle:
+            handle.write("not a directory")
+        status, err = self.refusal()
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("not a directory", err)
+
+    def test_a_group_readable_worktree_directory_is_refused(self):
+        self.start()
+        directory = self.state_directory()
+        os.chmod(directory, 0o750)
+
+        status, _out, err = self.run_cli(["check", "--allow", "unit"])
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("beyond its owner", err)
+        self.assertEqual(self.mode(directory), 0o750)
+        self.assertEqual(self.case.fired(), [], "a validator ran on unsafe state")
+
+    # --- files ------------------------------------------------------------
+
+    def unsafe_file_refuses(self, name, argv):
+        path = self.state_path(name)
+        self.assertTrue(os.path.exists(path), name)
+        os.chmod(path, 0o644)
+        status, _out, err = self.run_cli(argv)
+        self.assertEqual(status, exits.UNSUPPORTED, name)
+        self.assertIn("mode 0644", err, name)
+        self.assertEqual(self.mode(path), 0o644, "AIQE changed the mode")
+        return err
+
+    def test_a_world_readable_salt_is_refused(self):
+        self.start()
+        path = taskstate.salt_path(self.env)
+        os.chmod(path, 0o644)
+        status, _out, err = self.run_cli(["task"])
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("mode 0644", err)
+        self.assertEqual(self.mode(path), 0o644)
+
+    def test_a_world_readable_task_record_is_refused(self):
+        self.start()
+        self.unsafe_file_refuses(taskstate.ACTIVE_TASK_NAME, ["task"])
+
+    def test_a_world_readable_check_record_is_refused(self):
+        self.start()
+        self.check("unit", "causality")
+        self.unsafe_file_refuses(evidence.CHECK_FILE_NAME, ["receipt"])
+
+    def test_a_world_readable_consent_record_is_refused(self):
+        """The component the whole boundary exists for.
+
+        A consent store somebody else can write is a list of commands they can
+        have executed as this user, so it is refused rather than read - and
+        refused with `--allow` too, because AIQE will not go on to write its
+        evidence into a state area it has just decided it cannot trust.
+        """
+        self.start()
+        self.check(prompt=lambda _text: True)
+        self.assertEqual(sorted(self.case.fired()), ["causality", "unit"])
+        for marker in ("causality", "unit"):
+            os.unlink(self.case.marker(marker))
+
+        path = self.state_path(validators.CONSENT_FILE_NAME)
+        os.chmod(path, 0o644)
+
+        status, _out, err = self.run_cli(["check"])
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("consent", err.lower())
+        self.assertEqual(self.case.fired(), [])
+
+        status, _out, _err = self.run_cli(["check", "--allow", "unit"])
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertEqual(self.case.fired(), [])
+        self.assertEqual(self.mode(path), 0o644)
+
+    def test_a_symlinked_consent_record_is_refused_and_not_written_through(self):
+        self.start()
+        target = os.path.join(self.root, "outside.json")
+        with open(target, "w") as handle:
+            handle.write("original")
+        os.symlink(target, self.state_path(validators.CONSENT_FILE_NAME))
+
+        status, _out, err = self.run_cli(["check", "--allow", "unit"])
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("symbolic link", err)
+        with open(target) as handle:
+            self.assertEqual(handle.read(), "original")
+        self.assertTrue(
+            os.path.islink(self.state_path(validators.CONSENT_FILE_NAME))
+        )
+        self.assertEqual(self.case.fired(), [])
+
+    def test_a_state_component_owned_by_someone_else_is_refused(self):
+        """Ownership, exercised by making AIQE believe it is another user.
+
+        A file owned by somebody else cannot be created here without being
+        root, so the branch is reached the only way it can be: `getuid` is
+        made to disagree with the file on disk, which is exactly the condition
+        the check exists to detect.
+        """
+        self.start()
+        real = os.getuid
+
+        os.getuid = lambda: real() + 1
+        try:
+            status, _out, err = self.run_cli(["task"])
+        finally:
+            os.getuid = real
+
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("owned by another user", err)
+
+    # --- and the other half -----------------------------------------------
+
+    def test_ordinary_pre_existing_state_keeps_working(self):
+        """The refusals are only worth having if the normal path is untouched."""
+        self.start()
+        self.assertEqual(self.check("unit", "causality"), exits.OK)
+
+        # Everything now pre-exists. A second pass over it must be ordinary.
+        self.assertEqual(self.check("unit", "causality"), exits.OK)
+        status, _out, _err = self.run_cli(["receipt"])
+        self.assertEqual(status, exits.INCOMPLETE)
+        self.assertEqual(self.run_cli(["task", "end"])[0], exits.OK)
+
+    def test_the_refusal_carries_one_stable_reason_code(self):
+        os.makedirs(self.aiqe_root())
+        os.chmod(self.aiqe_root(), 0o777)
+        try:
+            taskstate.state_root(self.env)
+        except taskstate.StateError as error:
+            self.assertEqual(error.code, taskstate.LOCAL_STATE_UNSAFE)
+        else:
+            self.fail("an unsafe state root was accepted")
+
+
 class EvidenceLifecycleTests(LocalStateTestCase):
     """One active record. Replaced whole, removed with the task, never inherited."""
 

@@ -124,8 +124,71 @@ class FixtureCoverageTests(unittest.TestCase):
             "large_output_bounded",
             "large_output_with_timeout",
             "detached_child_escapes_the_process_group",
+            "unsafe_state_root_mode",
+            "unsafe_derived_state_directory_mode",
+            "unsafe_consent_file_mode",
+            "state_symlink_refused",
+            "safe_existing_state_still_works",
+            "malicious_consent_denied",
+            "malicious_consent_accepted",
+            "malicious_validator_output",
         }
         self.assertEqual(required - set(support.check_case_ids()), set())
+
+    def test_unsafe_local_state_never_executes_a_validator(self):
+        """The point of the trust boundary, read off the expectations.
+
+        Every case that damages an AIQE-managed component must expect a
+        refusal and zero executions. A future case that wrote down anything
+        else would fail here before it ever ran.
+        """
+        by_id = {case["id"]: case["expect"] for case in support.check_cases()}
+        for identifier in (
+            "unsafe_state_root_mode",
+            "unsafe_derived_state_directory_mode",
+            "unsafe_consent_file_mode",
+            "state_symlink_refused",
+        ):
+            expect = by_id[identifier]
+            self.assertEqual(expect["executions"], 0, identifier)
+            self.assertEqual(expect["check_exit"], 3, identifier)
+
+        # And the other half: ordinary pre-existing state is untouched by any
+        # of it, at the modes AIQE creates.
+        safe = by_id["safe_existing_state_still_works"]
+        self.assertEqual(safe["first_check_exit"], 0)
+        self.assertEqual(safe["second_check_exit"], 0)
+        self.assertEqual(safe["state_modes"]["root"], "0700")
+        self.assertEqual(safe["state_modes"]["consents.json"] if
+                         "consents.json" in safe["state_modes"] else "0600", "0600")
+        for name in ("task.json", "check.json", "salt"):
+            self.assertEqual(safe["state_modes"][name], "0600", name)
+
+    def test_hostile_repository_text_never_reaches_the_terminal_raw(self):
+        """Escaped, not stripped, and the digest still binds the real thing."""
+        by_id = {case["id"]: case["expect"] for case in support.check_cases()}
+
+        for identifier in ("malicious_consent_denied", "malicious_consent_accepted"):
+            expect = by_id[identifier]
+            self.assertEqual(expect["raw_control_bytes"], 0, identifier)
+            self.assertEqual(expect["raw_escape_sequences"], 0, identifier)
+            self.assertEqual(expect["raw_carriage_returns"], 0, identifier)
+            self.assertTrue(expect["escaped_form_shown"], identifier)
+            self.assertTrue(expect["warning_intact"], identifier)
+
+        accepted = by_id["malicious_consent_accepted"]
+        self.assertTrue(accepted["consent_matches_raw_definition_digest"])
+        self.assertTrue(accepted["consent_is_not_over_display_text"])
+
+        output = by_id["malicious_validator_output"]
+        for surface in (
+            "check_human_control_bytes",
+            "receipt_local_control_bytes",
+            "default_receipt_control_bytes",
+        ):
+            self.assertEqual(output[surface], 0, surface)
+        self.assertTrue(output["json_retains_the_output_itself"])
+        self.assertTrue(output["default_receipt_holds_no_validator_output"])
 
     def test_consent_is_proved_through_a_real_terminal(self):
         """Not through an injected prompt callable.

@@ -15,7 +15,7 @@ import unittest
 
 from . import support  # noqa: F401  (sets up sys.path)
 
-from aiqe import validators
+from aiqe import taskstate, validators
 from aiqe.config import parse
 
 
@@ -102,19 +102,47 @@ class ConsentStoreTests(unittest.TestCase):
         self.assertTrue(store.granted(original))
         self.assertFalse(store.granted(drifted))
 
+    def seed(self, contents):
+        """Put a consent store on disk the way AIQE would have written one.
+
+        At 0600 deliberately. A store at any other mode is refused before its
+        contents are read at all, and that refusal has its own tests: what
+        these two are about is a store AIQE wrote and can no longer interpret.
+        """
+        path = os.path.join(self.root, validators.CONSENT_FILE_NAME)
+        with open(path, "w") as handle:
+            handle.write(contents)
+        os.chmod(path, taskstate.PRIVATE_FILE_MODE)
+        return path
+
     def test_an_unreadable_store_grants_nothing(self):
         """Fail closed: a lost record costs one prompt, the opposite costs more."""
-        with open(os.path.join(self.root, validators.CONSENT_FILE_NAME), "w") as handle:
-            handle.write("not json at all")
+        self.seed("not json at all")
         self.assertFalse(validators.ConsentStore(self.root).granted("sha256:x"))
 
     def test_a_record_from_another_schema_grants_nothing(self):
         import json
 
-        path = os.path.join(self.root, validators.CONSENT_FILE_NAME)
-        with open(path, "w") as handle:
-            json.dump({"schema_version": 99, "granted": {"sha256:x": {}}}, handle)
+        self.seed(json.dumps({"schema_version": 99, "granted": {"sha256:x": {}}}))
         self.assertFalse(validators.ConsentStore(self.root).granted("sha256:x"))
+
+    def test_a_store_at_any_other_mode_is_refused_rather_than_read(self):
+        """The refusal comes before the contents, not after.
+
+        A store somebody else can write is a list of commands they can have
+        executed as this user, so it is not parsed and then judged - it is not
+        parsed.
+        """
+        import json
+
+        digest = validators.definition_digest(declared())
+        validators.ConsentStore(self.root).grant(digest, "unit")
+        os.chmod(
+            os.path.join(self.root, validators.CONSENT_FILE_NAME), 0o644
+        )
+        with self.assertRaises(taskstate.StateError) as caught:
+            validators.ConsentStore(self.root)
+        self.assertEqual(caught.exception.code, taskstate.LOCAL_STATE_UNSAFE)
 
     def test_the_record_is_owner_only(self):
         digest = validators.definition_digest(declared())

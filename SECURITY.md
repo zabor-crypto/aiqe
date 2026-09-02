@@ -100,6 +100,19 @@ survives, and the benchmark keeps a fixture that demonstrates it rather than wor
 around it. Delivering containment would mean building the sandbox this document says
 AIQE is not.
 
+### Repository-controlled text and your terminal
+
+A validator's identifier, argument vector and output are written by anyone who can land
+a commit, and all three are printed back to a person — the argument vector next to the
+question AIQE wants a truthful answer to. Terminal control sequences are escaped, never
+executed and never stripped: a prompt that removed part of the command it is asking
+about would stop describing what is being consented to. The configuration grammar
+refuses what it can first, so an identifier containing a newline never reaches a
+renderer at all.
+
+The definition digest is taken over the argument vector AIQE will execute, never over
+the escaped text it displayed.
+
 AIQE makes **no sandbox claim**, **no filesystem-restriction claim** and **no
 network-restriction claim** about a validator. It runs as you, with your environment,
 and can do anything your shell can do — including modifying files outside the owned
@@ -180,6 +193,13 @@ say so than imply a defence we have not built.
   there is no window in which one is broader than its final form. This matters because
   local evidence can hold a failing validator's output, and AIQE is in no position to
   promise there is nothing sensitive in it. The modes are asserted under `umask(0)`.
+- **State AIQE did not create is not trusted.** Every AIQE-managed component is
+  validated before it is read or written — a real directory or regular file, not a
+  symlink, owned by you, 0700 or 0600. Anything else is `LOCAL_STATE_UNSAFE`: exit 3,
+  no validator executed, recorded consent not trusted. AIQE does not repair it: no
+  `chmod`, no `chown`, no replacement, and it does not follow the symlink to see what is
+  behind it. This validates AIQE's own components only; the directories above
+  `$XDG_STATE_HOME` are the operating system's business.
 
 ## Network behaviour
 

@@ -51,7 +51,14 @@ zero-tolerance:
 AIQE_CORE_REPOSITORY_WRITES         = 0
 UNCONSENTED_VALIDATOR_EXECUTIONS    = 0
 PRECOMMIT_REVIEWABLE_VERDICTS       = 0
+RAW_TERMINAL_CONTROL_BYTES          = 0
 ```
+
+The last of those is counted by any scenario that renders repository-controlled text -
+a validator's argument vector or its output - to a human surface. Newline is AIQE's own
+layout and is excluded; ESC, carriage return, BEL, backspace, DEL and the C1 range are
+what an attacker uses to move a cursor or repaint a line, and none of them may reach a
+terminal.
 
 The attribution lists are declared per scenario in the builders, so a case cannot
 quietly acquire permission to write by writing somewhere new. Every fixture validator
@@ -80,6 +87,24 @@ Two more measure bounds rather than semantics: `large_output_bounded` and
 `large_output_with_timeout` emit far past the retention budget — the second of them
 without ever stopping — and assert that the run completes, the retained output stays
 within the budget, and the evidence record stays small.
+
+Five cases damage AIQE's own machine-local state and require a refusal rather than a
+repair — a world-writable state root, a group-readable worktree directory, a 0644
+consent store, a symlinked consent store — plus one proving that ordinary pre-existing
+state keeps working at 0700 and 0600 under `umask(0)`.
+
+Three more supply repository-controlled text aimed at the terminal:
+
+```
+malicious_consent_denied      an argv carrying ESC[2J and a second prompt, answered no
+malicious_consent_accepted    the same, answered yes - and what the digest binds
+malicious_validator_output    a validator that fails while printing a screen clear
+```
+
+The pseudo-terminal is put in raw mode for these, with echo and output post-processing
+off, so the transcript is exactly the bytes AIQE wrote rather than the line discipline's
+rendering of them. Otherwise the question "did AIQE emit a control character" would be
+answered about the terminal's own work.
 
 Each of the six launch contract families has its own three fixtures — covered, failed,
 and coverage gap. One family standing in for six would leave five with no evidence at

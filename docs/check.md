@@ -332,6 +332,63 @@ no window in which a record is broader than its final form. Both are asserted un
 `umask(0)`, the most permissive setting there is — a file that is 0600 under that umask
 is 0600 because AIQE asked for it.
 
+### State AIQE did not create
+
+Creating its own state privately is only half the job. State that is *already there* is
+state somebody else may have put there, and AIQE cannot tell a file it wrote last week
+from one that was placed for it to find. So every AIQE-managed component that is
+actually used is validated first:
+
+```
+directories   a real directory, not a symlink, owned by this user,
+              with no group or world permission bits
+files         a regular file, not a symlink, owned by this user, mode 0600
+```
+
+Anything else is `LOCAL_STATE_UNSAFE`: exit `3`, no validator executed, and recorded
+consent not trusted. Consent is the reason this matters most — a `consents.json`
+somebody else can write is a list of commands somebody else can have executed as you,
+and reading it on the assumption that AIQE wrote it would be the whole authorization
+boundary undone by a file mode. The refusal stands even with `--allow`, because AIQE
+will not go on to write its evidence into a state area it has just decided it cannot
+trust.
+
+**AIQE does not repair what it finds.** No `chmod`, no `chown`, no replacing the file,
+and no following the symlink to see what is on the other side — every one of those is an
+action taken on a path AIQE has already decided it cannot trust, and a tool that "fixes"
+a hostile symlink by writing through it has done the attacker's work. You are told what
+is wrong and left to decide.
+
+This is deliberately not a general local-security framework. It validates AIQE's own
+managed components and nothing else: the directories above `$XDG_STATE_HOME`, your home
+directory and the rest of the machine are the operating system's business.
+
+### Repository text and your terminal
+
+A validator's identifier, its argument vector and its output are all written by whoever
+can land a commit, and all three are printed back to a person. A terminal acts on some
+bytes rather than displaying them, so the rule is: **escape, never strip, and never
+execute.**
+
+Two defences, in order. The configuration grammar refuses what it can — an identifier
+containing a newline or an escape never reaches a renderer at all — and everything else
+goes through the same escaping AIQE already uses for repository paths:
+
+```
+ESC, C0 and C1 controls, CR, LF, tab, DEL   ->  \xNN, \r, \n, \t
+a literal backslash                         ->  \\
+```
+
+Escaping rather than stripping matters. A consent prompt that quietly removed part of
+the command it is asking about would stop describing the thing being consented to, and
+evidence with the awkward bytes deleted is not evidence. What you see is a reversible
+rendering of exactly what is there — an argument vector carrying `ESC[2J` and a
+plausible second prompt appears as `\x1b[2J`, on the line AIQE put it on.
+
+**Rendering and authority stay separate.** The validator definition digest is taken over
+the argument vector AIQE will actually execute, never over the escaped text it printed.
+If it bound the rendering, two different commands could share one consent.
+
 ## Exit status
 
 ```

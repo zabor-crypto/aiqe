@@ -48,7 +48,7 @@ from . import pathstate
 from . import task as task_module
 from . import taskstate
 from . import validators as validators_module
-from .textsafe import display_bytes
+from .textsafe import display_bytes, display_text
 
 #: The internal completion state a fully green pre-commit check produces. Not
 #: a verdict, and deliberately not the word `REVIEWABLE`.
@@ -174,10 +174,11 @@ def run(cwd, allow=(), env=None, prompt=None):
             exits.UNSUPPORTED,
             [
                 "aiqe: --allow names no declared validator: %s"
-                % (", ".join(sorted(set(unknown))),),
+                % (", ".join(display_text(name) for name in sorted(set(unknown))),),
                 "Declared validators: %s"
                 % (
-                    ", ".join(v.id for v in config.validators) or "none",
+                    ", ".join(display_text(v.id) for v in config.validators)
+                    or "none",
                 ),
             ],
         )
@@ -214,7 +215,15 @@ def run(cwd, allow=(), env=None, prompt=None):
         validator.id: validators_module.definition_digest(validator)
         for validator in config.validators
     }
-    consents = validators_module.ConsentStore(state_directory)
+
+    try:
+        # Constructed before anything is executed. Recorded consent is the
+        # authorization boundary for running repository-declared commands, so
+        # a consent store AIQE cannot trust has to stop the operation rather
+        # than be read past.
+        consents = validators_module.ConsentStore(state_directory)
+    except taskstate.StateError as error:
+        return _state_refusal(error)
 
     before = _authority(repository, config, owned_states, definitions)
     outcomes = _execute(
@@ -226,7 +235,10 @@ def run(cwd, allow=(), env=None, prompt=None):
         # Something the conclusion rests on moved while the validators ran.
         # The previous record described a state that certainly no longer
         # holds, so it goes rather than being left to look current.
-        evidence_module.remove(state_directory)
+        try:
+            evidence_module.remove(state_directory)
+        except taskstate.StateError as error:
+            return _state_refusal(error)
         return CheckOutcome(
             AUTHORITY_CHANGED_DURING_CHECK,
             exits.INCOMPLETE,
@@ -252,9 +264,9 @@ def run(cwd, allow=(), env=None, prompt=None):
         "reasons": list(reasons),
         "evidence": "CURRENT",
     }
-    evidence_module.write(
-        state_directory,
-        evidence_module.build_record(
+    try:
+        _record_evidence(
+            state_directory,
             record,
             __version__,
             config,
@@ -265,9 +277,9 @@ def run(cwd, allow=(), env=None, prompt=None):
             coverage_results,
             result,
             foreign,
-            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        ),
-    )
+        )
+    except taskstate.StateError as error:
+        return _state_refusal(error)
 
     document = _document(
         __version__,
@@ -314,6 +326,51 @@ def _incomplete_document(reasons, evidence):
             "evidence": evidence,
         },
     }
+
+
+def _record_evidence(
+    state_directory,
+    record,
+    aiqe_version,
+    config,
+    authority,
+    owned_states,
+    classification,
+    outcomes,
+    coverage_results,
+    result,
+    foreign,
+):
+    evidence_module.write(
+        state_directory,
+        evidence_module.build_record(
+            record,
+            aiqe_version,
+            config,
+            authority,
+            owned_states,
+            classification,
+            outcomes,
+            coverage_results,
+            result,
+            foreign,
+            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        ),
+    )
+
+
+def _state_refusal(error):
+    """AIQE's own local state is outside its trust boundary.
+
+    Exit 3 rather than a completion verdict: nothing was established about the
+    repository, and the thing AIQE could not trust was its own filing cabinet.
+    """
+    return CheckOutcome(
+        error.code,
+        exits.UNSUPPORTED,
+        ["aiqe: " + error.message, "AIQE will not repair local state it did "
+         "not create. Fix or remove it, then run the check again."],
+    )
 
 
 # --- Authority -------------------------------------------------------------
@@ -441,9 +498,14 @@ def _execute(applicable, definitions, consents, repository, env, allow, prompt):
 
 
 def _consent_request(validator, digest):
-    """Exactly what is about to run, and exactly what AIQE does not promise."""
-    from .textsafe import display_text
+    """Exactly what is about to run, and exactly what AIQE does not promise.
 
+    Every repository-controlled value here is escaped. This prompt is the one
+    place AIQE prints an attacker-chosen argument vector next to a question it
+    wants a truthful answer to, and an argv element carrying `ESC[2J` and a
+    plausible second prompt is the obvious way to get the wrong answer to it.
+    What the user sees is `\x1b[2J`, on the line where AIQE put it.
+    """
     lines = [
         "",
         "  %s declares a validator AIQE has not been allowed to run here."
@@ -568,13 +630,21 @@ def _render(
         lines.append("")
         lines.append("  Contracts")
         for result in coverage_results:
+            # Contract and validator identifiers are constrained by the
+            # configuration grammar, so neither can carry a control character.
+            # Escaped anyway: the grammar is one edit away from the rendering,
+            # and a rendering that only works because of a check somewhere else
+            # is a rendering nobody can review on its own.
             detail = (
-                ", ".join(result.required_validator_ids)
+                ", ".join(
+                    display_text(name) for name in result.required_validator_ids
+                )
                 if result.required_validator_ids
                 else "no required validator declares it"
             )
             lines.append(
-                "      %-22s %-14s %s" % (result.contract, result.state, detail)
+                "      %-22s %-14s %s"
+                % (display_text(result.contract), result.state, detail)
             )
 
     if outcomes:
@@ -586,7 +656,11 @@ def _render(
         lines.append("")
         lines.append(
             "  Not applicable  %s"
-            % (", ".join(validator.id for validator in not_applicable),)
+            % (
+                ", ".join(
+                    display_text(validator.id) for validator in not_applicable
+                ),
+            )
         )
 
     lines.append("")
@@ -608,8 +682,6 @@ def _render(
 
 
 def _validator_line(outcome):
-    from .textsafe import display_text
-
     detail = ""
     if outcome.timed_out:
         detail = "timed out"

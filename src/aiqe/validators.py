@@ -176,19 +176,27 @@ class ConsentStore(object):
         self._state_directory = state_directory
         self._granted = self._read()
 
-    def _path(self):
-        if self._state_directory is None:
-            return None
-        return os.path.join(self._state_directory, CONSENT_FILE_NAME)
-
     def _read(self):
-        path = self._path()
-        if path is None:
+        """Read the store through AIQE's validated local-state path.
+
+        Not `open()` directly. This file is the authorization boundary for
+        running arbitrary repository-declared commands, so it is exactly the
+        file that must not be read on trust: one that somebody else owns or
+        can write is a list of commands they can have executed as this user.
+        `read_local_file` refuses it, and that refusal is allowed to
+        propagate - a malformed store means "no consent", but an unsafe one
+        means the operation stops.
+        """
+        from . import taskstate
+
+        if self._state_directory is None:
+            return {}
+        raw = taskstate.read_local_file(self._state_directory, CONSENT_FILE_NAME)
+        if raw is None:
             return {}
         try:
-            with open(path, "rb") as handle:
-                document = json.loads(handle.read().decode("utf-8"))
-        except (OSError, ValueError, UnicodeDecodeError):
+            document = json.loads(raw.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
             return {}
         if not isinstance(document, dict):
             return {}

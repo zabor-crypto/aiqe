@@ -30,10 +30,12 @@ never allowed to blur into one number.
 import json
 import os
 import platform
+import stat
 import pty
 import select
 import subprocess
 import sys
+import termios
 import time
 
 from ..repobuild import (  # noqa: F401  (re-exported: scenarios use these names)
@@ -233,6 +235,7 @@ def run_cli_pty(cwd, env, arguments, answers, timeout=PTY_TIMEOUT_SECONDS):
     child["TERM"] = "dumb"
 
     master, slave = pty.openpty()
+    _make_transcript_faithful(slave)
     process = subprocess.Popen(
         [sys.executable, "-m", "aiqe"] + list(arguments),
         cwd=cwd,
@@ -283,6 +286,22 @@ def run_cli_pty(cwd, env, arguments, answers, timeout=PTY_TIMEOUT_SECONDS):
         os.close(master)
 
     return process.wait(), bytes(transcript)
+
+
+def _make_transcript_faithful(slave):
+    """Turn off echo and output post-processing on the pseudo-terminal.
+
+    Without this the transcript is not AIQE's output. The line discipline
+    echoes whatever the driver types, and `OPOST`/`ONLCR` rewrites every
+    newline AIQE prints as a carriage return and a newline - so a test asking
+    "did AIQE emit a control character" would be answering about the terminal's
+    own bytes. With both off, what comes back is exactly what AIQE wrote.
+    """
+    attributes = termios.tcgetattr(slave)
+    attributes[0] &= ~termios.ICRNL           # iflag
+    attributes[1] &= ~termios.OPOST           # oflag
+    attributes[3] &= ~termios.ECHO            # lflag
+    termios.tcsetattr(slave, termios.TCSANOW, attributes)
 
 
 def _drain_pty(master, transcript):
@@ -1159,6 +1178,462 @@ def operate_detached_child(case, env, root):
     return observation
 
 
+# --- Scenarios: AIQE's own local state, found in an unsafe condition --------
+#
+# AIQE creates its state private. That is only half the job: state that is
+# already there is state somebody else may have put there, and a consents.json
+# anyone can write is a list of commands anyone can have executed as this user.
+# These scenarios damage AIQE's own managed components and require a refusal -
+# not a repair, and not a shrug.
+
+UNSAFE_STATE_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["CAUSALITY"]),
+        NON_QUANT,
+        validator(
+            "causality", ["./checks/causality.sh"], True, 60, contracts=["CAUSALITY"]
+        ),
+    ]
+)
+
+
+def _aiqe_root(env):
+    return os.path.join(env["XDG_STATE_HOME"], "aiqe")
+
+
+def _derived_directory(root, env):
+    return state_directory(root, env)
+
+
+def _state_modes(root, env):
+    """The modes of every AIQE-managed component that exists right now."""
+    from aiqe import taskstate as taskstate_module
+
+    observed = {}
+    def mode_of(path):
+        return "%04o" % (stat.S_IMODE(os.lstat(path).st_mode),)
+
+    aiqe_root = _aiqe_root(env)
+    if os.path.isdir(aiqe_root):
+        observed["root"] = mode_of(aiqe_root)
+    directory = _derived_directory(root, env)
+    if directory and os.path.isdir(directory):
+        observed["worktree"] = mode_of(directory)
+        for name in ("task.json", "task.lock", "check.json", "consents.json"):
+            path = os.path.join(directory, name)
+            if os.path.exists(path):
+                observed[name] = mode_of(path)
+    salt = os.path.join(aiqe_root, taskstate_module.SALT_NAME)
+    if os.path.exists(salt):
+        observed["salt"] = mode_of(salt)
+    return observed
+
+
+def operate_unsafe_state_root_mode(case, env, root):
+    """A pre-existing AIQE root that anyone can write."""
+    aiqe_root = _aiqe_root(env)
+    os.makedirs(aiqe_root, exist_ok=True)
+    os.chmod(aiqe_root, 0o777)
+
+    started = run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    checked = run_cli(root, env, b"check", b"--allow", b"causality")
+    return {
+        "start_exit": started.returncode,
+        "check_exit": checked.returncode,
+        "refusal_named": b"LOCAL_STATE_UNSAFE" in checked.stderr
+        or b"grants access beyond its owner" in checked.stderr,
+        "executions": executions(case, "causality"),
+        "mode_unchanged": stat.S_IMODE(os.lstat(aiqe_root).st_mode) == 0o777,
+        "terminal_safe": terminal_safe(started, checked),
+        "consented": ["causality"],
+    }
+
+
+def operate_unsafe_derived_directory_mode(case, env, root):
+    """The worktree's own state directory, opened to the group."""
+    started = run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    directory = _derived_directory(root, env)
+    os.chmod(directory, 0o750)
+
+    checked = run_cli(root, env, b"check", b"--allow", b"causality")
+    receipted = run_cli(root, env, b"receipt")
+    return {
+        "start_exit": started.returncode,
+        "check_exit": checked.returncode,
+        "receipt_exit": receipted.returncode,
+        "executions": executions(case, "causality"),
+        "mode_unchanged": stat.S_IMODE(os.lstat(directory).st_mode) == 0o750,
+        "terminal_safe": terminal_safe(started, checked, receipted),
+        "consented": ["causality"],
+    }
+
+
+def operate_unsafe_consent_mode(case, env, root):
+    """Valid recorded consent in a file anyone can write.
+
+    This is the component the trust boundary exists for. A consent store
+    somebody else can write is a list of commands they can have executed here,
+    so it is refused rather than read - and refused even when `--allow` would
+    otherwise have authorised the run, because AIQE will not write its evidence
+    into a state area it has just decided it cannot trust.
+    """
+    from aiqe import validators as validators_module
+
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    directory = _derived_directory(root, env)
+    digests = definition_digests(root)
+    validators_module.ConsentStore(directory).grant(digests["causality"], "causality")
+
+    consent_file = os.path.join(directory, "consents.json")
+    recorded_before = len(recorded_consents(root, env))
+    os.chmod(consent_file, 0o644)
+
+    checked = run_cli(root, env, b"check", b"--format", b"json")
+    allowed = run_cli(root, env, b"check", b"--allow", b"causality")
+    return {
+        "consent_was_recorded": recorded_before == 1,
+        "check_exit": checked.returncode,
+        "check_with_allow_exit": allowed.returncode,
+        "executions": executions(case, "causality"),
+        "mode_unchanged": stat.S_IMODE(os.lstat(consent_file).st_mode) == 0o644,
+        "terminal_safe": terminal_safe(checked, allowed),
+        "consented": ["causality"],
+    }
+
+
+def build_symlink_target(case, env):
+    """The repository, plus the file the hostile symlink will point at.
+
+    Created during construction rather than during the measured window, so
+    that the file's existence is part of the baseline and only the symlink
+    itself - which lands inside AIQE's own state area - is a change under
+    measurement.
+    """
+    root = build_repository(
+        case, env, UNSAFE_STATE_CONFIG, [script("causality")]
+    )
+    write(os.path.join(case.root, "elsewhere.json"), "original\n")
+    return root
+
+
+def operate_state_symlink_refused(case, env, root):
+    """A symlink where the consent store belongs, pointing somewhere else."""
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    directory = _derived_directory(root, env)
+
+    target = os.path.join(case.root, "elsewhere.json")
+    os.symlink(target, os.path.join(directory, "consents.json"))
+
+    checked = run_cli(root, env, b"check", b"--allow", b"causality")
+    with open(target) as handle:
+        after = handle.read()
+    return {
+        "check_exit": checked.returncode,
+        "executions": executions(case, "causality"),
+        "symlink_still_a_symlink": os.path.islink(
+            os.path.join(directory, "consents.json")
+        ),
+        "target_unchanged": after == "original\n",
+        "terminal_safe": terminal_safe(checked),
+        "consented": ["causality"],
+    }
+
+
+def operate_safe_existing_state(case, env, root):
+    """Ordinary state, created under a permissive umask, keeps working.
+
+    The refusals above are only worth having if the normal path is unaffected,
+    and the umask is set wide open here so that the modes observed are AIQE's
+    doing rather than the environment's.
+    """
+    previous = os.umask(0)
+    try:
+        run_cli(root, env, b"task", b"start", b"--own", OWNED)
+        first = run_cli(root, env, b"check", b"--allow", b"causality")
+        modes = _state_modes(root, env)
+        # A second run over the same, now pre-existing, state.
+        second = run_cli(root, env, b"check", b"--allow", b"causality")
+        receipted = run_cli(root, env, b"receipt")
+        ended = run_cli(root, env, b"task", b"end")
+    finally:
+        os.umask(previous)
+
+    return {
+        "first_check_exit": first.returncode,
+        "second_check_exit": second.returncode,
+        "receipt_exit": receipted.returncode,
+        "executions": executions(case, "causality"),
+        "state_modes": modes,
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "terminal_safe": terminal_safe(first, second, receipted, ended),
+        "consented": ["causality"],
+    }
+
+
+# --- Scenarios: repository-controlled text aimed at the terminal ------------
+#
+# Two attacks, and they are different. One is in the *declaration* - an
+# argument vector carrying escape sequences, shown to a person who is about to
+# be asked a yes/no question about it. The other is in the *output* - a
+# validator that fails while printing a screen clear and the word PASS.
+#
+# Neither can be answered by trusting the repository, and neither is answered
+# by stripping the data: what AIQE renders has to remain a faithful, reversible
+# rendering of what is actually there, or the prompt stops describing the thing
+# it is asking about.
+
+#: Written into TOML as escapes, because a raw control character is not legal
+#: in a TOML basic string - so this is the shape the attack actually has to
+#: take. `tomllib` decodes them, and the parsed argv holds real ESC, CR and
+#: newline bytes.
+MALICIOUS_ARGV = (
+    "./checks/evil.sh",
+    "\\u001B[2J\\u001B[H",
+    "[y/N]",
+    "\\nProceed? Type 'yes' to continue: yes\\n",
+    "\\rPASS",
+)
+
+#: A validator id that fits AIQE's identifier grammar and still reads like a
+#: prompt. The grammar is the first line of defence here: an id containing a
+#: newline is refused at parse time rather than escaped at render time.
+MALICIOUS_VALIDATOR_ID = "evil.y-N"
+
+MALICIOUS_CONSENT_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["CAUSALITY"]),
+        NON_QUANT,
+        validator(
+            MALICIOUS_VALIDATOR_ID,
+            list(MALICIOUS_ARGV),
+            True,
+            60,
+            contracts=["CAUSALITY"],
+        ),
+    ]
+)
+
+#: Bytes a terminal acts on. Their absence from AIQE's own output is the
+#: property; AIQE's newlines are its own layout and are excluded.
+def raw_control_bytes(data):
+    """Control bytes in a stream that a terminal would act on.
+
+    Excludes newline, which is AIQE's own line structure. Includes ESC,
+    carriage return, BEL, backspace, DEL and the C1 range - the ones an
+    attacker uses to move the cursor, repaint a line, or hide what they wrote.
+    """
+    found = []
+    for index, byte in enumerate(data):
+        if byte == 0x0A:
+            continue
+        if byte < 0x20 or byte == 0x7F or 0x80 <= byte <= 0x9F:
+            found.append((index, byte))
+    return found
+
+
+def _terminal_safety(transcript):
+    return {
+        "raw_control_bytes": len(raw_control_bytes(transcript)),
+        "raw_escape_sequences": transcript.count(b"\x1b"),
+        "raw_carriage_returns": transcript.count(b"\r"),
+        "escaped_form_shown": b"\\x1b[2J" in transcript,
+        "warning_intact": all(
+            phrase in transcript for phrase in DISCLOSURE_PHRASES
+        ),
+        "real_prompt_present": transcript.rstrip().endswith(
+            b"Proceed? Type 'yes' to continue:"
+        )
+        or b"Proceed? Type 'yes' to continue:" in transcript,
+    }
+
+
+def build_malicious_consent(case, env):
+    return build_repository(
+        case, env, MALICIOUS_CONSENT_CONFIG, [script("evil")]
+    )
+
+
+def operate_malicious_consent_denied(case, env, root):
+    """The argv is aimed at the terminal; the answer is no."""
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    status, transcript = run_cli_pty(root, env, [b"check"], [b"no\n"])
+    consents = recorded_consents(root, env)
+    ended = run_cli(root, env, b"task", b"end")
+
+    observation = {
+        "pty_exit": status,
+        "executions": executions(case, "evil"),
+        "consents_recorded": len(consents),
+        "declined_reason_shown": b"CONSENT_DECLINED" in transcript,
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "consented": [],
+    }
+    observation.update(_terminal_safety(transcript))
+    return observation
+
+
+def operate_malicious_consent_accepted(case, env, root):
+    """The same argv, answered yes - and what the digest is taken over.
+
+    The digest has to bind the argument vector AIQE will actually execute, not
+    the escaped text it printed. If it bound the rendering, two different
+    commands could share a consent, which is the whole mechanism inverted.
+    """
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    digests = definition_digests(root)
+
+    status, transcript = run_cli_pty(root, env, [b"check"], [b"yes\n"])
+    accepted_executions = executions(case, "evil")
+    consents = recorded_consents(root, env)
+
+    raw_digest = _digest_over_raw_argv(root)
+
+    # One semantic field changes; the old consent must not carry over.
+    with open(os.path.join(root, "aiqe.toml")) as handle:
+        declared = handle.read()
+    write(
+        os.path.join(root, "aiqe.toml"),
+        declared.replace("timeout = 60", "timeout = 90"),
+    )
+    drifted = run_cli(root, env, b"check", b"--format", b"json")
+    drifted_executions = executions(case, "evil")
+    ended = run_cli(root, env, b"task", b"end")
+
+    observation = {
+        "pty_exit": status,
+        "executions_after_accept": accepted_executions,
+        "consents_recorded": len(consents),
+        "consent_matches_raw_definition_digest": raw_digest in consents,
+        "consent_is_not_over_display_text": _display_digest(root) not in consents,
+        "drifted_exit": drifted.returncode,
+        "executions_added_by_drifted_run": drifted_executions - accepted_executions,
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "consented": ["evil"],
+    }
+    observation.update(_terminal_safety(transcript))
+    observation["digests_agree"] = digests[MALICIOUS_VALIDATOR_ID] == raw_digest
+    return observation
+
+
+def _digest_over_raw_argv(root):
+    """The definition digest AIQE records, recomputed from the parsed config."""
+    from aiqe import config as config_module
+    from aiqe import validators as validators_module
+
+    parsed = config_module.load(os.fsencode(root))
+    return validators_module.definition_digest(parsed.validators[0])
+
+
+class _DisplayValidator(object):
+    """The same definition with its argv replaced by its escaped rendering.
+
+    Used only to compute a digest that must *not* appear in the consent store.
+    """
+
+    __slots__ = ("id", "argv", "required", "timeout", "contracts")
+
+    def __init__(self, declared):
+        from aiqe.textsafe import display_text
+
+        self.id = declared.id
+        self.argv = tuple(display_text(part) for part in declared.argv)
+        self.required = declared.required
+        self.timeout = declared.timeout
+        self.contracts = declared.contracts
+
+
+def _display_digest(root):
+    from aiqe import config as config_module
+    from aiqe import validators as validators_module
+
+    parsed = config_module.load(os.fsencode(root))
+    return validators_module.definition_digest(_DisplayValidator(parsed.validators[0]))
+
+
+# --- Scenario: a validator whose output is aimed at the terminal ------------
+
+MALICIOUS_OUTPUT_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["CAUSALITY"]),
+        NON_QUANT,
+        validator(
+            "causality", ["./checks/causality.sh"], True, 60, contracts=["CAUSALITY"]
+        ),
+    ]
+)
+
+#: A token that cannot occur in AIQE's own vocabulary, so its absence from the
+#: default receipt is a fact about leakage rather than a coincidence. Asserting
+#: on the word PASS would not work: the default receipt names the outcome
+#: states, and `PASS` is one of them.
+LEAK_SENTINEL = "LEAK-CANARY-8f3a2b"
+
+#: Fails, and spends its dying breath trying to look like it passed: a screen
+#: clear, a cursor home, a carriage return to overwrite the line AIQE just
+#: printed, the word PASS, a bell, a colour change, and a prompt of its own.
+MALICIOUS_OUTPUT_BODY = (
+    "printf 'checking...\\rPASS %(token)s\\n'\n"
+    "printf '\\033[2J\\033[Hall checks passed %(token)s\\033[32m\\a\\n' >&2\n"
+    "printf '\\rProceed? Type '\"'\"'yes'\"'\"' to continue: \\n' >&2\n"
+    "exit 1" % {"token": LEAK_SENTINEL}
+)
+
+
+def operate_malicious_output(case, env, root):
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    machine = run_cli(
+        root, env, b"check", b"--allow", b"causality", b"--format", b"json"
+    )
+    human = run_cli(root, env, b"check", b"--allow", b"causality")
+    receipt_default = run_cli(root, env, b"receipt")
+    receipt_default_json = run_cli(root, env, b"receipt", b"--format", b"json")
+    receipt_local = run_cli(root, env, b"receipt", b"--local")
+    receipt_local_json = run_cli(
+        root, env, b"receipt", b"--local", b"--format", b"json"
+    )
+    ended = run_cli(root, env, b"task", b"end")
+
+    default_surface = receipt_default.stdout + receipt_default_json.stdout
+    local_json = json.loads(receipt_local_json.stdout.decode("utf-8"))
+    tails = [
+        entry.get("stderr_tail") or ""
+        for entry in local_json["local"]["validators"]
+    ] + [
+        entry.get("stdout_tail") or ""
+        for entry in local_json["local"]["validators"]
+    ]
+    joined = "\n".join(tails)
+
+    observation = {
+        "check_exit": human.returncode,
+        "check_human_control_bytes": len(raw_control_bytes(human.stdout)),
+        "receipt_local_control_bytes": len(raw_control_bytes(receipt_local.stdout)),
+        "default_receipt_control_bytes": len(raw_control_bytes(default_surface)),
+        # `aiqe check` reports the outcome, not the output: the failing
+        # validator's own words belong to `receipt --local`. Both are asserted
+        # terminal-safe above; only one of them has anything to escape.
+        "local_receipt_shows_escaped_form": b"\\x1b[2J" in receipt_local.stdout,
+        "json_retains_the_escape_faithfully": "\\x1b[2J" in joined,
+        "json_retains_the_output_itself": LEAK_SENTINEL in joined,
+        "json_holds_no_raw_escape": "\x1b" not in joined,
+        "default_receipt_holds_no_validator_output": (
+            LEAK_SENTINEL.encode("ascii") not in default_surface
+        ),
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "terminal_safe": terminal_safe(
+            machine, human, receipt_default, receipt_local, ended
+        ),
+        "consented": ["causality"],
+    }
+    observation.update(_from_check(machine))
+    observation.update(_from_receipt(receipt_default_json))
+    return observation
+
+
 def build_no_config(case, env):
     """A repository AIQE has never been configured for."""
     return build_repository(
@@ -1286,6 +1761,42 @@ SCENARIOS.update(
         "detached_child_escapes_the_process_group": {
             "build": build_detached_child,
             "operate": operate_detached_child,
+        },
+        "unsafe_state_root_mode": {
+            "build": _builder(UNSAFE_STATE_CONFIG, [script("causality")]),
+            "operate": operate_unsafe_state_root_mode,
+        },
+        "unsafe_derived_state_directory_mode": {
+            "build": _builder(UNSAFE_STATE_CONFIG, [script("causality")]),
+            "operate": operate_unsafe_derived_directory_mode,
+        },
+        "unsafe_consent_file_mode": {
+            "build": _builder(UNSAFE_STATE_CONFIG, [script("causality")]),
+            "operate": operate_unsafe_consent_mode,
+        },
+        "state_symlink_refused": {
+            "build": build_symlink_target,
+            "operate": operate_state_symlink_refused,
+        },
+        "safe_existing_state_still_works": {
+            "build": _builder(UNSAFE_STATE_CONFIG, [script("causality")]),
+            "operate": operate_safe_existing_state,
+        },
+        "malicious_consent_denied": {
+            "build": build_malicious_consent,
+            "operate": operate_malicious_consent_denied,
+        },
+        "malicious_consent_accepted": {
+            "build": build_malicious_consent,
+            "operate": operate_malicious_consent_accepted,
+            "fixture_writes": ("repo/aiqe.toml",),
+        },
+        "malicious_validator_output": {
+            "build": _builder(
+                MALICIOUS_OUTPUT_CONFIG,
+                [script("causality", body=MALICIOUS_OUTPUT_BODY)],
+            ),
+            "operate": operate_malicious_output,
         },
     }
 )

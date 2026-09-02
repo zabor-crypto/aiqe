@@ -230,9 +230,14 @@ class SaltTests(TaskTestCase):
         self.assertEqual([e for e in entries if e.startswith(".")], [])
 
     def test_a_truncated_salt_is_refused_rather_than_used(self):
-        os.makedirs(self.state_root(), exist_ok=True)
-        with open(taskstate.salt_path(self.env), "wb") as handle:
+        # Seeded the way AIQE would have written it - a private directory and
+        # a 0600 file - so that what is under test is the salt's length and
+        # not the local-state trust boundary, which has its own tests.
+        os.makedirs(self.state_root(), taskstate.STATE_DIRECTORY_MODE, exist_ok=True)
+        path = taskstate.salt_path(self.env)
+        with open(path, "wb") as handle:
             handle.write(b"short")
+        os.chmod(path, taskstate.PRIVATE_FILE_MODE)
         with self.assertRaises(taskstate.StateError):
             taskstate.read_salt(self.env)
 
@@ -515,11 +520,11 @@ class ExitVocabularyTests(TaskTestCase):
     def test_unsafe_state_location_is_refused(self):
         elsewhere = os.path.join(self.root, "elsewhere")
         os.makedirs(elsewhere)
-        os.makedirs(self.state_root(), exist_ok=True)
+        os.makedirs(self.state_root(), taskstate.STATE_DIRECTORY_MODE, exist_ok=True)
         os.symlink(elsewhere, os.path.join(self.state_root(), "task.json"))
         with open(taskstate.salt_path(self.env), "wb") as handle:
             handle.write(b"\x07" * 32)
-        os.chmod(taskstate.salt_path(self.env), 0o600)
+        os.chmod(taskstate.salt_path(self.env), taskstate.PRIVATE_FILE_MODE)
 
         directory = self.state_directory()
         os.makedirs(os.path.dirname(directory), exist_ok=True)
@@ -529,7 +534,11 @@ class ExitVocabularyTests(TaskTestCase):
             ["task", "start", "--own", "src/strategy.py"], self.repo, self.env
         )
         self.assertEqual(status, exits.UNSUPPORTED)
-        self.assertIn("refusing to write through it", err)
+        self.assertIn("symbolic link", err)
+        self.assertFalse(
+            os.path.exists(os.path.join(elsewhere, "task.json")),
+            "AIQE wrote through a symlink it found in its own state area",
+        )
 
     def test_task_never_exits_one(self):
         """Exit 1 is a FAIL verdict, and a task boundary adjudicates nothing."""
