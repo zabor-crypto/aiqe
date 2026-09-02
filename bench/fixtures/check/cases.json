@@ -1315,10 +1315,167 @@
         "unconsented_validator_executions": 0
       },
       "id": "init_writes_only_the_config"
+    },
+    {
+      "description": "A real Unix pseudo-terminal drives the real CLI. The prompt is presented with the validator id, the exact argument vector and the timeout, and states that AIQE does not sandbox the validator or restrict its filesystem or network access. The answer is no: nothing executes, nothing is recorded, and the outcome is CONSENT_DECLINED. An injected prompt callable cannot prove this, because the decision under test is whether AIQE asks at all.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "completion_shown": true,
+        "consents_recorded": 0,
+        "declined_reason_shown": true,
+        "end_exit": 0,
+        "executions": 0,
+        "prompt_presented": true,
+        "prompt_shows_exact_argv": true,
+        "prompt_shows_timeout": true,
+        "prompt_shows_validator_id": true,
+        "prompt_warns_no_containment": true,
+        "pty_exit": 2,
+        "unconsented_validator_executions": 0
+      },
+      "id": "pty_consent_denied"
+    },
+    {
+      "description": "The same real terminal, answered yes. The validator runs exactly once, and consent is recorded against that exact definition digest. A later non-interactive run acts on the recorded consent and runs it again. Then one semantic field of the definition changes: the digest changes with it, the recorded consent no longer applies, and the validator does not run. Consent outlives the task; evidence does not.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "consent_matches_definition_digest": true,
+        "consent_survives_task_end": true,
+        "consents_recorded": 1,
+        "definition_digest_changed": true,
+        "drifted_exit": 2,
+        "drifted_outcomes": {
+          "causality": "UNKNOWN"
+        },
+        "end_exit": 0,
+        "executions_added_by_drifted_run": 0,
+        "executions_added_by_persisted_run": 1,
+        "executions_after_accept": 1,
+        "executions_after_drift": 2,
+        "executions_after_persisted_run": 2,
+        "persisted_exit": 0,
+        "prompt_presented": true,
+        "prompt_shows_exact_argv": true,
+        "prompt_shows_timeout": true,
+        "prompt_shows_validator_id": true,
+        "prompt_warns_no_containment": true,
+        "pty_exit": 0,
+        "unconsented_validator_executions": 0
+      },
+      "id": "pty_consent_accepted_and_persisted"
+    },
+    {
+      "description": "A validator that emits eight megabytes on each stream - three orders of magnitude past the retention budget - and then fails. The run completes, the retained output stays within the budget, the evidence record stays small, and the result semantics are unchanged. Output is bounded while it is read, not buffered whole and truncated afterwards.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "changed_owned_count": 1,
+        "check_exit": 1,
+        "classification": [
+          1,
+          0,
+          0
+        ],
+        "completed_promptly": true,
+        "completion": "NOT_REVIEWABLE",
+        "coverage_states": {
+          "CAUSALITY": "CONTRACT_FAILED"
+        },
+        "end_exit": 0,
+        "evidence_record_bounded": true,
+        "executions": 1,
+        "reasons": [
+          "CONTRACT_FAILED",
+          "REQUIRED_VALIDATOR_FAILED"
+        ],
+        "receipt_commit": "NONE",
+        "receipt_evidence": "CURRENT",
+        "receipt_verdict": "NOT_REVIEWABLE",
+        "retained_output_bytes_within_budget": true,
+        "retained_output_present": true,
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0,
+        "validator_outcomes": {
+          "causality": "FAIL"
+        }
+      },
+      "id": "large_output_bounded"
+    },
+    {
+      "description": "A validator whose output never stops, under a timeout. Nothing about this run ends on its own: the deadline has to hold, the memory has to hold, and the outcome has to be a failure rather than an unknown. An implementation that read the stream to completion before truncating it would never return.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "changed_owned_count": 1,
+        "check_exit": 1,
+        "classification": [
+          1,
+          0,
+          0
+        ],
+        "completed_promptly": true,
+        "completion": "NOT_REVIEWABLE",
+        "coverage_states": {
+          "DETERMINISM": "CONTRACT_FAILED"
+        },
+        "end_exit": 0,
+        "evidence_record_bounded": true,
+        "executions": 1,
+        "reasons": [
+          "CONTRACT_FAILED",
+          "REQUIRED_VALIDATOR_FAILED"
+        ],
+        "receipt_commit": "NONE",
+        "receipt_evidence": "CURRENT",
+        "receipt_verdict": "NOT_REVIEWABLE",
+        "retained_output_bytes_within_budget": true,
+        "retained_output_present": true,
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0,
+        "validator_outcomes": {
+          "determinism": "FAIL"
+        }
+      },
+      "id": "large_output_with_timeout"
+    },
+    {
+      "description": "The boundary of the termination claim, measured rather than worded. A validator spawns a child that calls setsid, leaving the process group AIQE created. The timeout terminates that group; the detached child survives it and finishes on its own afterwards. AIQE terminates the process group it created - it does not contain a process tree, and this case exists so that the stronger, false claim cannot return to the documentation unnoticed.",
+      "expect": {
+        "active_after_end": false,
+        "aiqe_core_repository_mutations": 0,
+        "changed_owned_count": 1,
+        "check_completed_promptly": true,
+        "check_ended_before_the_child_did": true,
+        "check_exit": 1,
+        "classification": [
+          1,
+          0,
+          0
+        ],
+        "completion": "NOT_REVIEWABLE",
+        "coverage_states": {
+          "DETERMINISM": "CONTRACT_FAILED"
+        },
+        "detached_child_survived_the_group_kill": true,
+        "end_exit": 0,
+        "executions": 1,
+        "reasons": [
+          "CONTRACT_FAILED",
+          "REQUIRED_VALIDATOR_FAILED"
+        ],
+        "terminal_safe": true,
+        "unconsented_validator_executions": 0,
+        "validator_outcomes": {
+          "determinism": "FAIL"
+        }
+      },
+      "id": "detached_child_escapes_the_process_group"
     }
   ],
   "family": "CHECK_RECEIPT_EVIDENCE",
-  "note": "Expected outcomes are written from the frozen OSS-6C contract, not recorded from a run. Every repository change is attributed to one cause - an authorised `aiqe init` write, a fixture validator's declared side effect, the scenario's own declared action, or AIQE core - and only the last is zero-tolerance. Validators announce themselves with a marker outside every snapshot root, so unconsented executions are counted rather than argued. No pre-commit state may produce a REVIEWABLE verdict.",
+  "note": "Expected outcomes are written from the frozen OSS-6C contract, not recorded from a run. Every repository change is attributed to one cause - an authorised `aiqe init` write, a fixture validator's declared side effect, the scenario's own declared action, or AIQE core - and only the last is zero-tolerance. Validators announce themselves with a marker outside every snapshot root, so unconsented executions are counted rather than argued. No pre-commit state may produce a REVIEWABLE verdict. Validator output is bounded as it is read, so a validator that emits far more than the retention budget is measured rather than avoided. Consent is proved through a real pseudo-terminal driving the real CLI, because the decision under test is whether AIQE asks at all. A canary named with the `observed.` prefix records an observation rather than a validator execution, and is never counted as an unconsented one.",
   "platform_restricted_cases": "A case may declare a platform restriction. It is reported as skipped with its restriction named on machines it does not apply to, and never dropped from the listing.",
   "schema_version": 1,
   "zero_tolerance": [

@@ -30,7 +30,11 @@ never allowed to blur into one number.
 import json
 import os
 import platform
+import pty
+import select
+import subprocess
 import sys
+import time
 
 from ..repobuild import (  # noqa: F401  (re-exported: scenarios use these names)
     canary,
@@ -57,6 +61,7 @@ if SOURCE not in sys.path:
 
 from aiqe import contracts as contracts_module  # noqa: E402
 from aiqe import evidence as evidence_module  # noqa: E402
+from aiqe.validators import OUTPUT_BUDGET_BYTES as OUTPUT_BUDGET  # noqa: E402
 
 #: The one path every scenario's task owns.
 OWNED = b"src/strategy/alpha.py"
@@ -102,6 +107,61 @@ NON_QUANT = surface(
 # --- Repository construction -----------------------------------------------
 
 
+def counting_canary(path, marker, body="exit 0"):
+    """A validator script that records *each* run, not merely that it ran.
+
+    The shared canary records existence, which answers "did anything run".
+    Consent needs the stronger question answered - "how many times" - because
+    the claim being proved is that a denied validator runs zero times and an
+    accepted one runs once.
+    """
+    write(
+        path,
+        "#!/bin/sh\nprintf 'x\\n' >> %s\n%s\n" % (_shell_quote(marker), body),
+        mode=0o755,
+    )
+
+
+def _shell_quote(path):
+    return "'" + path.replace("'", "'\\''") + "'"
+
+
+def executions(case, validator_id):
+    """How many times that validator actually ran."""
+    marker = case.marker(validator_id)
+    try:
+        with open(marker, "rb") as handle:
+            return len(handle.read().split(b"\n")) - 1
+    except OSError:
+        return 0
+
+
+def recorded_consents(root, env):
+    """The consent digests recorded on this machine for this worktree."""
+    directory = state_directory(root, env)
+    if directory is None:
+        return {}
+    path = os.path.join(directory, "consents.json")
+    try:
+        with open(path, "rb") as handle:
+            document = json.loads(handle.read().decode("utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return {}
+    return document.get("granted") or {}
+
+
+def definition_digests(root):
+    """Every declared validator's definition digest, via the product's own code."""
+    from aiqe import config as config_module
+    from aiqe import validators as validators_module
+
+    parsed = config_module.load(os.fsencode(root))
+    return {
+        declared.id: validators_module.definition_digest(declared)
+        for declared in parsed.validators
+    }
+
+
 def build_repository(case, env, config_text, scripts=(), edit_owned=True,
                      write_config=True):
     """A repository with one commit, a configuration, and validator scripts.
@@ -114,7 +174,7 @@ def build_repository(case, env, config_text, scripts=(), edit_owned=True,
     write(os.path.join(root, "tests", "test_alpha.py"), "def test():\n    pass\n")
     write(os.path.join(root, "docs", "notes.md"), "notes\n")
     for identifier, body in scripts:
-        canary(
+        counting_canary(
             os.path.join(root, "checks", "%s.sh" % (identifier,)),
             case.marker(identifier),
             body=body,
@@ -135,6 +195,108 @@ def script(identifier, exit_code=0, body=None):
     if body is not None:
         return (identifier, body)
     return (identifier, "exit %d" % (exit_code,))
+
+
+# --- Driving the product through a real terminal ---------------------------
+
+#: How long a pseudo-terminal fixture waits for the CLI to finish. Generous,
+#: because the point of the fixture is the interaction rather than the timing,
+#: and bounded, because a hung prompt must fail the test rather than the run.
+PTY_TIMEOUT_SECONDS = 120
+
+#: What the consent prompt asks. The driver waits for this rather than for a
+#: fixed number of bytes, so a change to the surrounding text does not turn
+#: the fixture into a timing race.
+PROMPT_MARKER = b"Proceed?"
+
+
+def run_cli_pty(cwd, env, arguments, answers, timeout=PTY_TIMEOUT_SECONDS):
+    """Run the real entry point attached to a real pseudo-terminal.
+
+    Consent is the authorization boundary for arbitrary repository-defined
+    code, so proving it with an injected prompt function proves the wrong
+    thing: the injected version cannot fail the way the real one can. `aiqe`
+    decides whether to ask by looking at whether standard input *and* standard
+    output are terminals, and that decision is only exercised by giving it
+    terminals.
+
+    `answers` are written one per prompt, in order, as the prompts appear. The
+    driver waits for the prompt text rather than for a byte count, so the
+    fixture does not become a race against the CLI's buffering.
+
+    Returns (exit status, transcript). The transcript is everything the
+    terminal saw, including the echo of what was typed - which is what a person
+    at that terminal would have seen.
+    """
+    child = dict(env)
+    child["PYTHONPATH"] = SOURCE
+    child["TERM"] = "dumb"
+
+    master, slave = pty.openpty()
+    process = subprocess.Popen(
+        [sys.executable, "-m", "aiqe"] + list(arguments),
+        cwd=cwd,
+        env=child,
+        stdin=slave,
+        stdout=slave,
+        stderr=slave,
+        close_fds=True,
+    )
+    os.close(slave)
+
+    transcript = bytearray()
+    pending = list(answers)
+    answered = 0
+    deadline = time.monotonic() + timeout
+
+    try:
+        while True:
+            if time.monotonic() > deadline:
+                process.kill()
+                raise AssertionError(
+                    "the pseudo-terminal fixture timed out. Transcript so "
+                    "far:\n%s" % (transcript.decode("utf-8", "replace"),)
+                )
+
+            readable, _writable, _failed = select.select([master], [], [], 0.1)
+            if readable:
+                try:
+                    chunk = os.read(master, 4096)
+                except OSError:
+                    # The child closed its side. On Linux this is EIO rather
+                    # than end of file, and it means the same thing.
+                    break
+                if not chunk:
+                    break
+                transcript += chunk
+
+            seen = transcript.count(PROMPT_MARKER)
+            while answered < seen and pending:
+                os.write(master, pending.pop(0))
+                answered += 1
+
+            if process.poll() is not None and not readable:
+                # Drain whatever is still in the terminal buffer, then stop.
+                _drain_pty(master, transcript)
+                break
+    finally:
+        os.close(master)
+
+    return process.wait(), bytes(transcript)
+
+
+def _drain_pty(master, transcript):
+    while True:
+        readable, _writable, _failed = select.select([master], [], [], 0.05)
+        if not readable:
+            return
+        try:
+            chunk = os.read(master, 4096)
+        except OSError:
+            return
+        if not chunk:
+            return
+        transcript += chunk
 
 
 # --- Driving the product ---------------------------------------------------
@@ -626,6 +788,377 @@ def _uncommented(path):
         ]
 
 
+# --- Scenarios: consent through a real terminal -----------------------------
+
+PTY_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["CAUSALITY"]),
+        NON_QUANT,
+        validator(
+            "causality", ["./checks/causality.sh"], True, 60, contracts=["CAUSALITY"]
+        ),
+    ]
+)
+
+#: What the prompt must disclose before it asks. Checked as substrings of the
+#: real terminal transcript, because a disclosure the user cannot see on their
+#: screen is not a disclosure.
+DISCLOSURE_PHRASES = (
+    b"does not sandbox",
+    b"does not restrict its filesystem",
+    b"restrict its network access",
+)
+
+
+def _prompt_evidence(transcript):
+    return {
+        "prompt_presented": PROMPT_MARKER in transcript,
+        "prompt_shows_validator_id": b"id        causality" in transcript,
+        "prompt_shows_exact_argv": b"command   ./checks/causality.sh" in transcript,
+        "prompt_shows_timeout": b"timeout   60 seconds" in transcript,
+        "prompt_warns_no_containment": all(
+            phrase in transcript for phrase in DISCLOSURE_PHRASES
+        ),
+    }
+
+
+def operate_pty_consent_denied(case, env, root):
+    """A real terminal, a real prompt, and the answer no.
+
+    The injected-callable version of this test cannot fail the way this one
+    can: `aiqe` decides whether to ask by looking at whether standard input and
+    standard output are terminals, and that decision is only exercised by
+    giving it terminals.
+    """
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    status, transcript = run_cli_pty(root, env, [b"check"], [b"no\n"])
+    consents = recorded_consents(root, env)
+    ended = run_cli(root, env, b"task", b"end")
+
+    observation = {
+        "pty_exit": status,
+        "executions": executions(case, "causality"),
+        "declined_reason_shown": b"CONSENT_DECLINED" in transcript,
+        "completion_shown": b"Completion      INCOMPLETE" in transcript,
+        "consents_recorded": len(consents),
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "consented": [],
+    }
+    observation.update(_prompt_evidence(transcript))
+    return observation
+
+
+def operate_pty_consent_accepted(case, env, root):
+    """A real terminal, the answer yes, and what that consent does afterwards.
+
+    Three things in one scenario because they are one claim: consent granted at
+    a terminal is recorded against the exact definition, a later non-interactive
+    run may act on it, and changing any semantic field of that definition ends
+    it.
+    """
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    before = definition_digests(root)
+
+    status, transcript = run_cli_pty(root, env, [b"check"], [b"yes\n"])
+    accepted_executions = executions(case, "causality")
+    consents = recorded_consents(root, env)
+
+    # The same definition, with nobody at the terminal.
+    persisted = run_cli(root, env, b"check", b"--format", b"json")
+    persisted_executions = executions(case, "causality")
+
+    # One semantic field changes, and with it the validator's identity.
+    with open(os.path.join(root, "aiqe.toml")) as handle:
+        declared = handle.read()
+    write(
+        os.path.join(root, "aiqe.toml"),
+        declared.replace("timeout = 60", "timeout = 90"),
+    )
+    after = definition_digests(root)
+
+    drifted = run_cli(root, env, b"check", b"--format", b"json")
+    drifted_executions = executions(case, "causality")
+    ended = run_cli(root, env, b"task", b"end")
+
+    observation = {
+        "pty_exit": status,
+        "executions_after_accept": accepted_executions,
+        "consents_recorded": len(consents),
+        "consent_matches_definition_digest": before["causality"] in consents,
+        "persisted_exit": persisted.returncode,
+        "executions_after_persisted_run": persisted_executions,
+        # The deltas are the claim: recorded consent lets the next run execute,
+        # and a changed definition does not.
+        "executions_added_by_persisted_run": (
+            persisted_executions - accepted_executions
+        ),
+        "definition_digest_changed": before["causality"] != after["causality"],
+        "drifted_exit": drifted.returncode,
+        "executions_after_drift": drifted_executions,
+        "executions_added_by_drifted_run": (
+            drifted_executions - persisted_executions
+        ),
+        "drifted_outcomes": _from_check(drifted)["validator_outcomes"],
+        "consent_survives_task_end": len(recorded_consents(root, env)) == 1,
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "consented": ["causality"],
+    }
+    observation.update(_prompt_evidence(transcript))
+    return observation
+
+
+# --- Scenarios: unbounded validator output ---------------------------------
+
+#: Bytes per stream in the stress fixtures. Three orders of magnitude above the
+#: retention budget, and fast for `yes` to produce.
+STRESS_BYTES = 8 * 1048576
+
+LOUD_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["CAUSALITY"]),
+        NON_QUANT,
+        validator(
+            "causality", ["./checks/causality.sh"], True, 60, contracts=["CAUSALITY"]
+        ),
+    ]
+)
+
+#: Four seconds, not one. Measured, not guessed: on macOS the first execution
+#: of a freshly written script costs 0.7-1.1s of loader and security work
+#: before the script's own first line runs, so a one-second timeout races the
+#: shell's startup rather than the behaviour under test. These fixtures are
+#: about bounding output and honouring the deadline, so they get a window they
+#: can actually be observed in.
+STRESS_TIMEOUT_SECONDS = 4
+
+TIMEOUT_LOUD_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["DETERMINISM"]),
+        NON_QUANT,
+        validator(
+            "determinism",
+            ["./checks/determinism.sh"],
+            True,
+            STRESS_TIMEOUT_SECONDS,
+            contracts=["DETERMINISM"],
+        ),
+    ]
+)
+
+LOUD_BODY = (
+    "yes 0123456789abcdef0123456789abcdef | head -c %d\n"
+    "yes 0123456789abcdef0123456789abcdef | head -c %d >&2\n"
+    "exit 1" % (STRESS_BYTES, STRESS_BYTES)
+)
+
+#: `yes` writes until it is stopped. Nothing about this validator ends on its
+#: own, which is the case the drain deadline and the process-group kill exist
+#: for.
+ENDLESS_BODY = "yes 0123456789abcdef0123456789abcdef"
+
+#: The bound a rendered output tail must respect. Capture is bounded in bytes;
+#: terminal-safe escaping can turn one byte into four characters, and AIQE adds
+#: a fixed marker saying earlier output was not retained.
+RENDERED_TAIL_LIMIT = 4 * OUTPUT_BUDGET + 64
+
+
+def _retained_bytes(root, env, validator_id):
+    """How much validator output the local evidence record actually holds."""
+    directory = state_directory(root, env)
+    if directory is None:
+        return None
+    path = os.path.join(directory, evidence_module.CHECK_FILE_NAME)
+    try:
+        with open(path, "rb") as handle:
+            record = json.loads(handle.read().decode("utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return None
+    total = 0
+    for entry in record.get("validators") or []:
+        if entry.get("validator_id") != validator_id:
+            continue
+        for stream in ("stdout_tail", "stderr_tail"):
+            if entry.get(stream):
+                total += len(entry[stream].encode("utf-8"))
+    return total
+
+
+def _evidence_size(root, env):
+    directory = state_directory(root, env)
+    if directory is None:
+        return None
+    path = os.path.join(directory, evidence_module.CHECK_FILE_NAME)
+    try:
+        return os.path.getsize(path)
+    except OSError:
+        return None
+
+
+def _loud_observation(case, env, root, validator_id):
+    started = time.monotonic()
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+    machine = run_cli(
+        root,
+        env,
+        b"check",
+        b"--allow",
+        validator_id.encode("ascii"),
+        b"--format",
+        b"json",
+    )
+    elapsed = time.monotonic() - started
+    retained = _retained_bytes(root, env, validator_id)
+    size = _evidence_size(root, env)
+    receipt = run_cli(root, env, b"receipt", b"--format", b"json")
+    ended = run_cli(root, env, b"task", b"end")
+
+    observation = {
+        "check_exit": machine.returncode,
+        "retained_output_present": bool(retained),
+        "retained_output_bytes_within_budget": (
+            retained is not None and retained <= 2 * RENDERED_TAIL_LIMIT
+        ),
+        "evidence_record_bounded": size is not None and size < 262144,
+        "completed_promptly": elapsed < 120,
+        "executions": executions(case, validator_id),
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "terminal_safe": terminal_safe(machine, receipt, ended),
+        "consented": [validator_id],
+    }
+    observation.update(_from_check(machine))
+    observation.update(_from_receipt(receipt))
+    return observation
+
+
+def operate_large_output(case, env, root):
+    """Far more output than the retention budget, then a non-zero exit."""
+    return _loud_observation(case, env, root, "causality")
+
+
+def operate_large_output_with_timeout(case, env, root):
+    """Output that never stops, under a one-second timeout."""
+    return _loud_observation(case, env, root, "determinism")
+
+
+# --- Scenario: what the process-group claim does not cover ------------------
+
+#: The validator's deadline, and how long its detached child outlives it. The
+#: child must still be alive when the process group is terminated, or the
+#: scenario proves nothing: it would be indistinguishable from a child that had
+#: simply already finished.
+DETACHED_TIMEOUT_SECONDS = 3
+DETACHED_CHILD_LIFETIME_SECONDS = 6.0
+
+DETACHED_CONFIG = config(
+    [
+        surface(["src/strategy/**"], quant=True, contracts=["DETERMINISM"]),
+        NON_QUANT,
+        validator(
+            "determinism",
+            ["./checks/determinism.sh"],
+            True,
+            DETACHED_TIMEOUT_SECONDS,
+            contracts=["DETERMINISM"],
+        ),
+    ]
+)
+
+_DETACH_SOURCE = '''"""A child that deliberately leaves the process group AIQE created.
+
+It exists to keep one sentence honest. AIQE terminates the process group it
+started; it does not supervise a process tree, and a descendant that calls
+`setsid` is in a different session and survives. Proving that is better than
+wording around it.
+
+Short-lived and self-terminating, so the fixture leaves nothing behind.
+"""
+
+import os
+import sys
+import time
+
+os.setsid()
+time.sleep(%(delay)s)
+with open(%(marker)r, "w") as handle:
+    handle.write("survived")
+sys.exit(0)
+'''
+
+
+def build_detached_child(case, env):
+    """A validator whose child escapes the group, under a one-second timeout."""
+    root = init_repo(case.repo_path, env)
+    write(os.path.join(root, "src", "strategy", "alpha.py"), "SIGNAL = 1\n")
+    write(os.path.join(root, "tests", "test_alpha.py"), "def test():\n    pass\n")
+    write(os.path.join(root, "docs", "notes.md"), "notes\n")
+
+    survivor = case.marker("observed.detached-child-survived")
+    write(
+        os.path.join(root, "checks", "detach.py"),
+        _DETACH_SOURCE
+        % {"delay": repr(DETACHED_CHILD_LIFETIME_SECONDS), "marker": survivor},
+    )
+    counting_canary(
+        os.path.join(root, "checks", "determinism.sh"),
+        case.marker("determinism"),
+        # The detached child gets its own stdio, so that this scenario measures
+        # process-group escape and nothing else.
+        body=(
+            "%s ./checks/detach.py </dev/null >/dev/null 2>&1 &\n"
+            "sleep 30" % (_shell_quote(sys.executable),)
+        ),
+    )
+    write(os.path.join(root, "aiqe.toml"), DETACHED_CONFIG)
+    commit_all(root, "base", env)
+    write(
+        os.path.join(root, "src", "strategy", "alpha.py"),
+        "SIGNAL = 1\nADJUSTED = 2\n",
+    )
+    return root
+
+
+def operate_detached_child(case, env, root):
+    """The validator times out; its detached child is outside the mechanism.
+
+    The observation this scenario exists for is the *survival*. AIQE's
+    documented claim is that it terminates the process group it created, and a
+    fixture that could not distinguish that from "terminates every descendant"
+    would let the stronger, false claim back into the documentation unnoticed.
+    """
+    survivor = case.marker("observed.detached-child-survived")
+    run_cli(root, env, b"task", b"start", b"--own", OWNED)
+
+    started = time.monotonic()
+    machine = run_cli(
+        root, env, b"check", b"--allow", b"determinism", b"--format", b"json"
+    )
+    elapsed = time.monotonic() - started
+
+    # Wait for the detached child to finish on its own, so the fixture leaves
+    # no process behind. Bounded: if it never appears, that is the observation.
+    deadline = time.monotonic() + 4 * DETACHED_CHILD_LIFETIME_SECONDS
+    while not os.path.exists(survivor) and time.monotonic() < deadline:
+        time.sleep(0.1)
+
+    ended = run_cli(root, env, b"task", b"end")
+    observation = {
+        "check_exit": machine.returncode,
+        "check_completed_promptly": elapsed < 30,
+        "check_ended_before_the_child_did": elapsed < DETACHED_CHILD_LIFETIME_SECONDS,
+        "detached_child_survived_the_group_kill": os.path.exists(survivor),
+        "executions": executions(case, "determinism"),
+        "active_after_end": read_active(root, env) is not None,
+        "end_exit": ended.returncode,
+        "terminal_safe": terminal_safe(machine, ended),
+        "consented": ["determinism"],
+    }
+    observation.update(_from_check(machine))
+    return observation
+
+
 def build_no_config(case, env):
     """A repository AIQE has never been configured for."""
     return build_repository(
@@ -730,6 +1263,29 @@ SCENARIOS.update(
             "build": build_init_target,
             "operate": operate_init_writes_config,
             "aiqe_init_writes": ("repo/aiqe.toml",),
+        },
+        "pty_consent_denied": {
+            "build": _builder(PTY_CONFIG, [script("causality")]),
+            "operate": operate_pty_consent_denied,
+        },
+        "pty_consent_accepted_and_persisted": {
+            "build": _builder(PTY_CONFIG, [script("causality")]),
+            "operate": operate_pty_consent_accepted,
+            "fixture_writes": ("repo/aiqe.toml",),
+        },
+        "large_output_bounded": {
+            "build": _builder(LOUD_CONFIG, [script("causality", body=LOUD_BODY)]),
+            "operate": operate_large_output,
+        },
+        "large_output_with_timeout": {
+            "build": _builder(
+                TIMEOUT_LOUD_CONFIG, [script("determinism", body=ENDLESS_BODY)]
+            ),
+            "operate": operate_large_output_with_timeout,
+        },
+        "detached_child_escapes_the_process_group": {
+            "build": build_detached_child,
+            "operate": operate_detached_child,
         },
     }
 )

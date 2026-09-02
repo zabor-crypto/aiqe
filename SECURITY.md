@@ -90,9 +90,15 @@ never as authorization. Consent is:
 `--allow <id>` authorises one run and records nothing. The measured invariant is
 `UNCONSENTED_VALIDATOR_EXECUTIONS = 0`, and it is a benchmark gate with zero tolerance.
 
-Timeouts are mandatory, and a timeout is a `FAIL`. The timeout ends the validator's
-whole process group, so a validator that spawns children cannot outlive the bound it was
-given.
+Timeouts are mandatory, and a timeout is a `FAIL`. On timeout AIQE terminates **the
+process group it created** for that validator, so a script's ordinary children go with
+it.
+
+That claim stops exactly there. AIQE does not bound every descendant and does not
+supervise a process tree: a child that calls `setsid` is in a different session and
+survives, and the benchmark keeps a fixture that demonstrates it rather than wording
+around it. Delivering containment would mean building the sandbox this document says
+AIQE is not.
 
 AIQE makes **no sandbox claim**, **no filesystem-restriction claim** and **no
 network-restriction claim** about a validator. It runs as you, with your environment,
@@ -168,6 +174,12 @@ say so than imply a defence we have not built.
 - `--local` produces richer evidence. It is opt-in, allowlisted, and bounded.
 - AIQE stores its local state outside the repository. Recorded validator consent lives
   there too, and outlives the task it was granted during.
+- **Local state is owner-only regardless of your umask.** The state directories are
+  0700 and every record in them — the salt, the task record, the check evidence, the
+  consent record — is 0600, including the temporary file each is written through, so
+  there is no window in which one is broader than its final form. This matters because
+  local evidence can hold a failing validator's output, and AIQE is in no position to
+  promise there is nothing sensitive in it. The modes are asserted under `umask(0)`.
 
 ## Network behaviour
 

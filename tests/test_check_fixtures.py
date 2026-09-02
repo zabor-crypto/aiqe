@@ -119,8 +119,52 @@ class FixtureCoverageTests(unittest.TestCase):
             "configuration_absent",
             "init_print_writes_nothing",
             "init_writes_only_the_config",
+            "pty_consent_denied",
+            "pty_consent_accepted_and_persisted",
+            "large_output_bounded",
+            "large_output_with_timeout",
+            "detached_child_escapes_the_process_group",
         }
         self.assertEqual(required - set(support.check_case_ids()), set())
+
+    def test_consent_is_proved_through_a_real_terminal(self):
+        """Not through an injected prompt callable.
+
+        `aiqe` decides whether to ask by looking at whether standard input and
+        standard output are terminals. An injected callable bypasses exactly
+        the decision that matters, so both directions - denied and accepted -
+        are driven through a real pseudo-terminal against the real CLI.
+        """
+        by_id = {case["id"]: case["expect"] for case in support.check_cases()}
+
+        denied = by_id["pty_consent_denied"]
+        self.assertEqual(denied["executions"], 0)
+        self.assertEqual(denied["consents_recorded"], 0)
+        for disclosure in (
+            "prompt_shows_validator_id",
+            "prompt_shows_exact_argv",
+            "prompt_shows_timeout",
+            "prompt_warns_no_containment",
+        ):
+            self.assertTrue(denied[disclosure], disclosure)
+
+        accepted = by_id["pty_consent_accepted_and_persisted"]
+        self.assertEqual(accepted["executions_after_accept"], 1)
+        self.assertTrue(accepted["consent_matches_definition_digest"])
+        self.assertEqual(accepted["executions_added_by_persisted_run"], 1)
+        self.assertEqual(accepted["executions_added_by_drifted_run"], 0)
+
+    def test_the_termination_claim_has_a_fixture_that_bounds_it(self):
+        """A detached child must be observed surviving the group kill.
+
+        Without it, "terminates the process group it created" and "bounds every
+        descendant" look the same from the outside, and the stronger, false
+        claim could return to the documentation unnoticed.
+        """
+        by_id = {case["id"]: case["expect"] for case in support.check_cases()}
+        detached = by_id["detached_child_escapes_the_process_group"]
+        self.assertTrue(detached["detached_child_survived_the_group_kill"])
+        self.assertTrue(detached["check_ended_before_the_child_did"])
 
     def test_no_expectation_permits_a_reviewable_verdict(self):
         """The property, asserted over the recorded expectations themselves.

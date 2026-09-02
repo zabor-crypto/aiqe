@@ -56,6 +56,13 @@ CASES_FILE = os.path.join(HERE, "cases.json")
 
 REPOSITORY_DIRS = ("repo",)
 
+#: A canary whose name starts with this is an *observation*, not a validator
+#: execution. One scenario proves that a detached descendant survives the
+#: process-group kill, and the marker it leaves is the evidence for that claim -
+#: counting it as an unconsented validator execution would turn a deliberate,
+#: documented observation into a zero-tolerance violation.
+OBSERVATION_MARKER_PREFIX = "observed."
+
 #: The isolated XDG state home, relative to the case root: the only place AIQE
 #: core may write outside an authorised `aiqe init`.
 XDG_STATE_PREFIX = os.path.join("state", "xdg", "state")
@@ -163,11 +170,20 @@ def run_case(case_id, keep=False):
 
         buckets = _classify(case, scenario, compare(before, after))
         fired = case.fired()
+        observations = [
+            name for name in fired if name.startswith(OBSERVATION_MARKER_PREFIX)
+        ]
+        validator_canaries = [
+            name for name in fired if not name.startswith(OBSERVATION_MARKER_PREFIX)
+        ]
         consented = set(observation.get("consented") or [])
-        unconsented = sorted(name for name in fired if name not in consented)
+        unconsented = sorted(
+            name for name in validator_canaries if name not in consented
+        )
 
         record = {
             "case": case_id,
+            "observation_markers": sorted(observations),
             "aiqe_state_changes": len(buckets["aiqe_state"]),
             "aiqe_init_writes": sorted(buckets["aiqe_init"]),
             "aiqe_core_repository_mutations": len(buckets["aiqe_core_repository"]),
@@ -177,7 +193,7 @@ def run_case(case_id, keep=False):
             "local_state_writes": len(buckets["local_state"]),
             "local_state_write_detail": buckets["local_state"],
             "other_changes": buckets["other"],
-            "validators_fired": fired,
+            "validators_fired": sorted(validator_canaries),
             "unconsented_validator_executions": len(unconsented),
             "unconsented_validators": unconsented,
         }

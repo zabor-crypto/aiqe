@@ -172,16 +172,53 @@ contract not applicable NOT_APPLICABLE
 
 **A timeout is a `FAIL`.** A check that hangs is a check that failed to establish what
 it was asked to establish, and treating it as merely unknown is how an unbounded
-validator becomes a permanent excuse. The timeout ends the validator's whole process
-group, not only the process AIQE started: a script's children inherit its pipes, and
-killing just the top would let a bounded wait run as long as whatever it spawned.
+validator becomes a permanent excuse.
 
-Output is captured within one fixed budget per stream, retained locally only for
-`FAIL`, timeout and `UNAVAILABLE`, and discarded for `PASS` — a passing validator's
-output is not evidence of anything its exit status did not already say, and retaining
-it is how a local evidence file acquires the contents of a log. Retained output is
-rendered terminal-safe, because it is attacker-controlled bytes. None of it reaches
-the default shareable receipt.
+### What the timeout actually terminates
+
+> On timeout, AIQE terminates the validator process group it created.
+
+That sentence is the whole claim, and it is deliberately narrower than the one that
+would be nicer to make. A validator runs in its own process group, so a script's
+ordinary children are terminated with it — which matters, because those children
+inherit its pipes, and killing only the process AIQE started would let a bounded wait
+run as long as whatever it spawned. Measured, not assumed: a `sh -c "sleep 30"` under
+a one-second timeout took thirty seconds before the group existed.
+
+AIQE does **not** bound every descendant, does not contain a process tree, and does not
+supervise one. A child that calls `setsid` is in a different session and outlives the
+kill. The benchmark keeps a fixture that demonstrates exactly that, so the stronger and
+false claim cannot quietly return to this page. Delivering containment would mean
+building the sandbox AIQE says it is not.
+
+Draining after the kill is therefore bounded too: a detached descendant can hold the
+inherited pipe open indefinitely, and the timeout is a promise about how long a check
+can take.
+
+### Output
+
+Output is **drained into a fixed-size tail as it arrives** — never read whole and
+truncated afterwards. A validator may be buggy or hostile and emit gigabytes, and the
+memory AIQE spends on it must not be a function of how much it decided to print. What
+is held is the budget plus one read buffer per stream, whatever the validator emits;
+the benchmark measures peak allocation across a thirty-two-fold change in output volume
+to keep that honest.
+
+The drain is also what stops the child deadlocking on a full pipe, so it runs for the
+whole life of the process rather than only at the end — including for a validator that
+is going to pass.
+
+The retention policy is one documented rule: the **tail**, because a failure's last
+lines are the ones that say why. Output is retained locally for `FAIL`, timeout and
+`UNAVAILABLE`, and discarded for `PASS` — a passing validator's output is not evidence
+of anything its exit status did not already say, and retaining it is how a local
+evidence file acquires the contents of a log.
+
+The bound is on captured bytes. Retained output is rendered terminal-safe before it is
+stored, because it is attacker-controlled bytes, and escaping can turn one byte into
+four characters — so the stored field is bounded by four times the budget plus a fixed
+marker saying earlier output was not kept. None of it reaches the default shareable
+receipt.
 
 AIQE makes **no sandbox, no filesystem-restriction and no network-restriction claim**
 about a validator. It runs as you and can do anything your shell can do. AIQE core
@@ -267,6 +304,33 @@ record. `task end` removes it — evidence about an abandoned unit of work is no
 evidence about anything — while recorded consent survives. A record belonging to a
 different task, or written under a different evidence schema, is not read and is not
 migrated.
+
+Each check replaces the record with a rename, so a reader mid-replacement sees the
+previous record whole or the new one whole, never half of either. A refused check —
+`CONFIG_CONFLICT`, an invalid configuration — writes nothing at all, and leaves the
+previous record untouched rather than replacing it with something misleading. There is
+no second file: four checks leave one record.
+
+### File modes
+
+The record can hold a failing validator's bounded output, and that output can contain
+anything the validator printed. So its privacy does not depend on the umask of whoever
+ran the command:
+
+```
+$XDG_STATE_HOME/aiqe/                 0700
+$XDG_STATE_HOME/aiqe/salt             0600
+$XDG_STATE_HOME/aiqe/<key>/           0700
+$XDG_STATE_HOME/aiqe/<key>/task.json  0600
+$XDG_STATE_HOME/aiqe/<key>/task.lock  0600
+$XDG_STATE_HOME/aiqe/<key>/check.json 0600
+$XDG_STATE_HOME/aiqe/<key>/consents.json  0600
+```
+
+The temporary files these are written through are created at the same mode, so there is
+no window in which a record is broader than its final form. Both are asserted under
+`umask(0)`, the most permissive setting there is — a file that is 0600 under that umask
+is 0600 because AIQE asked for it.
 
 ## Exit status
 

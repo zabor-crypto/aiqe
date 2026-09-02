@@ -55,8 +55,31 @@ PRECOMMIT_REVIEWABLE_VERDICTS       = 0
 
 The attribution lists are declared per scenario in the builders, so a case cannot
 quietly acquire permission to write by writing somewhere new. Every fixture validator
-records the fact that it ran, in a directory outside every snapshot root, so the second
-quantity is counted rather than argued.
+records *each* run, in a directory outside every snapshot root, so the second quantity
+is counted rather than argued. A canary named with the `observed.` prefix records an
+observation rather than a validator execution and is never counted as an unconsented
+one — the detached-child case leaves one deliberately.
+
+Three cases in this family are proofs rather than behaviours:
+
+```
+pty_consent_denied                        a real pseudo-terminal, answered no
+pty_consent_accepted_and_persisted        answered yes, then persisted, then drifted
+detached_child_escapes_the_process_group  what the termination claim does not cover
+```
+
+Consent is driven through a real Unix pseudo-terminal against the real CLI rather than
+through an injected prompt callable, because the decision under test is whether AIQE
+asks at all — and that decision is made by looking at whether standard input and output
+are terminals. The detached-child case spawns a child that calls `setsid` and observes
+it surviving the group kill: AIQE terminates the process group it created, and a fixture
+that could not tell that apart from "terminates every descendant" would let the
+stronger, false claim back into the documentation.
+
+Two more measure bounds rather than semantics: `large_output_bounded` and
+`large_output_with_timeout` emit far past the retention budget — the second of them
+without ever stopping — and assert that the run completes, the retained output stays
+within the budget, and the evidence record stays small.
 
 Each of the six launch contract families has its own three fixtures — covered, failed,
 and coverage gap. One family standing in for six would leave five with no evidence at

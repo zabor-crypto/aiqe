@@ -43,16 +43,34 @@ A timeout is a `FAIL`, not an unknown. A check that hangs is a check that
 failed to establish what it was asked to establish, and treating it as merely
 unknown is how an unbounded validator becomes a permanent excuse.
 
+Output is **drained incrementally into a fixed-size tail**, never buffered
+whole and truncated afterwards. A validator may be buggy or hostile and emit
+gigabytes; the memory AIQE spends on it must not be a function of how much it
+decided to print. The drain is also what stops the child deadlocking on a full
+pipe, so it runs for the whole lifetime of the process rather than only at the
+end.
+
 What AIQE does **not** claim about a validator it runs: no sandbox, no
 filesystem restriction, no network restriction. It runs as the user, with the
 user's environment, and can do anything the user's shell can do. That is
 stated to the user before consent is asked for, because it is the only
 honest basis on which to ask.
+
+The termination claim is bounded in the same spirit, and is worth stating
+exactly because the tempting sentence is wrong:
+
+> On timeout, AIQE terminates the validator process group it created.
+
+Not "every descendant", and not "the process tree". A child that deliberately
+calls `setsid` leaves that group and is outside the mechanism. Nothing here
+supervises a process tree, and adding a supervisor would be building the
+sandbox this product says it does not have.
 """
 
 import hashlib
 import json
 import os
+import selectors
 import signal
 import subprocess
 import time
@@ -67,7 +85,24 @@ CONSENT_FILE_NAME = "consents.json"
 #: One fixed budget for retained validator output, per stream. Bounded rather
 #: than configurable: a budget the user can raise is a budget that ends up
 #: holding a megabyte of somebody's test log in a local evidence file.
+#:
+#: This is a retention budget *and* a memory budget. Output is drained into a
+#: tail of this size as it arrives, so peak accumulation is the budget plus one
+#: read buffer per stream - not the total the validator emitted.
 OUTPUT_BUDGET_BYTES = 8192
+
+#: How much is read from a ready pipe at a time. Small and fixed: it is the
+#: only term besides the budget in AIQE's memory use during a validator run.
+READ_CHUNK_BYTES = 8192
+
+#: How long to keep draining after the process group has been killed. Bounded,
+#: because a detached descendant can hold the inherited pipe open forever and
+#: the timeout is a promise about how long a check can take.
+DRAIN_SECONDS = 5.0
+
+#: The retention policy, named so that output and documentation cannot drift
+#: apart about which end of the stream is kept.
+RETENTION_POLICY = "tail"
 
 PASS = "PASS"
 FAIL = "FAIL"
@@ -257,6 +292,41 @@ class Outcome(object):
         }
 
 
+class _BoundedTail(object):
+    """A fixed-size tail of a byte stream, and a count of what went past.
+
+    The whole reason this class exists instead of a `bytes` accumulator: a
+    validator's output is not bounded by anything AIQE controls, so the buffer
+    it lands in has to be. Chunks are appended and the front is dropped, so the
+    memory held is the budget plus at most one read, whatever the validator
+    emits.
+
+    `total` is a counter, not a buffer. It is what lets the rendering say that
+    earlier output existed without having kept it.
+    """
+
+    __slots__ = ("_buffer", "_budget", "total")
+
+    def __init__(self, budget):
+        self._buffer = bytearray()
+        self._budget = budget
+        self.total = 0
+
+    def add(self, chunk):
+        self.total += len(chunk)
+        self._buffer += chunk
+        excess = len(self._buffer) - self._budget
+        if excess > 0:
+            del self._buffer[:excess]
+
+    @property
+    def truncated(self):
+        return self.total > self._budget
+
+    def value(self):
+        return bytes(self._buffer)
+
+
 def execute(validator, digest, worktree, env):
     """Run one validator to completion, or to its timeout.
 
@@ -273,13 +343,16 @@ def execute(validator, digest, worktree, env):
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            # Its own process group, so the timeout can end the whole thing.
-            # A validator is usually a script, and a script's children inherit
-            # the pipes: killing only the process AIQE started leaves those
-            # children holding the pipe open, and the read that was supposed
-            # to be bounded blocks until they finish on their own. Measured,
-            # not assumed - a `sh -c "sleep 30"` under a one-second timeout
-            # took thirty seconds before this line existed.
+            # Its own process group, so that a timeout has something to
+            # terminate other than the single process AIQE started. A script's
+            # children inherit its pipes, and killing only the top of that
+            # leaves them holding the pipe open - measured, not assumed: a
+            # `sh -c "sleep 30"` under a one-second timeout took thirty
+            # seconds before this line existed.
+            #
+            # This bounds the group AIQE created. It does not bound a
+            # descendant that deliberately leaves the group, and nothing here
+            # pretends otherwise.
             start_new_session=True,
         )
     except FileNotFoundError:
@@ -299,23 +372,9 @@ def execute(validator, digest, worktree, env):
             duration_ms=_elapsed(started),
         )
 
-    timed_out = False
-    try:
-        stdout, stderr = process.communicate(timeout=validator.timeout)
-    except subprocess.TimeoutExpired:
-        timed_out = True
-        _terminate(process)
-        try:
-            stdout, stderr = process.communicate(timeout=_DRAIN_SECONDS)
-        except subprocess.TimeoutExpired:
-            # Something is still holding the pipes open despite the group
-            # kill. The timeout is a promise about how long a check can take,
-            # so it is kept: the outcome is a failure either way, and the
-            # bounded output is a convenience, not evidence.
-            process.kill()
-            stdout, stderr = b"", b""
-
+    stdout, stderr, timed_out = _drain(process, validator.timeout)
     duration = _elapsed(started)
+
     if timed_out:
         # R11 is explicit, and it is the right rule. A validator that did not
         # finish did not establish what it was asked to establish, and calling
@@ -328,14 +387,16 @@ def execute(validator, digest, worktree, env):
             exit_code=None,
             timed_out=True,
             duration_ms=duration,
-            stdout_tail=_bounded(stdout),
-            stderr_tail=_bounded(stderr),
+            stdout_tail=_render(stdout),
+            stderr_tail=_render(stderr),
         )
 
     if process.returncode == 0:
         # Output from a passing validator is discarded. It is not evidence of
         # anything the exit status did not already say, and retaining it is
         # how a local evidence file quietly acquires the contents of a log.
+        # It was drained rather than ignored, because an undrained pipe is how
+        # a validator deadlocks instead of passing.
         return Outcome(
             validator, digest, PASS, exit_code=0, duration_ms=duration
         )
@@ -346,21 +407,124 @@ def execute(validator, digest, worktree, env):
         FAIL,
         exit_code=process.returncode,
         duration_ms=duration,
-        stdout_tail=_bounded(stdout),
-        stderr_tail=_bounded(stderr),
+        stdout_tail=_render(stdout),
+        stderr_tail=_render(stderr),
     )
 
 
-#: How long to wait for a killed validator's output after the group kill.
-#: Short, because by this point the outcome is already decided.
-_DRAIN_SECONDS = 5
+def _drain(process, timeout):
+    """Read both pipes into bounded tails until exit, or until the timeout.
+
+    Returns (stdout tail, stderr tail, timed out).
+
+    Three jobs at once, which is why it is one loop rather than three:
+
+    **Keep the child alive.** A pipe nobody reads fills and blocks the writer
+    forever. `communicate()` avoids that by reading everything into memory,
+    which is precisely what must not happen here.
+
+    **Keep memory bounded.** Each chunk goes into a fixed-size tail, so what is
+    held is the budget plus one read buffer per stream, whatever the validator
+    emits.
+
+    **Keep the wall clock bounded.** Every wait has a deadline. After the
+    timeout the process group is terminated and draining continues briefly, so
+    that a failing validator's last words survive - but only briefly, because a
+    descendant that left the group can hold the inherited pipe open forever and
+    the timeout is a promise about how long a check can take.
+    """
+    stdout_fd = process.stdout.fileno()
+    stderr_fd = process.stderr.fileno()
+    tails = {
+        stdout_fd: _BoundedTail(OUTPUT_BUDGET_BYTES),
+        stderr_fd: _BoundedTail(OUTPUT_BUDGET_BYTES),
+    }
+
+    selector = selectors.DefaultSelector()
+    for stream in (process.stdout, process.stderr):
+        os.set_blocking(stream.fileno(), False)
+        selector.register(stream, selectors.EVENT_READ)
+
+    deadline = time.monotonic() + timeout
+    try:
+        timed_out = bool(_pump(selector, tails, deadline))
+
+        if not timed_out:
+            # Both pipes reached end of file, which is not the same as the
+            # process having been reaped. The kernel closes the descriptors
+            # when the process exits and `waitpid` reports a moment later, and
+            # on a loaded machine that gap is wide enough to observe - a
+            # single non-blocking poll here reported "still running" for a
+            # script that had already exited 0, and the check called it a
+            # timeout. Waiting inside the remaining budget closes the gap,
+            # while a validator that closed its pipes and kept running still
+            # times out.
+            try:
+                process.wait(timeout=max(deadline - time.monotonic(), 0.0))
+            except subprocess.TimeoutExpired:
+                timed_out = True
+
+        if timed_out:
+            _terminate(process)
+            _pump(selector, tails, time.monotonic() + DRAIN_SECONDS)
+    finally:
+        selector.close()
+        for stream in (process.stdout, process.stderr):
+            try:
+                stream.close()
+            except OSError:
+                pass
+
+    try:
+        process.wait(timeout=DRAIN_SECONDS)
+    except subprocess.TimeoutExpired:
+        # Left for the operating system to reap. Waiting further would trade a
+        # bounded check for an unbounded one, which is the trade this whole
+        # function exists to refuse.
+        pass
+
+    return tails[stdout_fd], tails[stderr_fd], timed_out
+
+
+def _pump(selector, tails, deadline):
+    """Drain every registered stream until end of file or the deadline.
+
+    Returns the descriptors still open.
+    """
+    while selector.get_map():
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        for key, _events in selector.select(timeout=min(remaining, 0.1)):
+            descriptor = key.fileobj.fileno()
+            try:
+                chunk = os.read(descriptor, READ_CHUNK_BYTES)
+            except BlockingIOError:
+                continue
+            except OSError:
+                # The pipe went away underneath us. That is end of file, not a
+                # failure of the check.
+                selector.unregister(key.fileobj)
+                continue
+            if not chunk:
+                selector.unregister(key.fileobj)
+                continue
+            tails[descriptor].add(chunk)
+    return list(selector.get_map())
 
 
 def _terminate(process):
-    """End a timed-out validator and everything it started.
+    """Terminate the process group AIQE created for this validator.
 
-    The process group, not the process. Falls back to killing the process
-    alone if the group is already gone, which is a race rather than an error.
+    The group, not the process, so that a script's children go with it. Falls
+    back to killing the process alone if the group is already gone, which is a
+    race rather than an error.
+
+    What this does **not** do is bound every descendant. A child that calls
+    `setsid` is in a different session and survives, and AIQE says so rather
+    than implying a containment it does not provide. Delivering that guarantee
+    would mean supervising a process tree, which is the sandbox this product
+    explicitly does not claim to be.
     """
     try:
         os.killpg(os.getpgid(process.pid), signal.SIGKILL)
@@ -375,24 +539,27 @@ def _elapsed(started):
     return int((time.monotonic() - started) * 1000)
 
 
-def _bounded(raw):
-    """The tail of a stream, within the fixed budget, rendered terminal-safe.
+def _render(tail):
+    """Render an already-bounded tail as terminal-safe text.
 
     The tail rather than the head: a failing command's last lines are the ones
-    that say why. Rendering happens here so that nothing downstream has to
+    that say why. Nothing is truncated here - the bound was applied while the
+    output was being read, which is the point - so this only turns bytes into
+    something safe to print.
+
+    Rendering happens at this boundary so that nothing downstream has to
     remember that a validator's output is attacker-controlled bytes.
     """
     from .textsafe import display_bytes
 
+    raw = tail.value()
     if not raw:
         return None
-    truncated = len(raw) > OUTPUT_BUDGET_BYTES
-    tail = raw[-OUTPUT_BUDGET_BYTES:]
     rendered = "\n".join(
-        display_bytes(line) for line in tail.split(b"\n")
+        display_bytes(line) for line in raw.split(b"\n")
     ).strip()
     if not rendered:
         return None
-    if truncated:
+    if tail.truncated:
         rendered = "[earlier output not retained]\n" + rendered
     return rendered

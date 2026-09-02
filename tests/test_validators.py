@@ -10,6 +10,7 @@ import os
 import shutil
 import stat
 import tempfile
+import time
 import unittest
 
 from . import support  # noqa: F401  (sets up sys.path)
@@ -122,7 +123,9 @@ class ConsentStoreTests(unittest.TestCase):
         self.assertEqual(stat.S_IMODE(os.stat(path).st_mode) & 0o077, 0)
 
 
-class ExecutionTests(unittest.TestCase):
+class ValidatorProcessTestCase(unittest.TestCase):
+    """A temporary worktree, and shell scripts to run in it."""
+
     def setUp(self):
         self.root = tempfile.mkdtemp(prefix="aiqe-validator-")
         self.addCleanup(shutil.rmtree, self.root, True)
@@ -140,11 +143,32 @@ class ExecutionTests(unittest.TestCase):
             validator, "sha256:x", self.worktree, dict(os.environ)
         )
 
+
+class ExecutionTests(ValidatorProcessTestCase):
     def test_exit_zero_is_a_pass(self):
         run = (self.script("ok.sh", "exit 0"),)
         result = self.execute(declared(run=run))
         self.assertEqual(result.outcome, validators.PASS)
         self.assertEqual(result.exit_code, 0)
+
+    def test_a_fast_validator_is_never_mistaken_for_a_timeout(self):
+        """End of file on the pipes is not the same as the process being reaped.
+
+        The kernel closes a process's descriptors when it exits and `waitpid`
+        reports a moment later. Deciding "timed out" from a single
+        non-blocking poll at that instant called a script that had already
+        exited 0 a timeout - rarely, and only under load, which is the worst
+        way for a bug like this to behave. Repetition is the test: one run
+        would pass with the defect still present.
+        """
+        run = (self.script("fast.sh", "exit 0"),)
+        validator = declared(run=run)
+        outcomes = [self.execute(validator).outcome for _ in range(40)]
+        self.assertEqual(
+            sorted(set(outcomes)),
+            [validators.PASS],
+            "a validator that exits 0 immediately was misclassified",
+        )
 
     def test_a_non_zero_exit_is_a_failure(self):
         run = (self.script("bad.sh", "exit 7"),)
@@ -166,13 +190,17 @@ class ExecutionTests(unittest.TestCase):
         self.assertIs(result.exit_code, None)
         self.assertEqual(result.reason, validators.TIMED_OUT)
 
-    def test_a_timeout_ends_the_children_a_validator_started(self):
-        """The timeout must bound the whole tree, not just the top of it.
+    def test_a_timeout_terminates_the_process_group_aiqe_created(self):
+        """The claim is the process group, and only the process group.
 
-        A script's children inherit its pipes. Killing only the process AIQE
-        started leaves them holding the pipe open, and the bounded wait turns
-        into the full duration of whatever the validator spawned. This asserts
-        the wall-clock, because that is the property.
+        A script's ordinary children are in it, and they inherit its pipes:
+        killing only the process AIQE started leaves them holding the pipe
+        open, and the bounded wait turns into the full duration of whatever
+        the validator spawned. This asserts the wall clock, because that is
+        the property.
+
+        It is not a containment claim. A child that leaves the group survives,
+        and the benchmark keeps a fixture that demonstrates it.
         """
         import time
 
@@ -218,6 +246,22 @@ class ExecutionTests(unittest.TestCase):
         self.assertIs(result.stdout_tail, None)
         self.assertIs(result.stderr_tail, None)
 
+    def test_the_bounded_tail_holds_only_the_budget(self):
+        """The buffer, on its own, before anything else depends on it."""
+        tail = validators._BoundedTail(16)
+        for _ in range(1000):
+            tail.add(b"0123456789")
+        self.assertEqual(len(tail.value()), 16)
+        self.assertEqual(tail.total, 10000)
+        self.assertTrue(tail.truncated)
+
+    def test_the_bounded_tail_keeps_the_end_of_the_stream(self):
+        """The retention policy is `tail`: a failure's last lines say why."""
+        tail = validators._BoundedTail(4)
+        tail.add(b"abcdefgh")
+        self.assertEqual(tail.value(), b"efgh")
+        self.assertEqual(validators.RETENTION_POLICY, "tail")
+
     def test_output_from_a_failing_validator_is_retained_and_bounded(self):
         run = (
             self.script(
@@ -246,6 +290,138 @@ class ExecutionTests(unittest.TestCase):
     def test_a_validator_gets_no_standard_input(self):
         run = (self.script("stdin.sh", "read line && exit 5; exit 0"),)
         self.assertEqual(self.execute(declared(run=run)).outcome, validators.PASS)
+
+
+class StreamingCaptureTests(ValidatorProcessTestCase):
+    """Output is bounded while it is being read, not after.
+
+    A validator may be buggy or hostile and emit gigabytes. The memory AIQE
+    spends on it must not be a function of how much it decided to print, and
+    the only way to know that is to measure it rather than to read the code
+    and agree with it.
+    """
+
+    #: Bytes per stream in the stress fixtures. Three orders of magnitude
+    #: above the retention budget, and fast to produce.
+    MEGABYTE = 1048576
+
+    def loud(self, name, megabytes, exit_code=1):
+        """A validator that emits `megabytes` on each stream, then exits."""
+        return self.script(
+            name,
+            "yes 0123456789abcdef0123456789abcdef | head -c %d\n"
+            "yes 0123456789abcdef0123456789abcdef | head -c %d >&2\n"
+            "exit %d"
+            % (megabytes * self.MEGABYTE, megabytes * self.MEGABYTE, exit_code),
+        )
+
+    def rendered_bytes(self, outcome):
+        total = 0
+        for tail in (outcome.stdout_tail, outcome.stderr_tail):
+            if tail:
+                total += len(tail.encode("utf-8"))
+        return total
+
+    def test_a_validator_that_far_exceeds_the_budget_still_completes(self):
+        run = (self.loud("loud.sh", 32),)
+        started = time.monotonic()
+        outcome = self.execute(declared(run=run))
+        elapsed = time.monotonic() - started
+
+        self.assertEqual(outcome.outcome, validators.FAIL)
+        self.assertEqual(outcome.exit_code, 1)
+        self.assertFalse(outcome.timed_out)
+        self.assertLess(
+            elapsed, 30, "64 MB of validator output should not take 30 seconds"
+        )
+
+    def test_a_validator_that_fills_the_pipe_does_not_deadlock(self):
+        """A pipe nobody reads fills and blocks the writer forever.
+
+        This validator emits far more than any pipe buffer and then exits 0.
+        Reaching `PASS` at all is the assertion: it means the drain kept
+        running for the whole life of the process rather than only at the end.
+        """
+        run = (self.loud("quiet-pass.sh", 8, exit_code=0),)
+        outcome = self.execute(declared(run=run, timeout=30))
+        self.assertEqual(outcome.outcome, validators.PASS)
+        self.assertIsNone(outcome.stdout_tail)
+        self.assertIsNone(outcome.stderr_tail)
+
+    def test_retained_output_stays_within_the_budget(self):
+        run = (self.loud("loud-retained.sh", 8),)
+        outcome = self.execute(declared(run=run))
+
+        for tail in (outcome.stdout_tail, outcome.stderr_tail):
+            self.assertIsNotNone(tail)
+            self.assertIn("earlier output not retained", tail)
+            # The captured bytes are bounded by the budget. Rendering escapes
+            # them for the terminal, and one byte can become four characters,
+            # so the rendered field is bounded by four times the budget plus
+            # AIQE's own fixed marker - not by what the validator emitted.
+            self.assertLessEqual(
+                len(tail.encode("utf-8")),
+                4 * validators.OUTPUT_BUDGET_BYTES + 64,
+            )
+
+    def test_peak_memory_does_not_track_the_validator_s_output(self):
+        """The property, measured: peak allocation against emitted volume.
+
+        A 32-fold increase in what the validator prints must not move the peak
+        meaningfully. An implementation that buffered the stream and truncated
+        afterwards would fail this by roughly the difference in output size.
+        """
+        import tracemalloc
+
+        def peak_for(name, megabytes):
+            run = (self.loud(name, megabytes),)
+            tracemalloc.start()
+            try:
+                outcome = self.execute(declared(run=run))
+                _current, peak = tracemalloc.get_traced_memory()
+            finally:
+                tracemalloc.stop()
+            self.assertEqual(outcome.outcome, validators.FAIL)
+            return peak
+
+        small = peak_for("peak-small.sh", 1)
+        large = peak_for("peak-large.sh", 32)
+
+        self.assertLess(
+            large,
+            small + 1048576,
+            "peak allocation grew with validator output: %d B for 1 MB per "
+            "stream, %d B for 32 MB per stream" % (small, large),
+        )
+
+    def test_large_output_with_a_timeout_is_bounded_and_still_a_failure(self):
+        """The hard case: an unbounded emitter that never finishes.
+
+        `yes` writes until it is stopped, so nothing about this run ends on its
+        own. The timeout has to hold, the memory has to hold, and the outcome
+        has to be a failure rather than an unknown.
+        """
+        import tracemalloc
+
+        run = (self.script("forever.sh", "yes 0123456789abcdef0123456789abcdef"),)
+        tracemalloc.start()
+        try:
+            started = time.monotonic()
+            outcome = self.execute(declared(run=run, timeout=1))
+            elapsed = time.monotonic() - started
+            _current, peak = tracemalloc.get_traced_memory()
+        finally:
+            tracemalloc.stop()
+
+        self.assertEqual(outcome.outcome, validators.FAIL)
+        self.assertTrue(outcome.timed_out)
+        self.assertEqual(outcome.reason, validators.TIMED_OUT)
+        self.assertLess(elapsed, 15, "the timeout did not bound the run")
+        self.assertLess(peak, 4194304, "peak allocation was %d B" % (peak,))
+        self.assertLessEqual(
+            len((outcome.stdout_tail or "").encode("utf-8")),
+            4 * validators.OUTPUT_BUDGET_BYTES + 64,
+        )
 
 
 if __name__ == "__main__":

@@ -209,6 +209,41 @@ class CheckReferenceTests(unittest.TestCase):
         self.assertIn("no sandbox", reference)
         self.assertIn("REVIEWABLE_CANDIDATE", reference)
 
+    def test_the_termination_claim_is_bounded(self):
+        """The narrow sentence must be there, and the wide ones must not.
+
+        "Terminates the process group it created" is a mechanism. "Bounds
+        every descendant" is a containment guarantee AIQE does not provide,
+        and it is the sentence that would be easy to write by accident.
+        """
+        reference = read(CHECK_REFERENCE)
+        self.assertIn(
+            "AIQE terminates the validator process group it created", reference
+        )
+        self.assertIn("setsid", reference)
+        self.assertIn("does not", reference)
+        for overclaim in (
+            "bounds every descendant",
+            "kills all descendants",
+            "contains the process tree",
+            "whole process group, so a validator",
+        ):
+            self.assertNotIn(overclaim, reference, overclaim)
+
+    def test_the_output_capture_policy_is_documented(self):
+        from aiqe import validators
+
+        reference = read(CHECK_REFERENCE)
+        self.assertIn("as it arrives", reference)
+        self.assertIn("never read whole and", reference)
+        self.assertIn(validators.RETENTION_POLICY, reference)
+
+    def test_the_local_state_modes_are_documented(self):
+        reference = read(CHECK_REFERENCE)
+        for line in ("task.json  0600", "check.json 0600", "consents.json  0600"):
+            self.assertIn(line, reference, line)
+        self.assertIn("umask(0)", reference)
+
     def test_the_evidence_schema_version_is_stated(self):
         from aiqe import evidence
 
@@ -250,6 +285,25 @@ class ReceiptReferenceTests(unittest.TestCase):
             "the hostname",
         ):
             self.assertIn(excluded, reference, excluded)
+
+
+class SecurityPolicyTests(unittest.TestCase):
+    SECURITY = os.path.join(support.ROOT, "SECURITY.md")
+
+    def test_the_termination_claim_is_bounded(self):
+        policy = read(self.SECURITY)
+        self.assertIn("process group it created", policy)
+        self.assertIn("setsid", policy)
+        self.assertNotIn("cannot outlive the bound", policy)
+
+    def test_local_state_privacy_is_stated(self):
+        policy = read(self.SECURITY)
+        self.assertIn("owner-only regardless of your umask", policy)
+        self.assertIn("0600", policy)
+
+    def test_the_unimplemented_commit_boundary_is_marked_as_intent(self):
+        policy = read(self.SECURITY)
+        self.assertIn("`aiqe commit` is not implemented", policy)
 
 
 class ArchitectureTests(unittest.TestCase):

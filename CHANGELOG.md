@@ -42,9 +42,11 @@ makes the change, not at release time.
   identity mismatch, with no migration. `--allow <id>` authorises one run and persists
   nothing. A non-interactive or `--format json` check never prompts and reports
   `UNKNOWN` / `CONSENT_REQUIRED`.
-- **Mandatory validator timeouts**, and a timeout is a `FAIL`. The timeout ends the
-  validator's whole process group: a script's children inherit its pipes, and killing
-  only the process AIQE started let a one-second timeout run for thirty seconds.
+- **Mandatory validator timeouts**, and a timeout is a `FAIL`. On timeout AIQE
+  terminates the process group it created for that validator: a script's children
+  inherit its pipes, and killing only the process AIQE started let a one-second timeout
+  run for thirty seconds. It does not bound a descendant that leaves that group, and
+  does not claim to.
 - **Checked-content binding**, bounded to the owned pathset — content digests, modes,
   deletion and pending markers, the baseline and current HEAD, the raw `aiqe.toml`
   digest and every validator definition digest. No whole-tree fingerprint.
@@ -75,6 +77,29 @@ makes the change, not at release time.
 
 ### Changed
 
+- **Validator output is bounded while it is read**, not buffered whole and truncated
+  afterwards. Both pipes are drained incrementally into a fixed-size tail through one
+  deadline-bounded loop, so peak memory is the retention budget plus one read buffer per
+  stream whatever the validator emits — measured across a thirty-two-fold change in
+  output volume — and a validator that fills the pipe cannot deadlock. The retention
+  policy is documented as `tail`, and output is still discarded for `PASS`.
+- **The termination claim is stated exactly.** On timeout AIQE terminates the process
+  group it created for that validator, and nothing more. Wording that implied it bounds
+  every descendant, contains a process tree, or that a validator spawning children
+  cannot outlive its deadline has been corrected across the product, the security
+  policy and the references. A benchmark fixture spawns a child that calls `setsid` and
+  observes it surviving the group kill, so the stronger and false claim cannot return
+  unnoticed.
+- **Consent is proved through a real pseudo-terminal**, driving the real CLI, in both
+  directions: denied (nothing executes, nothing is recorded) and accepted (the validator
+  runs once, consent is recorded against the exact definition digest, a later
+  non-interactive run acts on it, and changing one semantic field ends it). An injected
+  prompt callable cannot prove this, because the decision under test is whether AIQE
+  asks at all.
+- **Machine-local state is owner-only regardless of umask.** Directories are 0700 and
+  every record is 0600 — the salt, the task record, the check evidence, the consent
+  record — including the temporary file each is written through. Asserted under
+  `umask(0)`, so the modes are AIQE's doing rather than the environment's.
 - `git ls-tree` and `git cat-file` joined the Git subcommand allowlist. `check` needs an
   owned path's baseline content, and asking Git whether a file changed would make it
   read worktree content through any configured check-in filter. Both new subcommands
