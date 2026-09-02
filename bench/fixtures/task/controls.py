@@ -11,6 +11,8 @@ recorded per control rather than assumed.
 
 The three here are the reasons for three specific decisions:
 
+    state in .git      -> why task state is machine-local rather than kept
+                          beside Git's own files
     prefix ownership   -> why ownership is an exact literal pathset, with no
                           descendant or directory scope
     pathspec ownership -> why owned paths are literal data and never reach Git
@@ -26,9 +28,11 @@ import subprocess
 import sys
 import time
 
+from ..measurement import compare, snapshot, wait_until_quiescent
 from ..repobuild import commit_all, git, init_repo, write
 from . import builders
 
+STATE_INSIDE_GIT_METADATA = "state_inside_git_metadata"
 PREFIX_OWNERSHIP_BROADENING = "prefix_ownership_broadening"
 PATHSPEC_EXPANSION = "pathspec_expansion"
 SHARED_TASK_STATE = "shared_task_state"
@@ -44,6 +48,52 @@ def _repo_with_metacharacter_names(case, env):
     write(os.path.join(root, "*"), "literally named star\n")
     commit_all(root, "base", env)
     return root
+
+
+def run_state_inside_git_metadata(case, env):
+    """Task state kept inside .git, which is the obvious place and the wrong one.
+
+    It looks repository-local, and it is - which is the problem. A tool whose
+    claim is that it does not touch your repository should not keep its own
+    filing cabinet inside it, and state written there is state a fresh clone,
+    a `git clean` or an archive silently disagrees with.
+
+    Both halves run against the same repository, and the measurement is the
+    same: bytes under `.git` before and after.
+    """
+    root = builders.base_repo(case.repo_path, env)
+    git_dir = builders.git_dirs(root, env)[0]
+
+    def git_metadata_changes(action):
+        wait_until_quiescent(case.root, case.canaries)
+        before = snapshot(git_dir, case.canaries)
+        action()
+        after = snapshot(git_dir, case.canaries)
+        return compare(before, after)
+
+    def naive_start():
+        # The naive choice: a directory beside Git's own files.
+        directory = os.path.join(git_dir, "naive-aiqe")
+        os.makedirs(directory, exist_ok=True)
+        with open(os.path.join(directory, "task.json"), "w") as handle:
+            json.dump({"owned": ["src/strategy.py"]}, handle)
+
+    naive_changes = git_metadata_changes(naive_start)
+
+    def aiqe_start():
+        builders.run_cli(root, env, b"task", b"start", b"--own", b"src/strategy.py")
+        builders.run_cli(root, env, b"task")
+        builders.run_cli(root, env, b"task", b"end")
+
+    aiqe_changes = git_metadata_changes(aiqe_start)
+
+    return {
+        "naive_git_metadata_writes": len(naive_changes),
+        "naive_git_metadata_detail": naive_changes,
+        "aiqe_git_metadata_writes": len(aiqe_changes),
+        "aiqe_git_metadata_detail": aiqe_changes,
+        "aiqe_state_is_machine_local": builders.state_directory(root, env) is not None,
+    }
 
 
 def _naive_component_prefix_owns(declared, path):
@@ -198,6 +248,19 @@ def run_lost_start_race(case, env):
 
 CONTROLS = [
     {
+        "id": "NC_TASK_STATE_IN_GITDIR",
+        "description": (
+            "Task state written inside the Git directory. It looks "
+            "repository-local, and that is the defect: a tool claiming not to "
+            "touch your repository writes into it, and the state disagrees with "
+            "a fresh clone. AIQE keeps task state machine-local, so a task "
+            "operation changes nothing under .git at all."
+        ),
+        "invariant": "TASK_STATE_INSIDE_GIT_DIR = 0",
+        "detects": STATE_INSIDE_GIT_METADATA,
+        "run": run_state_inside_git_metadata,
+    },
+    {
         "id": "NC_TASK_PREFIX_OWNERSHIP_BROADENING",
         "description": (
             "Component-prefix ownership. A task declares a path that does not "
@@ -250,6 +313,11 @@ CONTROLS = [
 
 def violated(control, observation):
     """Did the naive implementation actually breach the invariant this time?"""
+    if control["detects"] == STATE_INSIDE_GIT_METADATA:
+        return (
+            observation["naive_git_metadata_writes"] > 0
+            and observation["aiqe_git_metadata_writes"] == 0
+        )
     if control["detects"] == PREFIX_OWNERSHIP_BROADENING:
         return (
             observation["naive_authorises_undeclared"] is True

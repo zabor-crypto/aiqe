@@ -85,10 +85,10 @@ class TaskReferenceTests(unittest.TestCase):
             "task_id",
             "aiqe_version",
             "started_at",
-            "start_head_state",
             "start_head_sha",
             "owned_paths",
             "owned_pathset_digest",
+            "foreign_staged_count_at_start",
             "label",
         ):
             self.assertIn(field, reference, field)
@@ -107,6 +107,13 @@ class TaskReferenceTests(unittest.TestCase):
                 continue
             field = stripped.split('"')[1]
             self.assertIn(field, reference, field)
+
+    def test_the_state_location_is_stated(self):
+        """A reader must be able to find where AIQE keeps its state."""
+        reference = read(TASK_REFERENCE)
+        self.assertIn("$XDG_STATE_HOME/aiqe", reference)
+        self.assertIn("HMAC-SHA256", reference)
+        self.assertNotIn("<worktree git directory>/aiqe/task.json", reference)
 
     def test_the_ownership_rule_is_stated(self):
         """A reader must not have to infer that ownership is exact."""

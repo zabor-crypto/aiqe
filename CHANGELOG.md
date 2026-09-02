@@ -12,6 +12,30 @@ makes the change, not at release time.
 
 ### Changed
 
+- **Task state moved out of Git metadata** to `$XDG_STATE_HOME/aiqe/` (falling back to
+  `~/.local/state`), in a directory named by
+  `HMAC-SHA256(salt, canonical common-dir || 0x00 || canonical git-dir)` under a
+  machine-local 32-byte salt at mode 0600. The key names no repository, and the
+  canonical paths are inputs only — nothing identifying is stored. A task operation now
+  changes nothing inside the repository at all, `.git` included.
+- The salt is created on the **first write only**: `doctor`, `task` and a refused
+  `task start` leave the filesystem exactly as they found it. Creation links into place,
+  so concurrent first-ever writers converge on one salt rather than two.
+- **Symlinks and special files are refused** as owned paths (`OWNED_PATH_IS_SYMLINK`,
+  `OWNED_PATH_NOT_REGULAR`), matching the frozen rule that v1 owns regular files, their
+  creation and their deletion. A symlink is refused as a link, not judged by its target.
+- **Duplicate declarations are refused** (`DUPLICATE_OWNED_PATH`) rather than merged.
+- **`task start` in a repository with no commits is refused.** A task records the commit
+  it started from. `doctor` and `task` still work there.
+- The record carries `foreign_staged_count_at_start`, informational and local. It is not
+  the foreign-staged guarantee, which belongs to `aiqe commit`.
+- **Task state schema version 3.** A record from a superseded schema is refused and left
+  untouched rather than reinterpreted; `task end` discards it. No migrations.
+- Added `NC_TASK_STATE_IN_GITDIR`: task state written inside the Git directory. The
+  naive implementation writes into `.git`; AIQE writes nothing there.
+- The benchmark snapshot describes special files instead of opening them — hashing a
+  FIFO blocks forever, and a fixture containing one is a real case the harness has to
+  survive measuring.
 - **Ownership is an exact literal pathset**, correcting the component-prefix semantics
   that landed in the previous entry. Owning `foo` owns `foo`, and not `foo/bar` or
   `foobar`. A prefix rule would let a task authorise files that did not exist when the
@@ -45,15 +69,15 @@ makes the change, not at release time.
   end to end on Linux with a path that is not valid UTF-8.
 - A documented deterministic owned-pathset digest binding the exact path bytes,
   component boundaries and canonical ordering.
-- Task state in `<worktree git directory>/aiqe/`, so two linked worktrees hold two
-  independent tasks. Atomic writes with fsync and rename; an exclusive `flock` over
-  start and end, so two concurrent starts produce one winner and one refusal.
+- Machine-local task state, so two linked worktrees hold two independent tasks. Atomic
+  writes with fsync and rename; an exclusive `flock` over start and end, so two
+  concurrent starts produce one winner and one refusal.
 - Terminal-safe rendering of owned paths and labels: a filename containing a newline or
   an escape sequence cannot forge an output row or repaint the terminal, and the stored
   value is untouched.
-- Task benchmark family under `bench/fixtures/task/`, with 20 cases and four negative
-  controls — prefix-ownership broadening, pathspec expansion, shared worktree state, and
-  a lost start race — all reproducing.
+- Task benchmark family under `bench/fixtures/task/`, with 25 cases and five negative
+  controls — state inside the Git directory, prefix-ownership broadening, pathspec
+  expansion, shared worktree state, and a lost start race — all reproducing.
 - Reference documentation for the task surface and its local state schema:
   [`docs/task.md`](docs/task.md).
 

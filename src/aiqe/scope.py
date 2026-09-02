@@ -66,6 +66,9 @@ OWNERSHIP_PATH_PARENT_AMBIGUOUS = "OWNERSHIP_PATH_PARENT_AMBIGUOUS"
 OWNERSHIP_PATH_ADMINISTRATIVE = "OWNERSHIP_PATH_ADMINISTRATIVE"
 OWNERSHIP_PATH_INVALID = "OWNERSHIP_PATH_INVALID"
 OWNED_PATH_IS_DIRECTORY = "OWNED_PATH_IS_DIRECTORY"
+OWNED_PATH_IS_SYMLINK = "OWNED_PATH_IS_SYMLINK"
+OWNED_PATH_NOT_REGULAR = "OWNED_PATH_NOT_REGULAR"
+DUPLICATE_OWNED_PATH = "DUPLICATE_OWNED_PATH"
 
 
 def canonicalise(raw, cwd_components):
@@ -142,10 +145,14 @@ def canonicalise(raw, cwd_components):
 def resolve(raw_paths, cwd_components):
     """Canonicalise every declared path into the task's owned pathset.
 
-    Exact duplicates collapse: declaring the same path twice is one pathset
-    entry, not two. Two *distinct* paths never collapse, even when one is a
-    lexical parent of the other - `foo` and `foo/bar` are two declarations of
-    two paths, and with exact ownership neither implies the other.
+    A duplicate is refused, not quietly collapsed. Two spellings of one path
+    in one declaration means the user believes they declared two things, and
+    silently agreeing with half of that belief is how a scope ends up meaning
+    something its author did not intend. Say so instead.
+
+    Two *distinct* paths never merge, even when one is a lexical parent of the
+    other - `foo` and `foo/bar` are two declarations of two paths, and with
+    exact ownership neither implies the other.
 
     The result is sorted by raw bytes, which is what makes the digest stable
     regardless of the order the paths were typed in.
@@ -158,8 +165,13 @@ def resolve(raw_paths, cwd_components):
     resolved = []
     for raw in raw_paths:
         canonical = canonicalise(raw, cwd_components)
-        if canonical not in resolved:
-            resolved.append(canonical)
+        if canonical in resolved:
+            raise ScopeError(
+                DUPLICATE_OWNED_PATH,
+                "%s is declared more than once; each owned path is declared "
+                "once" % (_render(canonical),),
+            )
+        resolved.append(canonical)
     return sorted(resolved)
 
 
@@ -209,24 +221,30 @@ def digest(owned_paths):
     return "sha256:" + hashlib.sha256(bytes(stream)).hexdigest()
 
 
-def reject_directories(owned_paths, worktree):
-    """Refuse a declared path that exists today as a directory.
+def validate_paths(owned_paths, worktree):
+    """Refuse a declared path that exists today as anything but a regular file.
 
-    v1 ownership is an exact pathset of files. A directory declaration has no
-    meaning under exact semantics, and the tempting readings are both wrong:
-    expanding it would authorise files nobody declared, and treating it as a
-    single path would silently own something that cannot be a file.
+    v1 owns an exact pathset of regular files. What the filesystem is
+    consulted for is refusal, and only refusal:
 
-    `lstat`, not `stat`. A symlink is a path object in its own right, and
-    declaring one owns the link, not whatever it currently resolves to. A
-    symlink pointing at a directory is therefore accepted - the declaration is
-    about the link.
+        absent                  accepted - a path declared before it exists
+        regular file            accepted - tracked or untracked, it makes no
+                                difference to a declaration
+        directory               refused
+        symlink                 refused
+        anything else           refused
+
+    `lstat`, not `stat`, and no target is followed. A symlink is refused as a
+    symlink rather than judged by what it points at, because v1's owned-path,
+    checked-content and commit semantics are defined over regular files, their
+    creation and their deletion - and nothing else. Supporting links is not
+    required for launch, and pretending to support them would put a hole in
+    the content binding rather than in the path rules.
 
     A path that does not exist is accepted: declaring a file before creating
-    it is the normal case. If it later materialises as a directory, a later
-    operation resolving path identity must fail closed rather than reinterpret
-    the declaration - the recorded pathset says a path was declared, not that
-    a directory was.
+    it is the normal case. If it later materialises as something other than a
+    regular file, a later operation resolving path identity must fail closed
+    rather than reinterpret the declaration.
     """
     if worktree is None:
         return
@@ -238,8 +256,11 @@ def reject_directories(owned_paths, worktree):
         except (FileNotFoundError, NotADirectoryError):
             continue
         except OSError:
-            # Unreadable is not the same as "is a directory". Leave it to the
-            # operations that must resolve identity to fail closed.
+            # Unreadable is not the same as "is the wrong kind". Leave it to
+            # the operations that must resolve identity to fail closed.
+            continue
+
+        if _stat_module.S_ISREG(stat.st_mode):
             continue
         if _stat_module.S_ISDIR(stat.st_mode):
             raise ScopeError(
@@ -248,6 +269,17 @@ def reject_directories(owned_paths, worktree):
                 "AIQE v1 owns an exact pathset, so declare the files this task "
                 "owns rather than a directory." % (_render(path),),
             )
+        if _stat_module.S_ISLNK(stat.st_mode):
+            raise ScopeError(
+                OWNED_PATH_IS_SYMLINK,
+                "an owned path must be a regular file; %s is a symbolic link. "
+                "AIQE v1 does not own links." % (_render(path),),
+            )
+        raise ScopeError(
+            OWNED_PATH_NOT_REGULAR,
+            "an owned path must be a regular file; %s is not one."
+            % (_render(path),),
+        )
 
 
 def _render(path):

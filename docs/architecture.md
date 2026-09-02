@@ -291,7 +291,10 @@ tests/        the deterministic suite
 bench/        fixture builders, expected outcomes, retained results
 ```
 
-Task state is repository-local and worktree-specific, in
-`<worktree git directory>/aiqe/`. Not `$HOME`, not an XDG directory, not the tracked
-worktree, and deliberately not the *common* Git directory, which linked worktrees share.
-Nothing AIQE writes goes anywhere Git owns.
+Task state is machine-local, under `$XDG_STATE_HOME/aiqe/`, in a directory named by an
+HMAC of the repository's canonical Git directories under a machine-local salt. Not the
+tracked worktree, and deliberately not inside `.git`: a tool claiming not to touch your
+repository should not keep its own filing cabinet inside it. Including the per-worktree
+Git directory in the key is what gives two linked worktrees two independent tasks, and
+the key names no repository, so a state directory listing is not an inventory of
+someone's projects.

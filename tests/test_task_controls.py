@@ -28,7 +28,7 @@ def _make_test(control):
 
 class TaskNegativeControlTests(unittest.TestCase):
     def test_controls_exist(self):
-        self.assertEqual(len(support.task_controls.CONTROLS), 4)
+        self.assertEqual(len(support.task_controls.CONTROLS), 5)
 
 
 for _control in support.task_controls.CONTROLS:
@@ -40,6 +40,13 @@ del _control
 
 class ControlVersusProductTests(unittest.TestCase):
     """The same fixture, measured twice: naive implementation, then AIQE."""
+
+    def test_state_in_git_metadata_versus_machine_local_state(self):
+        """The naive place for task state is inside the repository."""
+        observation = support.task_harness.run_control("NC_TASK_STATE_IN_GITDIR")
+        self.assertGreater(observation["naive_git_metadata_writes"], 0)
+        self.assertEqual(observation["aiqe_git_metadata_writes"], 0)
+        self.assertTrue(observation["aiqe_state_is_machine_local"])
 
     def test_prefix_ownership_versus_exact_ownership(self):
         """A prefix rule authorises a file that was never declared."""

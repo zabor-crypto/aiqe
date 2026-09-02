@@ -6,16 +6,23 @@ private state, and nothing else. That claim has a name:
 
     TASK_WRITE_CONFINEMENT
 
-and it is scoped deliberately. It says AIQE's own writes stay inside
-`<worktree git directory>/aiqe/`. It does not say the repository cannot change
-while AIQE runs - another process can do as it likes - which is why fixtures
-are quiescent before they are measured.
+and it is scoped deliberately. It says AIQE's own writes stay inside its
+machine-local state home, `$XDG_STATE_HOME/aiqe/`. It does not say the
+repository cannot change while AIQE runs - another process can do as it likes
+- which is why fixtures are quiescent before they are measured.
+
+Since task state moved out of Git metadata, the repository figure covers the
+Git directory too: a task operation now changes nothing at all inside the
+repository, including `.git`.
 
 Four quantities come out of each case:
 
-    aiqe_state_changes            changes inside AIQE's private state, allowed
-    repository_mutations          changes anywhere else in the repository
-    local_state_writes            changes in the isolated home and XDG tree
+    aiqe_state_changes            changes in the machine-local state home,
+                                  the only permitted write surface
+    repository_mutations          changes anywhere in the repository, .git
+                                  included
+    local_state_writes            changes elsewhere under the isolated HOME
+                                  and XDG tree
     repository_defined_executions canaries the repository installed that fired
 
 Only the first may be non-zero.
@@ -45,18 +52,22 @@ CASES_FILE = os.path.join(HERE, "cases.json")
 #: Repository directories a task case may create under its case root.
 REPOSITORY_DIRS = ("repo", "worktree-a", "worktree-b")
 
-def _is_aiqe_state(relative):
-    """Is this path inside AIQE's private state directory?
+#: Where the isolated XDG state home lives, relative to the case root. This
+#: mirrors what `measurement.Case.env` sets, and is the only place a task
+#: operation may write.
+XDG_STATE_PREFIX = os.path.join("state", "xdg", "state")
 
-    The directory sits under the worktree's own Git directory, which for a
-    linked worktree is `.git/worktrees/<name>/aiqe` rather than `.git/aiqe`.
-    Matching on components rather than on a fixed prefix covers both without
-    accidentally excusing anything else.
+
+def _is_aiqe_state(relative):
+    """Is this path inside the isolated XDG state home?
+
+    Task state is machine-local now, so this is the whole permitted write
+    surface. Anything under the isolated HOME or the other XDG directories is
+    not: AIQE writes to its state home and nowhere else.
     """
-    parts = relative.split(os.sep)
-    if ".git" not in parts or "aiqe" not in parts:
-        return False
-    return parts.index("aiqe") > parts.index(".git")
+    return relative == XDG_STATE_PREFIX or relative.startswith(
+        XDG_STATE_PREFIX + os.sep
+    )
 
 def load_cases():
     with open(CASES_FILE) as handle:

@@ -3,9 +3,9 @@
   "cases": [
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "simple_file_scope",
-      "description": "One file declared, shown, and ended. The shape every other case is a deviation from.",
+      "description": "One regular file declared, shown, and ended. The shape every other case is a deviation from.",
       "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
@@ -28,30 +28,10 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 0,
-      "case": "existing_directory_refused",
-      "description": "A declared path that exists today as a directory. v1 owns an exact pathset, so a directory declaration has no meaning in it and is refused rather than expanded or silently owned.",
-      "exit_codes": [
-        3
-      ],
-      "fired_canaries": [],
-      "local_state_write_detail": [],
-      "local_state_writes": 0,
-      "other_changes": [],
-      "outcome": "PASS",
-      "problems": [],
-      "refusal_names_the_directory": true,
-      "repository_defined_executions": 0,
-      "repository_mutation_detail": [],
-      "repository_mutations": 0,
-      "terminal_safe": true
-    },
-    {
-      "active_after_end": false,
-      "aiqe_state_changes": 2,
-      "case": "symlink_owns_the_link",
-      "description": "A symlink is a path object in its own right. Declaring one owns the link, not what it resolves to - so a symlink pointing at a directory is accepted, because the declaration is about the link.",
-      "digest_while_active": "sha256:ba2e0bd5fb8abfe19045a21932a414006b6e1129b20161aa5cdca4c39073a8a9",
+      "aiqe_state_changes": 5,
+      "case": "untracked_regular_file",
+      "description": "An untracked regular file. Tracked or not makes no difference to a declaration.",
+      "digest_while_active": "sha256:954edffd6505b40eed86cd4706189a5c250917e422f8cc431d03f9a51dc2350b",
       "exit_codes": [
         0,
         0,
@@ -63,8 +43,7 @@
       "other_changes": [],
       "outcome": "PASS",
       "owned_while_active": [
-        "linkdir",
-        "linkfile"
+        "scratch.py"
       ],
       "problems": [],
       "repository_defined_executions": 0,
@@ -74,10 +53,10 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "nonexistent_future_path",
       "declared_path_exists": false,
-      "description": "Declaring a path that does not exist yet - the normal case when the task is about to create it. Scope is a declaration, not an observation.",
+      "description": "A path that does not exist yet - the normal case when the task is about to create it. A declaration is not an observation.",
       "digest_while_active": "sha256:3abb060416a56f55f8262c68b23a7b1937f863663eedbd9fbb19a17bf2541ac9",
       "exit_codes": [
         0,
@@ -100,24 +79,19 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
-      "case": "duplicate_scope",
-      "description": "The same path declared twice is one scope, and its digest equals the single-declaration digest.",
-      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
+      "aiqe_state_changes": 0,
+      "case": "existing_directory_refused",
+      "description": "A declared path that exists today as a directory. v1 owns an exact pathset of regular files, so a directory declaration has no meaning in it.",
       "exit_codes": [
-        0,
-        0,
-        0
+        3
       ],
       "fired_canaries": [],
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "other_changes": [],
       "outcome": "PASS",
-      "owned_while_active": [
-        "src/strategy.py"
-      ],
       "problems": [],
+      "refusal_names_the_directory": true,
       "repository_defined_executions": 0,
       "repository_mutation_detail": [],
       "repository_mutations": 0,
@@ -125,9 +99,70 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 0,
+      "case": "symlink_refused",
+      "description": "A symlink to a file and a symlink to a directory. Both refused as links rather than judged by their targets: v1's owned-path and content semantics are defined over regular files.",
+      "exit_codes": [
+        3,
+        3
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "salt_created": false,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 0,
+      "case": "special_file_refused",
+      "description": "A FIFO. Not a regular file, so not something a v1 task can own.",
+      "exit_codes": [
+        3
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "salt_created": false,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 0,
+      "case": "duplicate_declaration_refused",
+      "description": "Two spellings of one path in one declaration. Refused rather than merged: silently agreeing with half of what the user typed is not an answer.",
+      "exit_codes": [
+        3
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "salt_created": false,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 5,
       "case": "lexical_parent_and_child",
-      "description": "'docs' and 'docs/guide.md' are two distinct declarations. Under exact ownership neither implies the other, so neither collapses into the other.",
+      "description": "'docs' and 'docs/guide.md' are two distinct declarations. Under exact ownership neither implies the other.",
       "digest_while_active": "sha256:fdbad0b19082141263a28754b6870b60dce885e8e1f59047f3c8304475a3186e",
       "exit_codes": [
         0,
@@ -151,9 +186,9 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "trailing_separator",
-      "description": "'docs/', './docs' and 'docs//' are three spellings of one path. They collapse to one owned path with one digest.",
+      "description": "A trailing separator is not part of a path's identity, so 'docs//' is the path 'docs'.",
       "digest_while_active": "sha256:60f8bd4ec4f9d16f5b0d13e73fad57514c98dd48a5f399b693330570bc9aa024",
       "exit_codes": [
         0,
@@ -176,7 +211,7 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "literal_metacharacter_names",
       "description": "Every declared name here is a filename, not a pattern: glob characters, pathspec magic, and arguments that look like flags. Nothing expands.",
       "digest_while_active": "sha256:3b363ad27e0a18a4530b25b75a46037a893bbea36379e62580a9f9b0e65e4f40",
@@ -207,7 +242,7 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "whitespace_names",
       "description": "Names containing a space, a tab and a newline. Stored literally, rendered escaped, and the newline does not become a second output row.",
       "digest_while_active": "sha256:697fd84fd61d4bf49fb13e1362d08bffc9c198119737bca1d2346baff35dcfc8",
@@ -234,9 +269,9 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "subdirectory_invocation",
-      "description": "'--own ../src/strategy.py' typed from tests/ means the same scope as declaring it from the root, and produces the same digest.",
+      "description": "'--own ../src/strategy.py' typed from tests/ means the same path as declaring it from the root, and produces the same digest.",
       "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
@@ -281,8 +316,82 @@
       "repository_mutations": 0
     },
     {
+      "aiqe_state_changes": 0,
+      "case": "unborn_head_refused",
+      "description": "A repository with no commits. A task records the commit it started from, so starting one is refused - while doctor and status still answer, and nothing is written.",
+      "exit_codes": [
+        3,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "salt_created": false,
+      "state_root_created": false,
+      "terminal_safe": true
+    },
+    {
+      "aiqe_state_changes": 5,
+      "case": "salt_created_only_on_write",
+      "description": "doctor, status and a refused start create no machine-local salt. The first successful start creates it: 32 bytes, readable by its owner alone.",
+      "exit_codes": [
+        0,
+        0,
+        3,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "salt_after_doctor": false,
+      "salt_after_refused_start": false,
+      "salt_after_start": true,
+      "salt_after_status": false,
+      "salt_bytes": 32,
+      "salt_mode": 384,
+      "terminal_safe": true
+    },
+    {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
+      "case": "foreign_staged_count_at_start",
+      "description": "Three staged entries the task never mentioned. The count is recorded informationally, the index is byte-identical across the lifecycle, and no filename reaches the output.",
+      "exit_codes": [
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "recorded_staged_count": 3,
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "staged_names_absent_from_output": true,
+      "staged_unchanged": true,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
+      "aiqe_state_changes": 5,
       "case": "foreign_staged_preserved",
       "description": "A repository with staged work it did not ask AIQE about. The index is byte-identical across start, status and end.",
       "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
@@ -312,7 +421,7 @@
     },
     {
       "active_after_end": false,
-      "aiqe_state_changes": 2,
+      "aiqe_state_changes": 5,
       "case": "repository_defined_execution",
       "description": "A repository pointing at commands every way it can - clean filter, fsmonitor, shell aliases, an executable hook. Declaring a task runs none of them.",
       "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
@@ -336,12 +445,14 @@
       "terminal_safe": true
     },
     {
-      "aiqe_state_changes": 4,
+      "aiqe_state_changes": 7,
       "b_survives_a_end": [
         "src/b.py"
       ],
       "case": "linked_worktree_isolation",
-      "description": "Two linked worktrees hold two independent tasks. Ending one does not touch the other, and the main worktree has no task at all.",
+      "common_dirs_match": true,
+      "derived_keys_differ": true,
+      "description": "Two linked worktrees share a common Git directory and have different per-worktree ones, so they derive different machine-local keys and hold two independent tasks. Neither writes inside any Git directory.",
       "exit_codes": [
         0,
         0,
@@ -350,9 +461,11 @@
         0
       ],
       "fired_canaries": [],
+      "git_dirs_differ": true,
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "main_worktree_has_no_task": true,
+      "no_state_inside_git_dirs": true,
       "other_changes": [],
       "outcome": "PASS",
       "problems": [],
@@ -369,7 +482,7 @@
       ]
     },
     {
-      "aiqe_state_changes": 3,
+      "aiqe_state_changes": 6,
       "case": "concurrent_start",
       "description": "Two real processes racing to start a task in one worktree. One wins, one is refused, and exactly one valid record exists.",
       "fired_canaries": [],
@@ -444,8 +557,8 @@
     {
       "active_after_end": false,
       "aiqe_state_changes": 2,
-      "case": "schema_v1_fail_closed",
-      "description": "An active record written under the superseded schema, where a declared path owned its descendants. Reading it under exact semantics would quietly narrow a live task's authority, so it is refused and left untouched. 'task end' discards it and the user starts again; there is no migration.",
+      "case": "superseded_schema_fail_closed",
+      "description": "An active record written under a superseded schema. Reading it under today's semantics would say something untrue about a live task, so it is refused and left untouched. 'task end' discards it; there is no migration.",
       "exit_codes": [
         2,
         2,
@@ -466,13 +579,13 @@
       "repository_defined_executions": 0,
       "repository_mutation_detail": [],
       "repository_mutations": 0,
-      "schema_after_restart": 2,
+      "schema_after_restart": 3,
       "terminal_safe": true
     },
     {
       "aiqe_state_changes": 0,
       "case": "unsafe_state_location",
-      "description": "A symlink planted where AIQE's private state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
+      "description": "A symlink planted where this worktree's machine-local state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
       "exit_codes": [
         3
       ],
@@ -496,14 +609,28 @@
     }
   ],
   "cases_failed": 0,
-  "cases_passed": 19,
+  "cases_passed": 24,
   "cases_skipped_platform": 1,
   "cases_skipped_platform_ids": [
     "non_utf8_owned_path"
   ],
-  "cases_total": 20,
+  "cases_total": 25,
   "family": "TASK_SCOPE_CORE",
   "negative_controls": [
+    {
+      "aiqe_git_metadata_detail": [],
+      "aiqe_git_metadata_writes": 0,
+      "aiqe_state_is_machine_local": true,
+      "control": "NC_TASK_STATE_IN_GITDIR",
+      "control_reproduces_failure": true,
+      "description": "Task state written inside the Git directory. It looks repository-local, and that is the defect: a tool claiming not to touch your repository writes into it, and the state disagrees with a fresh clone. AIQE keeps task state machine-local, so a task operation changes nothing under .git at all.",
+      "invariant": "TASK_STATE_INSIDE_GIT_DIR = 0",
+      "naive_git_metadata_detail": [
+        "added: naive-aiqe",
+        "added: naive-aiqe/task.json"
+      ],
+      "naive_git_metadata_writes": 2
+    },
     {
       "aiqe_authorises_undeclared": false,
       "aiqe_start_exit": 0,
@@ -551,8 +678,8 @@
       "naive_successes": 2
     }
   ],
-  "negative_controls_reproducing": 4,
-  "negative_controls_total": 4,
+  "negative_controls_reproducing": 5,
+  "negative_controls_total": 5,
   "other_families": {
     "BOUNDED_COMMIT": "NOT_RUN",
     "CHECK": "NOT_RUN",

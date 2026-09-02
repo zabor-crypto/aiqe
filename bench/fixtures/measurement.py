@@ -20,6 +20,7 @@ state directory could not go unseen.
 
 import hashlib
 import os
+import stat as stat_module
 import time
 
 
@@ -162,12 +163,21 @@ def _describe(path):
         stat = os.lstat(path)
     except OSError as exc:
         return ("error", str(exc))
-    if os.path.islink(path):
+
+    if stat_module.S_ISLNK(stat.st_mode):
         try:
             target = os.readlink(path)
         except OSError as exc:
             return ("error", str(exc))
         return ("link", hashlib.sha256(os.fsencode(target)).hexdigest())
+
+    if not stat_module.S_ISREG(stat.st_mode):
+        # A FIFO, socket or device node. Opening one to hash it would block
+        # forever waiting for a writer - a fixture containing one is a real
+        # case, and the harness has to survive measuring it. Its identity is
+        # its kind and metadata; there are no contents to read.
+        return ("special", stat.st_mode, stat.st_mtime_ns)
+
     try:
         with open(path, "rb") as handle:
             digest = hashlib.sha256(handle.read()).hexdigest()

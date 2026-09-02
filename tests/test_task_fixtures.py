@@ -35,7 +35,8 @@ def _make_test(case):
         self.assertEqual(
             observed["repository_mutations"],
             0,
-            "TASK_WRITE_CONFINEMENT: %s" % (observed["repository_mutation_detail"],),
+            "TASK_WRITE_CONFINEMENT: nothing in the repository, .git included, "
+            "may change: %s" % (observed["repository_mutation_detail"],),
         )
         self.assertEqual(
             observed["local_state_writes"],
@@ -74,12 +75,17 @@ class FixtureCoverageTests(unittest.TestCase):
         """Every condition the task contract names must have a case."""
         required = {
             "simple_file_scope",
-            "existing_directory_refused",
-            "symlink_owns_the_link",
+            "untracked_regular_file",
             "nonexistent_future_path",
-            "duplicate_scope",
+            "existing_directory_refused",
+            "symlink_refused",
+            "special_file_refused",
+            "duplicate_declaration_refused",
             "lexical_parent_and_child",
-            "schema_v1_fail_closed",
+            "unborn_head_refused",
+            "salt_created_only_on_write",
+            "foreign_staged_count_at_start",
+            "superseded_schema_fail_closed",
             "literal_metacharacter_names",
             "whitespace_names",
             "subdirectory_invocation",

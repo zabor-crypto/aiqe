@@ -106,15 +106,18 @@ Declare what a piece of work owns, before doing it:
 .venv/bin/aiqe task end
 ```
 
-Ownership is **exact**: owning `foo` owns `foo`, and not `foo/bar` or `foobar`. There is
-no directory scope in v1, and declaring one is refused — a prefix rule would let a task
-authorise files that did not exist when the scope was declared, which is the widening an
-owned scope exists to prevent. A declared path is literal — `--own '*'` declares a file
-named `*`, not a pattern — and it need not exist yet, because declaring
-`src/new_module.py` before writing it is the normal case. Task state lives in the
-worktree's own Git directory, so two linked worktrees hold two independent tasks, and
-starting a task changes nothing else in the repository: staged work you never mentioned
-is byte-identical afterwards.
+Ownership is **exact**: owning `foo` owns `foo`, and not `foo/bar` or `foobar`. v1 owns
+an exact pathset of regular files — declaring a directory, a symlink or the same path
+twice is refused — because a prefix rule would let a task authorise files that did not
+exist when the scope was declared, which is the widening an owned scope exists to
+prevent. A declared path is literal (`--own '*'` declares a file named `*`, not a
+pattern) and need not exist yet, because declaring `src/new_module.py` before writing it
+is the normal case.
+
+Task state is **machine-local**, under `$XDG_STATE_HOME/aiqe/`, keyed by an HMAC of the
+repository's Git directories so the key names no repository. Nothing is written inside
+`.git`, and starting a task changes nothing in the repository at all: staged work you
+never mentioned is byte-identical afterwards.
 
 Reference for the scope rules, the state schema and the exit status:
 [`docs/task.md`](docs/task.md).

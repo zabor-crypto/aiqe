@@ -178,8 +178,8 @@ class SymlinkTests(unittest.TestCase):
         self.assertEqual(scope.canonicalise(b"link/file.py", []), b"link/file.py")
 
 
-class DirectoryRejectionTests(unittest.TestCase):
-    """A directory declaration has no meaning under exact ownership."""
+class PathValidityTests(unittest.TestCase):
+    """v1 owns an exact pathset of regular files, and refuses the rest."""
 
     def setUp(self):
         self.worktree = os.fsencode(tempfile.mkdtemp(prefix="aiqe-dir-"))
@@ -198,42 +198,80 @@ class DirectoryRejectionTests(unittest.TestCase):
     def test_an_existing_directory_is_refused(self):
         self.make(b"src", "dir")
         with self.assertRaises(scope.ScopeError) as caught:
-            scope.reject_directories([b"src"], self.worktree)
+            scope.validate_paths([b"src"], self.worktree)
         self.assertEqual(caught.exception.code, scope.OWNED_PATH_IS_DIRECTORY)
 
     def test_an_existing_file_is_accepted(self):
         self.make(b"src/a.py", "file")
-        scope.reject_directories([b"src/a.py"], self.worktree)
+        scope.validate_paths([b"src/a.py"], self.worktree)
 
     def test_a_path_that_does_not_exist_is_accepted(self):
         """Declaring a file before creating it is the normal case."""
-        scope.reject_directories([b"src/future.py"], self.worktree)
+        scope.validate_paths([b"src/future.py"], self.worktree)
 
-    def test_a_symlink_to_a_directory_is_accepted(self):
-        """The declaration owns the link, not what it resolves to."""
+    def test_a_symlink_to_a_directory_is_refused(self):
         self.make(b"real", "dir")
         os.symlink(b"real", os.path.join(self.worktree, b"link"))
-        scope.reject_directories([b"link"], self.worktree)
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.validate_paths([b"link"], self.worktree)
+        self.assertEqual(caught.exception.code, scope.OWNED_PATH_IS_SYMLINK)
+
+    def test_a_symlink_to_a_file_is_refused(self):
+        """Refused as a link, not judged by what it points at.
+
+        v1's owned-path, checked-content and commit semantics are defined over
+        regular files. Accepting a link would put the hole in the content
+        binding rather than in the path rules.
+        """
+        self.make(b"real.py", "file")
+        os.symlink(b"real.py", os.path.join(self.worktree, b"link.py"))
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.validate_paths([b"link.py"], self.worktree)
+        self.assertEqual(caught.exception.code, scope.OWNED_PATH_IS_SYMLINK)
+
+    def test_a_special_file_is_refused(self):
+        os.mkfifo(os.path.join(self.worktree, b"pipe"))
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.validate_paths([b"pipe"], self.worktree)
+        self.assertEqual(caught.exception.code, scope.OWNED_PATH_NOT_REGULAR)
+
+    def test_a_broken_symlink_is_still_refused_as_a_symlink(self):
+        """lstat, not stat: the target's absence is not the question."""
+        os.symlink(b"nowhere", os.path.join(self.worktree, b"dangling"))
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.validate_paths([b"dangling"], self.worktree)
+        self.assertEqual(caught.exception.code, scope.OWNED_PATH_IS_SYMLINK)
 
     def test_only_the_offending_path_is_named(self):
         self.make(b"src", "dir")
         with self.assertRaises(scope.ScopeError) as caught:
-            scope.reject_directories([b"a.py", b"src", b"b.py"], self.worktree)
+            scope.validate_paths([b"a.py", b"src", b"b.py"], self.worktree)
         self.assertIn("src", caught.exception.message)
 
     def test_a_control_character_in_the_name_is_escaped_in_the_refusal(self):
         self.make(b"weird\nname", "dir")
         with self.assertRaises(scope.ScopeError) as caught:
-            scope.reject_directories([b"weird\nname"], self.worktree)
+            scope.validate_paths([b"weird\nname"], self.worktree)
         self.assertIn("weird\\nname", caught.exception.message)
         self.assertNotIn("\n", caught.exception.message.replace("\\n", ""))
 
 
 class ResolveTests(unittest.TestCase):
-    def test_exact_duplicates_collapse(self):
-        self.assertEqual(
-            scope.resolve([b"src/a.py", b"src/a.py", b"./src/a.py"], []), [b"src/a.py"]
-        )
+    def test_exact_duplicates_are_refused(self):
+        """Agreeing with half of what the user typed is not an answer."""
+        for declarations in (
+            [b"src/a.py", b"src/a.py"],
+            [b"src/a.py", b"./src/a.py"],
+            [b"src/a.py", b"src//a.py"],
+        ):
+            with self.assertRaises(scope.ScopeError, msg=repr(declarations)) as caught:
+                scope.resolve(declarations, [])
+            self.assertEqual(caught.exception.code, scope.DUPLICATE_OWNED_PATH)
+
+    def test_a_duplicate_refusal_names_the_path_safely(self):
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.resolve([b"weird\nname", b"weird\nname"], [])
+        self.assertIn("weird\\nname", caught.exception.message)
 
     def test_a_lexical_parent_and_child_are_two_distinct_paths(self):
         """Neither implies the other, so neither collapses into it."""

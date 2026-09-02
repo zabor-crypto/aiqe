@@ -52,6 +52,7 @@ OWNERSHIP_SEMANTICS = "exact_literal_pathset_v1"
 
 REPOSITORY_ABSENT = "REPOSITORY_ABSENT"
 UNSUPPORTED_TOPOLOGY = "UNSUPPORTED_TOPOLOGY"
+UNBORN_HEAD_UNSUPPORTED = "UNBORN_HEAD_UNSUPPORTED"
 TASK_ALREADY_ACTIVE = "TASK_ALREADY_ACTIVE"
 NO_ACTIVE_TASK = "NO_ACTIVE_TASK"
 TASK_STARTED = "TASK_STARTED"
@@ -78,14 +79,26 @@ class TaskOutcome(object):
 class Repository(object):
     """The worktree a task operation applies to."""
 
-    __slots__ = ("git_dir", "worktree", "cwd_components", "head_state", "head_sha")
+    __slots__ = (
+        "git_dir",
+        "common_dir",
+        "worktree",
+        "cwd_components",
+        "head_state",
+        "head_sha",
+        "runner",
+    )
 
-    def __init__(self, git_dir, worktree, cwd_components, head_state, head_sha):
+    def __init__(
+        self, git_dir, common_dir, worktree, cwd_components, head_state, head_sha, runner
+    ):
         self.git_dir = git_dir
+        self.common_dir = common_dir
         self.worktree = worktree
         self.cwd_components = cwd_components
         self.head_state = head_state
         self.head_sha = head_sha
+        self.runner = runner
 
 
 # --- Repository discovery --------------------------------------------------
@@ -100,7 +113,9 @@ def discover(cwd, env=None):
     worktree content is compared, so nothing here can trigger a filter driver.
     """
     runner = GitRunner(cwd, env=env)
-    located = runner.run("rev-parse", "--git-dir", "--is-inside-work-tree")
+    located = runner.run(
+        "rev-parse", "--git-dir", "--git-common-dir", "--is-inside-work-tree"
+    )
     if not located.ok:
         return None, TaskOutcome(
             REPOSITORY_ABSENT,
@@ -113,7 +128,7 @@ def discover(cwd, env=None):
         )
 
     lines = located.lines()
-    if len(lines) != 2 or lines[1].strip() != b"true":
+    if len(lines) != 3 or lines[2].strip() != b"true":
         return None, TaskOutcome(
             UNSUPPORTED_TOPOLOGY,
             3,
@@ -125,6 +140,7 @@ def discover(cwd, env=None):
 
     base = os.fsencode(cwd)
     git_dir = _absolute(lines[0], base)
+    common_dir = _absolute(lines[1], base)
 
     toplevel = runner.run("rev-parse", "--show-toplevel")
     if not toplevel.ok or not toplevel.lines():
@@ -143,7 +159,15 @@ def discover(cwd, env=None):
         head_sha = resolved.lines()[0].decode("ascii", "replace").strip()
 
     return (
-        Repository(git_dir, worktree, _relative_components(base, worktree), head_state, head_sha),
+        Repository(
+            git_dir,
+            common_dir,
+            worktree,
+            _relative_components(base, worktree),
+            head_state,
+            head_sha,
+            runner,
+        ),
         None,
     )
 
@@ -182,15 +206,39 @@ def start(cwd, owned, label=None, env=None):
     if failure is not None:
         return failure
 
+    if repository.head_state != "commit":
+        # A task's completion baseline is the commit it started from. Without
+        # a parent there is nothing for later evidence to be relative to, so
+        # the task is refused rather than started against nothing. Doctor
+        # still works here; this rule is about starting a task.
+        return TaskOutcome(
+            UNBORN_HEAD_UNSUPPORTED,
+            3,
+            [
+                "aiqe: this repository has no commits yet.",
+                "A task records the commit it started from, so make the first "
+                "commit before starting one.",
+            ],
+        )
+
     try:
         owned_paths = scope_module.resolve(owned, repository.cwd_components)
-        scope_module.reject_directories(owned_paths, repository.worktree)
+        scope_module.validate_paths(owned_paths, repository.worktree)
     except scope_module.ScopeError as error:
         return TaskOutcome(error.code, 3, ["aiqe: " + error.message])
 
+    staged = _foreign_staged_count(repository)
+
     try:
-        with taskstate.TaskLock(repository.git_dir):
-            existing = taskstate.read_active(repository.git_dir)
+        # The first write is what creates the machine-local salt. Everything
+        # before this point - discovery, validation, refusals - leaves the
+        # filesystem exactly as it was found.
+        salt = taskstate.ensure_salt(env)
+        key = taskstate.derive_key(salt, repository.common_dir, repository.git_dir)
+        state_directory = taskstate.ensure_state_directory(key, env)
+
+        with taskstate.TaskLock(state_directory):
+            existing = taskstate.read_active(state_directory)
             if existing is not None:
                 return TaskOutcome(
                     TASK_ALREADY_ACTIVE,
@@ -200,8 +248,8 @@ def start(cwd, owned, label=None, env=None):
                         "End it with `aiqe task end` before starting another.",
                     ],
                 )
-            record = _build_record(repository, owned_paths, label)
-            taskstate.write_active(repository.git_dir, record)
+            record = _build_record(repository, owned_paths, label, staged)
+            taskstate.write_active(state_directory, record)
     except taskstate.CorruptState as error:
         return _corrupt_outcome(error)
     except taskstate.StateError as error:
@@ -217,7 +265,7 @@ def status(cwd, env=None):
         return failure
 
     try:
-        record = taskstate.read_active(repository.git_dir)
+        record = taskstate.read_active(_existing_state_directory(repository, env))
     except taskstate.CorruptState as error:
         return _corrupt_outcome(error)
     except taskstate.StateError as error:
@@ -245,9 +293,14 @@ def end(cwd, env=None):
         return failure
 
     try:
-        with taskstate.TaskLock(repository.git_dir):
+        state_directory = _existing_state_directory(repository, env)
+        if state_directory is None:
+            return TaskOutcome(
+                NO_ACTIVE_TASK, 3, ["aiqe: no active task in this worktree."]
+            )
+        with taskstate.TaskLock(state_directory):
             try:
-                record = taskstate.read_active(repository.git_dir)
+                record = taskstate.read_active(state_directory)
             except taskstate.CorruptState as error:
                 # The record is present and this build will not interpret it -
                 # whether because it is malformed or because it was written
@@ -255,7 +308,7 @@ def end(cwd, env=None):
                 # operation that means "there should be no active task", and
                 # saying which of the two it was is more useful than a generic
                 # line.
-                taskstate.clear_active(repository.git_dir)
+                taskstate.clear_active(state_directory)
                 return TaskOutcome(
                     TASK_RECORD_DISCARDED,
                     0,
@@ -273,11 +326,44 @@ def end(cwd, env=None):
                     3,
                     ["aiqe: no active task in this worktree."],
                 )
-            taskstate.clear_active(repository.git_dir)
+            taskstate.clear_active(state_directory)
     except taskstate.StateError as error:
         return TaskOutcome(error.code, 3, ["aiqe: " + error.message])
 
     return TaskOutcome(TASK_ENDED, 0, _render(record, "ended"), record)
+
+
+def _existing_state_directory(repository, env):
+    """This worktree's machine-local state directory, if one exists.
+
+    Read-only throughout. When no salt has ever been created there can be no
+    state, so the answer is None and nothing is written to find that out.
+    """
+    salt = taskstate.read_salt(env)
+    if salt is None:
+        return None
+    key = taskstate.derive_key(salt, repository.common_dir, repository.git_dir)
+    return taskstate.worktree_state_directory(key, env)
+
+
+def _foreign_staged_count(repository):
+    """How many entries are staged when the task starts.
+
+    Informational, and local only. It is *not* the foreign-staged guarantee:
+    the load-bearing before-and-after comparison that decides whether a
+    bounded commit excluded foreign staged work belongs to `aiqe commit`, and
+    recording a number here does not make that comparison.
+
+    Obtained with `diff-index --cached`, which compares the index against HEAD
+    and reads no worktree content - so it cannot refresh the index and cannot
+    trigger a filter driver. Filenames are counted, never stored.
+    """
+    result = repository.runner.run(
+        "diff-index", "--cached", "--name-only", "-z", "HEAD"
+    )
+    if not result.ok:
+        return None
+    return len(result.nul_fields())
 
 
 def _corrupt_outcome(error):
@@ -294,14 +380,15 @@ def _corrupt_outcome(error):
 # --- The record ------------------------------------------------------------
 
 
-def _build_record(repository, owned_paths, label):
+def _build_record(repository, owned_paths, label, foreign_staged_count):
     """The active task record.
 
-    Deliberately absent: the worktree path, the remote URL, the repository
-    owner or name, the hostname, the username and the email. None of them is
-    needed to say which paths a task owns, and every one of them turns a local
-    state file into something that identifies a person or a project if it is
-    ever shared.
+    Deliberately absent: the worktree path, the Git directory, the remote URL,
+    the repository owner or name, the hostname, the username and the email.
+    None of them is needed to say which paths a task owns, and every one turns
+    a local state file into something that identifies a person or a project if
+    it is ever shared. The canonical Git paths are inputs to the machine-local
+    lookup key and are not stored anywhere.
 
     Paths are stored base64-encoded, because the record is JSON and JSON is
     text: a path is bytes, and round-tripping it through a text encoding is
@@ -315,10 +402,10 @@ def _build_record(repository, owned_paths, label):
         "task_id": _task_id(),
         "aiqe_version": __version__,
         "started_at": _timestamp(),
-        "start_head_state": repository.head_state,
         "start_head_sha": repository.head_sha,
         "owned_paths": [{"path_b64": _encode(path)} for path in owned_paths],
         "owned_pathset_digest": scope_module.digest(owned_paths),
+        "foreign_staged_count_at_start": foreign_staged_count,
         "label": label,
     }
 
@@ -368,9 +455,11 @@ def _render(record, state):
     lines.append("  Started         %s" % (record["started_at"],))
     if record.get("label"):
         lines.append("  Label           %s" % (display_text(record["label"]),))
+    lines.append("  Start HEAD      recorded")
+    staged = record.get("foreign_staged_count_at_start")
     lines.append(
-        "  Start HEAD      %s"
-        % ("no commits yet" if record["start_head_state"] == "unborn" else "recorded",)
+        "  Staged at start %s"
+        % ("unknown" if staged is None else "%d entries (informational)" % (staged,),)
     )
     lines.append(
         "  Owned pathset   %d exact %s"

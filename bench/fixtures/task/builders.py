@@ -34,6 +34,7 @@ SOURCE = os.path.join(ROOT, "src")
 if SOURCE not in sys.path:
     sys.path.insert(0, SOURCE)
 
+from aiqe import taskstate  # noqa: E402
 from aiqe.textsafe import display_bytes, is_safe  # noqa: E402
 
 CLI_TIMEOUT_SECONDS = 60
@@ -80,28 +81,65 @@ def spawn_cli(cwd, env, *arguments):
     )
 
 
-def git_dir(worktree, env):
-    """The worktree's own Git directory.
+def git_dirs(worktree, env):
+    """(per-worktree Git directory, common Git directory), both absolute.
 
-    Not the common one. In a linked worktree `.git` is a file pointing at
-    `<main>/.git/worktrees/<name>`, and reading the wrong one is exactly the
-    mistake the linked-worktree case exists to catch.
+    In a linked worktree `.git` is a file pointing at
+    `<main>/.git/worktrees/<name>`, and the two differ - which is what gives
+    the two worktrees distinct machine-local keys.
     """
-    result = git(worktree, "rev-parse", "--git-dir", env=env, check=False)
-    path = result.stdout.decode("utf-8", "surrogateescape").strip()
-    if not os.path.isabs(path):
-        path = os.path.join(worktree, path)
-    return os.path.normpath(path)
+    result = git(
+        worktree, "rev-parse", "--git-dir", "--git-common-dir", env=env, check=False
+    )
+    resolved = []
+    for line in result.stdout.decode("utf-8", "surrogateescape").splitlines():
+        path = line.strip()
+        if not os.path.isabs(path):
+            path = os.path.join(worktree, path)
+        resolved.append(os.path.normpath(path))
+    return resolved[0], resolved[1]
+
+
+def derived_key(worktree, env):
+    """This worktree's machine-local directory token, or None before any write.
+
+    Derived through the product's own locator rather than a second copy of the
+    construction: a fixture that computed the key differently would test the
+    fixture.
+    """
+    salt = taskstate.read_salt(env)
+    if salt is None:
+        return None
+    git_dir, common_dir = git_dirs(worktree, env)
+    return taskstate.derive_key(salt, common_dir, git_dir)
+
+
+def state_directory(worktree, env):
+    key = derived_key(worktree, env)
+    if key is None:
+        return None
+    return taskstate.worktree_state_directory(key, env)
 
 
 def state_path(worktree, env):
-    return os.path.join(git_dir(worktree, env), "aiqe", "task.json")
+    directory = state_directory(worktree, env)
+    if directory is None:
+        return None
+    return os.path.join(directory, "task.json")
+
+
+def salt_exists(env):
+    return os.path.exists(taskstate.salt_path(env))
+
+
+def state_root_exists(env):
+    return os.path.exists(taskstate.state_root(env))
 
 
 def read_active(worktree, env):
     """The active task record as the product wrote it, or None."""
     path = state_path(worktree, env)
-    if not os.path.isfile(path):
+    if path is None or not os.path.isfile(path):
         return None
     with open(path, "rb") as handle:
         return json.loads(handle.read().decode("utf-8"))
@@ -192,8 +230,18 @@ def operate_nonexistent_path(case, env, target):
     return observation
 
 
-def operate_duplicate_scope(case, env, target):
-    return _lifecycle(case, env, target, b"src/strategy.py", b"src/strategy.py")
+def operate_duplicate_declaration_refused(case, env, target):
+    """Two spellings of one path in one declaration is a refusal, not a merge."""
+    refused = run_cli(
+        target, env, b"task", b"start",
+        b"--own", b"src/strategy.py", b"--own", b"./src/strategy.py",
+    )
+    return {
+        "exit_codes": [refused.returncode],
+        "active_after_end": read_active(target, env) is not None,
+        "salt_created": salt_exists(env),
+        "terminal_safe": terminal_safe(refused),
+    }
 
 
 def operate_lexical_parent_and_child(case, env, target):
@@ -202,8 +250,8 @@ def operate_lexical_parent_and_child(case, env, target):
 
 
 def operate_trailing_separator(case, env, target):
-    """Three spellings of one path collapse to one owned path."""
-    return _lifecycle(case, env, target, b"docs/", b"./docs", b"docs//")
+    """A trailing separator is not part of the path's identity."""
+    return _lifecycle(case, env, target, b"docs//")
 
 
 def operate_literal_metacharacters(case, env, target):
@@ -376,6 +424,9 @@ def operate_linked_worktrees(case, env, target):
     status_b = run_cli(worktree_b, env, b"task")
     end_b = run_cli(worktree_b, env, b"task", b"end")
 
+    common_a = git_dirs(worktree_a, env)[1]
+    common_b = git_dirs(worktree_b, env)[1]
+
     return {
         "exit_codes": [
             start_a.returncode,
@@ -384,6 +435,18 @@ def operate_linked_worktrees(case, env, target):
             status_b.returncode,
             end_b.returncode,
         ],
+        "common_dirs_match": os.path.realpath(common_a) == os.path.realpath(common_b),
+        "git_dirs_differ": git_dirs(worktree_a, env)[0] != git_dirs(worktree_b, env)[0],
+        "derived_keys_differ": derived_key(worktree_a, env)
+        != derived_key(worktree_b, env),
+        "no_state_inside_git_dirs": not any(
+            os.path.exists(os.path.join(directory, "aiqe"))
+            for directory in (
+                git_dirs(worktree_a, env)[0],
+                git_dirs(worktree_b, env)[0],
+                common_a,
+            )
+        ),
         "worktree_a_owned": owned_display(record_a),
         "worktree_b_owned": owned_display(record_b),
         "task_ids_differ": (
@@ -410,7 +473,7 @@ def operate_concurrent_start(case, env, target):
 
     record = read_active(target, env)
     valid = 0
-    if record is not None and record.get("schema_version") == 2 and record.get("task_id"):
+    if record is not None and record.get("schema_version") == 3 and record.get("task_id"):
         valid = 1
 
     return {
@@ -422,15 +485,28 @@ def operate_concurrent_start(case, env, target):
     }
 
 
+def _seed_state_directory(case, env, root, filename, contents):
+    """Put a file into this worktree's machine-local state directory.
+
+    The salt has to exist for the directory to be derivable at all, so the
+    fixture creates one the way the product would - through the product's own
+    routine, not a second copy of it.
+    """
+    taskstate.ensure_salt(env)
+    directory = state_directory(root, env)
+    taskstate.ensure_state_directory(os.path.basename(directory), env)
+    write(os.path.join(directory, filename), contents)
+    return root
+
+
 def build_interrupted_write(case, env):
     """A crash before the atomic rename leaves a temporary file, not a task."""
     root = base_repo(case.repo_path, env)
-    state = os.path.join(root, ".git", "aiqe")
-    os.makedirs(state, exist_ok=True)
     # Exactly what a process killed mid-write leaves behind: a partial file
     # under the temporary name, never renamed into place.
-    write(os.path.join(state, ".task.json.tmp.99999"), '{"schema_version": 1, "task_')
-    return root
+    return _seed_state_directory(
+        case, env, root, ".task.json.tmp.99999", '{"schema_version": 3, "task_'
+    )
 
 
 def operate_interrupted_write(case, env, target):
@@ -450,10 +526,9 @@ def operate_interrupted_write(case, env, target):
 
 def build_corrupt_record(case, env):
     root = base_repo(case.repo_path, env)
-    state = os.path.join(root, ".git", "aiqe")
-    os.makedirs(state, exist_ok=True)
-    write(os.path.join(state, "task.json"), "this is not a task record")
-    return root
+    return _seed_state_directory(
+        case, env, root, "task.json", "this is not a task record"
+    )
 
 
 def operate_corrupt_record(case, env, target):
@@ -479,11 +554,12 @@ def operate_corrupt_record(case, env, target):
 
 
 def build_unsafe_state_location(case, env):
-    """A symlink where AIQE's private state belongs."""
+    """A symlink where this worktree's machine-local state belongs."""
     root = base_repo(case.repo_path, env)
     elsewhere = os.path.join(case.root, "elsewhere")
     os.makedirs(elsewhere)
-    os.symlink(elsewhere, os.path.join(root, ".git", "aiqe"))
+    taskstate.ensure_salt(env)
+    os.symlink(elsewhere, state_directory(root, env))
     return root
 
 
@@ -504,33 +580,172 @@ def build_symlink(case, env):
     return root
 
 
-def operate_symlink(case, env, target):
-    """A declaration owns the link, not whatever it resolves to.
+def operate_symlink_refused(case, env, target):
+    """v1 owns regular files. A link is refused as a link, not judged by target.
 
-    `linkdir` points at a directory, and is still accepted: the declared path
-    is the link. Nothing here follows it.
+    Owned-path, checked-content and commit semantics are defined over regular
+    files, their creation and their deletion. Accepting a link would put the
+    hole in the content binding rather than in the path rules.
     """
-    return _lifecycle(case, env, target, b"linkdir", b"linkfile")
+    to_file = run_cli(target, env, b"task", b"start", b"--own", b"linkfile")
+    to_directory = run_cli(target, env, b"task", b"start", b"--own", b"linkdir")
+    return {
+        "exit_codes": [to_file.returncode, to_directory.returncode],
+        "active_after_end": read_active(target, env) is not None,
+        "salt_created": salt_exists(env),
+        "terminal_safe": terminal_safe(to_file, to_directory),
+    }
 
 
-_SCHEMA_V1_RECORD = (
-    '{"schema_version": 1, "task_id": "%s", "aiqe_version": "0.0.0.dev0", '
-    '"started_at": "2026-09-01T00:00:00Z", "start_head_state": "unborn", '
-    '"start_head_sha": null, "owned_scope": [{"path_b64": "c3Jj"}], '
-    '"owned_scope_digest": "sha256:superseded", "label": null}\n' % ("0" * 32,)
-)
-
-
-def build_schema_v1_record(case, env):
-    """An active record written when a declared path owned its descendants."""
+def build_special_file(case, env):
     root = base_repo(case.repo_path, env)
-    state = os.path.join(root, ".git", "aiqe")
-    os.makedirs(state, exist_ok=True)
-    write(os.path.join(state, "task.json"), _SCHEMA_V1_RECORD)
+    os.mkfifo(os.path.join(root, "pipe"))
     return root
 
 
-def operate_schema_v1_record(case, env, target):
+def operate_special_file_refused(case, env, target):
+    refused = run_cli(target, env, b"task", b"start", b"--own", b"pipe")
+    return {
+        "exit_codes": [refused.returncode],
+        "active_after_end": read_active(target, env) is not None,
+        "salt_created": salt_exists(env),
+        "terminal_safe": terminal_safe(refused),
+    }
+
+
+def build_untracked_file(case, env):
+    root = base_repo(case.repo_path, env)
+    write(os.path.join(root, "scratch.py"), "TEMP = 1\n")
+    return root
+
+
+def operate_untracked_file(case, env, target):
+    """Tracked or not makes no difference to a declaration."""
+    return _lifecycle(case, env, target, b"scratch.py")
+
+
+def build_unborn(case, env):
+    return init_repo(case.repo_path, env)
+
+
+def operate_unborn_head_refused(case, env, target):
+    """A task records the commit it started from, and there is not one.
+
+    Doctor still works here; the rule is about starting a task.
+    """
+    started = run_cli(target, env, b"task", b"start", b"--own", b"src/strategy.py")
+    shown = run_cli(target, env, b"task")
+    doctored = run_cli(target, env, b"doctor")
+    return {
+        "exit_codes": [started.returncode, shown.returncode, doctored.returncode],
+        "salt_created": salt_exists(env),
+        "state_root_created": state_root_exists(env),
+        "terminal_safe": terminal_safe(started, shown, doctored),
+    }
+
+
+def build_foreign_staged_count(case, env):
+    root = base_repo(case.repo_path, env)
+    for name in ("f1.txt", "f2.txt", "f3.txt"):
+        write(os.path.join(root, name), "foreign\n")
+        git(root, "add", "--", name, env=env)
+    return root
+
+
+def operate_foreign_staged_count(case, env, target):
+    """The informational count, and the index it must not disturb.
+
+    This is not the foreign-staged guarantee. The load-bearing before-and-after
+    comparison belongs to a future bounded commit; recording a number here does
+    not make that comparison.
+    """
+    index = os.path.join(target, ".git", "index")
+
+    def index_state():
+        with open(index, "rb") as handle:
+            return handle.read()
+
+    def staged():
+        result = git(
+            target, "diff", "--cached", "--name-only", "-z", env=env, check=False
+        )
+        return sorted(p for p in result.stdout.split(b"\0") if p)
+
+    before_bytes, before_staged = index_state(), staged()
+    started = run_cli(target, env, b"task", b"start", b"--own", b"src/strategy.py")
+    record = read_active(target, env)
+    shown = run_cli(target, env, b"task")
+    ended = run_cli(target, env, b"task", b"end")
+    after_bytes, after_staged = index_state(), staged()
+
+    return {
+        "exit_codes": [started.returncode, shown.returncode, ended.returncode],
+        "recorded_staged_count": None
+        if record is None
+        else record["foreign_staged_count_at_start"],
+        "index_unchanged": before_bytes == after_bytes,
+        "staged_unchanged": before_staged == after_staged,
+        "staged_names_absent_from_output": all(
+            b"f1.txt" not in stream
+            for process in (started, shown, ended)
+            for stream in (process.stdout, process.stderr)
+        ),
+        "active_after_end": read_active(target, env) is not None,
+        "terminal_safe": terminal_safe(started, shown, ended),
+    }
+
+
+def operate_salt_created_only_on_write(case, env, target):
+    """Reads leave the machine exactly as they found it."""
+    doctored = run_cli(target, env, b"doctor")
+    salt_after_doctor = salt_exists(env)
+    shown = run_cli(target, env, b"task")
+    salt_after_status = salt_exists(env)
+    refused = run_cli(target, env, b"task", b"start", b"--own", b"src")
+    salt_after_refusal = salt_exists(env)
+    started = run_cli(target, env, b"task", b"start", b"--own", b"src/strategy.py")
+    salt_after_start = salt_exists(env)
+    mode = None
+    size = None
+    if salt_after_start:
+        stat = os.stat(taskstate.salt_path(env))
+        mode = stat.st_mode & 0o777
+        size = stat.st_size
+    run_cli(target, env, b"task", b"end")
+
+    return {
+        "exit_codes": [
+            doctored.returncode,
+            shown.returncode,
+            refused.returncode,
+            started.returncode,
+        ],
+        "salt_after_doctor": salt_after_doctor,
+        "salt_after_status": salt_after_status,
+        "salt_after_refused_start": salt_after_refusal,
+        "salt_after_start": salt_after_start,
+        "salt_mode": mode,
+        "salt_bytes": size,
+        "terminal_safe": terminal_safe(doctored, shown, refused, started),
+    }
+
+
+_SUPERSEDED_RECORD = (
+    '{"schema_version": 2, "ownership_semantics": "exact_literal_pathset_v1", '
+    '"task_id": "%s", "aiqe_version": "0.0.0.dev0", '
+    '"started_at": "2026-09-01T00:00:00Z", "start_head_state": "commit", '
+    '"start_head_sha": null, "owned_paths": [{"path_b64": "c3Jj"}], '
+    '"owned_pathset_digest": "sha256:superseded", "label": null}\n' % ("0" * 32,)
+)
+
+
+def build_superseded_schema_record(case, env):
+    """An active record written by a build with different state semantics."""
+    root = base_repo(case.repo_path, env)
+    return _seed_state_directory(case, env, root, "task.json", _SUPERSEDED_RECORD)
+
+
+def operate_superseded_schema_record(case, env, target):
     """Refused, not reinterpreted, and never silently migrated.
 
     Reading a version-1 record under exact semantics would quietly narrow a
@@ -609,13 +824,33 @@ SCENARIOS = {
         "build": build_base,
         "operate": operate_existing_directory_refused,
     },
-    "symlink_owns_the_link": {"build": build_symlink, "operate": operate_symlink},
-    "schema_v1_fail_closed": {
-        "build": build_schema_v1_record,
-        "operate": operate_schema_v1_record,
+    "symlink_refused": {"build": build_symlink, "operate": operate_symlink_refused},
+    "superseded_schema_fail_closed": {
+        "build": build_superseded_schema_record,
+        "operate": operate_superseded_schema_record,
     },
     "nonexistent_future_path": {"build": build_base, "operate": operate_nonexistent_path},
-    "duplicate_scope": {"build": build_base, "operate": operate_duplicate_scope},
+    "duplicate_declaration_refused": {
+        "build": build_base,
+        "operate": operate_duplicate_declaration_refused,
+    },
+    "special_file_refused": {
+        "build": build_special_file,
+        "operate": operate_special_file_refused,
+    },
+    "untracked_regular_file": {
+        "build": build_untracked_file,
+        "operate": operate_untracked_file,
+    },
+    "unborn_head_refused": {"build": build_unborn, "operate": operate_unborn_head_refused},
+    "foreign_staged_count_at_start": {
+        "build": build_foreign_staged_count,
+        "operate": operate_foreign_staged_count,
+    },
+    "salt_created_only_on_write": {
+        "build": build_base,
+        "operate": operate_salt_created_only_on_write,
+    },
     "lexical_parent_and_child": {
         "build": build_base,
         "operate": operate_lexical_parent_and_child,

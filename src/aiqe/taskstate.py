@@ -1,60 +1,84 @@
 """Where a task lives on disk, and how it is written safely.
 
-Task state is deliberately local, private and worktree-specific:
+Task state is machine-local, and deliberately nowhere near the repository:
 
-    <worktree git directory>/aiqe/task.json    the active task, if any
-    <worktree git directory>/aiqe/task.lock    the start/end mutex
+    $XDG_STATE_HOME/aiqe/salt              32 random bytes, mode 0600
+    $XDG_STATE_HOME/aiqe/<key>/task.json   the active task, if any
+    $XDG_STATE_HOME/aiqe/<key>/task.lock   the start/end mutex
 
-Not `$HOME`, not an XDG directory, not the tracked worktree, and not the
-*common* Git directory. That last one is the subtle part. A linked worktree
-has its own Git directory under `…/.git/worktrees/<name>` while sharing the
-common one, so putting task state in the common directory would give two
-worktrees one task between them. They get one each.
+When `XDG_STATE_HOME` is unset the conventional Unix fallback applies:
+`~/.local/state`.
 
-Nothing here writes to anything Git owns. The state directory sits beside
-Git's files rather than among them: no config, no index, no refs, no hooks.
+Nothing goes inside `.git`. Not the worktree Git directory, not the common
+one, not the index, not the configuration. A tool whose claim is that it does
+not touch your repository should not keep its own filing cabinet inside it,
+and state written there would also be state a `git clean` or a fresh clone
+silently disagrees with.
+
+**The lookup key names no repository.** The directory under `aiqe/` is
+
+    HMAC-SHA256(salt, canonical common-dir || 0x00 || canonical git-dir)
+
+rendered as hex. The paths are inputs only: they are never stored. Without the
+machine-local salt the key reveals nothing about which repository it belongs
+to, which is what keeps a state directory listing - and any future receipt -
+free of a project inventory. Including the per-worktree Git directory as well
+as the common one is what gives two linked worktrees two distinct keys, and
+therefore two independent tasks.
+
+**The salt is created on the first write, never on a read.** `aiqe doctor`
+creates nothing. `aiqe task`, with no salt and no state, answers that there is
+no active task and leaves the filesystem exactly as it found it.
 
 Two failure modes are handled deliberately.
 
-**Unsafe state location.** If `…/aiqe` or `task.json` already exists as
+**Unsafe state location.** If a path in the state directory already exists as
 something other than the expected kind - a symlink, a directory where a file
-belongs - AIQE refuses rather than following it. Writing through a symlink
-planted in a repository would put AIQE's own writes somewhere it never
-promised to write. The check is a narrow `lstat`, not a general defence
-against hostile Git metadata.
+belongs - AIQE refuses rather than following it.
 
 **A crash mid-write.** Every state transition is a write to a temporary file
-in the same directory, an fsync, and an atomic `rename`. A reader sees either
-the old state or the new one, never half of either, and a process killed
-between the two leaves the old state intact.
+in the same directory, an fsync, and an atomic rename. A reader sees either
+the old state or the new one, never half of either.
 """
 
 import errno
 import fcntl
+import hashlib
+import hmac
 import json
 import os
 import stat as stat_module
 import time
 
-STATE_DIRECTORY_NAME = b"aiqe"
-ACTIVE_TASK_NAME = b"task.json"
-LOCK_NAME = b"task.lock"
+#: The only record shape this build interprets.
+#:
+#: Earlier versions recorded a different ownership meaning and a different
+#: state location. Reading one of those under today's semantics would say
+#: something untrue about a live task, so they are refused rather than
+#: reinterpreted. There is no migration, by design: this is local pre-release
+#: state, and a migration framework for it would be machinery in place of a
+#: sentence telling the user to end the task and start it again.
+SUPPORTED_SCHEMA_VERSION = 3
+
+#: Bytes of randomness in the machine-local salt.
+SALT_BYTES = 32
+
+#: The salt is readable by its owner alone. It is the only thing standing
+#: between a state directory listing and a list of the repositories on this
+#: machine.
+SALT_MODE = 0o600
+STATE_DIRECTORY_MODE = 0o700
+
+STATE_ROOT_NAME = "aiqe"
+SALT_NAME = "salt"
+ACTIVE_TASK_NAME = "task.json"
+LOCK_NAME = "task.lock"
 
 #: How long `task start` waits for another AIQE process to finish before
 #: refusing. Bounded rather than indefinite: a command that hangs forever
 #: because some other process is wedged is its own kind of failure.
 LOCK_TIMEOUT_SECONDS = 5.0
 _LOCK_POLL_SECONDS = 0.02
-
-#: The only record shape this build interprets.
-#:
-#: Version 1 encoded a different ownership meaning: a declared path owned its
-#: descendants. Reading such a record under exact-pathset semantics would
-#: quietly narrow a live task's authority, so it is refused rather than
-#: reinterpreted. There is no migration, by design - this is local pre-release
-#: state, and a migration framework for it would be machinery in place of a
-#: sentence telling the user to end the task and start it again.
-SUPPORTED_SCHEMA_VERSION = 2
 
 STATE_DIRECTORY_UNSAFE = "STATE_DIRECTORY_UNSAFE"
 STATE_UNREADABLE = "STATE_UNREADABLE"
@@ -88,20 +112,147 @@ class UnsupportedSchema(CorruptState):
     """
 
 
-def state_directory(git_dir):
-    return os.path.join(git_dir, STATE_DIRECTORY_NAME)
+# --- Locating machine-local state ------------------------------------------
 
 
-def active_task_path(git_dir):
-    return os.path.join(state_directory(git_dir), ACTIVE_TASK_NAME)
+def state_root(env=None):
+    """`$XDG_STATE_HOME/aiqe`, or the conventional fallback beneath `$HOME`."""
+    env = os.environ if env is None else env
+    base = env.get("XDG_STATE_HOME")
+    if not base:
+        home = env.get("HOME")
+        if not home:
+            raise StateError(
+                STATE_DIRECTORY_UNSAFE,
+                "neither XDG_STATE_HOME nor HOME is set, so AIQE cannot "
+                "locate machine-local state",
+            )
+        base = os.path.join(home, ".local", "state")
+    return os.path.join(base, STATE_ROOT_NAME)
 
 
-def _lock_path(git_dir):
-    return os.path.join(state_directory(git_dir), LOCK_NAME)
+def salt_path(env=None):
+    return os.path.join(state_root(env), SALT_NAME)
+
+
+def read_salt(env=None):
+    """The machine-local salt, or None when it has never been created.
+
+    Reading never creates it. That is what lets `aiqe task` answer on a
+    machine AIQE has never written to without becoming a machine AIQE has
+    written to.
+    """
+    path = salt_path(env)
+    try:
+        with open(path, "rb") as handle:
+            salt = handle.read()
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        raise StateError(
+            STATE_DIRECTORY_UNSAFE,
+            "the AIQE machine-local salt could not be read: %s" % (exc.strerror,),
+        )
+    if len(salt) != SALT_BYTES:
+        raise StateError(
+            STATE_DIRECTORY_UNSAFE,
+            "the AIQE machine-local salt is not %d bytes; refusing to derive "
+            "state locations from it" % (SALT_BYTES,),
+        )
+    return salt
+
+
+def ensure_salt(env=None):
+    """The machine-local salt, creating it once if it does not exist.
+
+    Called only on a write path. Creation is a link into place, which is
+    atomic and fails rather than overwrites: two processes racing to be the
+    first ever writer both end up using the salt that won, never two salts.
+    A crash mid-write leaves a temporary file that was never linked, not a
+    short salt that would silently change every derived key.
+    """
+    existing = read_salt(env)
+    if existing is not None:
+        return existing
+
+    root = _ensure_directory(state_root(env))
+    final = os.path.join(root, SALT_NAME)
+    temporary = os.path.join(
+        root, ".%s.tmp.%d" % (SALT_NAME, os.getpid())
+    )
+
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, SALT_MODE)
+    try:
+        os.write(descriptor, os.urandom(SALT_BYTES))
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+    try:
+        os.link(temporary, final)
+    except FileExistsError:
+        # Another process got there first. Its salt is the canonical one.
+        pass
+    except OSError as exc:
+        os.unlink(temporary)
+        raise StateError(
+            STATE_DIRECTORY_UNSAFE,
+            "the AIQE machine-local salt could not be created: %s" % (exc.strerror,),
+        )
+    finally:
+        try:
+            os.unlink(temporary)
+        except OSError:
+            pass
+    _sync_directory(root)
+
+    salt = read_salt(env)
+    if salt is None:
+        raise StateError(
+            STATE_DIRECTORY_UNSAFE,
+            "the AIQE machine-local salt disappeared immediately after "
+            "creation",
+        )
+    return salt
+
+
+def derive_key(salt, common_dir, git_dir):
+    """The machine-local directory token for one worktree.
+
+    HMAC over the canonical common Git directory and the canonical
+    per-worktree Git directory, NUL-separated. NUL is a safe separator because
+    a POSIX path cannot contain one, so no two different pairs of paths can
+    produce the same input string.
+
+    Both are included on purpose. The common directory alone would give every
+    linked worktree of a repository the same key, and therefore one task
+    between them.
+    """
+    message = _canonical(common_dir) + b"\0" + _canonical(git_dir)
+    return hmac.new(salt, message, hashlib.sha256).hexdigest()
+
+
+def _canonical(path_bytes):
+    if not isinstance(path_bytes, bytes):
+        path_bytes = os.fsencode(path_bytes)
+    try:
+        return os.path.realpath(path_bytes)
+    except OSError:
+        return os.path.normpath(path_bytes)
+
+
+def worktree_state_directory(key, env=None):
+    return os.path.join(state_root(env), key)
+
+
+def active_task_path(state_directory):
+    return os.path.join(state_directory, ACTIVE_TASK_NAME)
+
+
+# --- Filesystem safety -----------------------------------------------------
 
 
 def _require_directory(path):
-    """The state directory must be a real directory, or absent."""
     try:
         stat = os.lstat(path)
     except FileNotFoundError:
@@ -121,7 +272,6 @@ def _require_directory(path):
 
 
 def _require_regular_file(path):
-    """The active task record must be a real file, or absent."""
     try:
         stat = os.lstat(path)
     except FileNotFoundError:
@@ -140,32 +290,38 @@ def _require_regular_file(path):
     return True
 
 
-def ensure_state_directory(git_dir):
-    """Create the state directory if needed, refusing an unsafe one."""
-    directory = state_directory(git_dir)
-    if not _require_directory(directory):
+def _ensure_directory(path):
+    if not _require_directory(path):
         try:
-            os.mkdir(directory, 0o700)
+            os.makedirs(path, STATE_DIRECTORY_MODE)
         except FileExistsError:
-            # Another AIQE process created it between the check and the
-            # attempt. Re-check rather than assume it is the right kind.
-            _require_directory(directory)
+            _require_directory(path)
         except OSError as exc:
             raise StateError(
                 STATE_DIRECTORY_UNSAFE,
                 "AIQE state directory could not be created: %s" % (exc.strerror,),
             )
-    return directory
+    return path
 
 
-def read_active(git_dir):
+def ensure_state_directory(key, env=None):
+    _ensure_directory(state_root(env))
+    return _ensure_directory(worktree_state_directory(key, env))
+
+
+# --- Reading and writing the active task -----------------------------------
+
+
+def read_active(state_directory):
     """The active task record, or None. Never mutates anything.
 
     `aiqe task` is a read. It creates no directory, takes no lock and writes
     no file, because a status command that changes state is a status command
     nobody can trust.
     """
-    path = active_task_path(git_dir)
+    if state_directory is None:
+        return None
+    path = active_task_path(state_directory)
     if not _require_regular_file(path):
         return None
     try:
@@ -193,7 +349,7 @@ def read_active(git_dir):
         raise UnsupportedSchema(
             TASK_STATE_SCHEMA_UNSUPPORTED,
             "the active AIQE task record uses state schema version %r, and "
-            "this build interprets version %d. Ownership meant something "
+            "this build interprets version %d. Task state meant something "
             "different in an earlier schema, so the record is refused rather "
             "than reinterpreted."
             % (record["schema_version"], SUPPORTED_SCHEMA_VERSION),
@@ -201,16 +357,16 @@ def read_active(git_dir):
     return record
 
 
-def write_active(git_dir, record):
+def write_active(state_directory, record):
     """Replace the active task record atomically."""
-    directory = ensure_state_directory(git_dir)
-    path = active_task_path(git_dir)
+    _ensure_directory(state_directory)
+    path = active_task_path(state_directory)
     _require_regular_file(path)
     payload = (json.dumps(record, indent=2, sort_keys=True) + "\n").encode("utf-8")
-    _atomic_replace(directory, path, payload)
+    _atomic_replace(state_directory, path, payload)
 
 
-def clear_active(git_dir):
+def clear_active(state_directory):
     """Remove the active task record atomically.
 
     Unlink is atomic from a reader's point of view: the record is either there
@@ -221,7 +377,7 @@ def clear_active(git_dir):
     this slice reads it. Completion evidence belongs to receipts, which are
     artifacts in their own right, not a side effect of ending a task.
     """
-    path = active_task_path(git_dir)
+    path = active_task_path(state_directory)
     try:
         os.unlink(path)
     except FileNotFoundError:
@@ -231,14 +387,12 @@ def clear_active(git_dir):
             STATE_UNREADABLE,
             "AIQE task record could not be removed: %s" % (exc.strerror,),
         )
-    _sync_directory(state_directory(git_dir))
+    _sync_directory(state_directory)
     return True
 
 
 def _atomic_replace(directory, path, payload):
-    temporary = os.path.join(
-        directory, b".task.json.tmp." + str(os.getpid()).encode("ascii")
-    )
+    temporary = os.path.join(directory, ".%s.tmp.%d" % (ACTIVE_TASK_NAME, os.getpid()))
     descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     try:
         os.write(descriptor, payload)
@@ -266,25 +420,25 @@ def _sync_directory(directory):
 
 
 class TaskLock(object):
-    """Exclusive lock over start and end in one worktree.
+    """Exclusive lock over start and end for one worktree.
 
-    An advisory `flock` on a file in the state directory. It is per-worktree,
-    because the state directory is, so two linked worktrees never contend.
-    The kernel releases it if the process dies, so a crash cannot wedge a
-    repository.
+    An advisory `flock` on a file in that worktree's machine-local state
+    directory. It is per-worktree because the directory is, so two linked
+    worktrees never contend. The kernel releases it if the process dies, so a
+    crash cannot wedge anything.
 
     Deliberately not: a daemon, a lock service, a lease, or anything
     distributed. One machine, one worktree, one active task.
     """
 
-    def __init__(self, git_dir, timeout=LOCK_TIMEOUT_SECONDS):
-        self._git_dir = git_dir
+    def __init__(self, state_directory, timeout=LOCK_TIMEOUT_SECONDS):
+        self._state_directory = state_directory
         self._timeout = timeout
         self._descriptor = None
 
     def __enter__(self):
-        ensure_state_directory(self._git_dir)
-        path = _lock_path(self._git_dir)
+        _ensure_directory(self._state_directory)
+        path = os.path.join(self._state_directory, LOCK_NAME)
         self._descriptor = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
         deadline = time.time() + self._timeout
         while True:
@@ -304,7 +458,7 @@ class TaskLock(object):
                 self._descriptor = None
                 raise StateError(
                     STATE_LOCK_UNAVAILABLE,
-                    "another AIQE task operation is in progress in this "
+                    "another AIQE task operation is in progress for this "
                     "worktree",
                 )
             time.sleep(_LOCK_POLL_SECONDS)

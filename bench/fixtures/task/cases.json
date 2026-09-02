@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "family": "TASK_SCOPE_CORE",
-  "note": "Expected outcomes are written from the frozen task contract, not recorded from a run. Ownership is an exact literal pathset: a declared path owns itself and nothing else. Owned paths are compared as escaped display text, which is unambiguous and reviewable; the raw byte round-trip is asserted separately by the arbitrary-byte case. Where two spellings of one path are expected to produce the same authority, the digests below are equal on purpose.",
+  "note": "Expected outcomes are written from the frozen task contract, not recorded from a run. Ownership is an exact literal pathset of regular files: a declared path owns itself and nothing else, and a path that exists today as anything but a regular file is refused. Task state is machine-local, so a task operation changes nothing inside the repository at all - the zero-tolerance quantities below include the Git directory. Owned paths are compared as escaped display text, which is unambiguous and reviewable; the raw byte round-trip is asserted separately by the arbitrary-byte case.",
   "zero_tolerance": [
     "repository_mutations",
     "local_state_writes",
@@ -11,10 +11,8 @@
   "cases": [
     {
       "id": "simple_file_scope",
-      "description": "One file declared, shown, and ended. The shape every other case is a deviation from.",
+      "description": "One regular file declared, shown, and ended. The shape every other case is a deviation from.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -23,12 +21,49 @@
         "owned_while_active": [
           "src/strategy.py"
         ],
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
     {
+      "id": "untracked_regular_file",
+      "description": "An untracked regular file. Tracked or not makes no difference to a declaration.",
+      "expect": {
+        "exit_codes": [
+          0,
+          0,
+          0
+        ],
+        "owned_while_active": [
+          "scratch.py"
+        ],
+        "digest_while_active": "sha256:954edffd6505b40eed86cd4706189a5c250917e422f8cc431d03f9a51dc2350b",
+        "active_after_end": false,
+        "terminal_safe": true
+      }
+    },
+    {
+      "id": "nonexistent_future_path",
+      "description": "A path that does not exist yet - the normal case when the task is about to create it. A declaration is not an observation.",
+      "expect": {
+        "exit_codes": [
+          0,
+          0,
+          0
+        ],
+        "owned_while_active": [
+          "src/new_module.py"
+        ],
+        "digest_while_active": "sha256:3abb060416a56f55f8262c68b23a7b1937f863663eedbd9fbb19a17bf2541ac9",
+        "active_after_end": false,
+        "terminal_safe": true,
+        "declared_path_exists": false
+      }
+    },
+    {
       "id": "existing_directory_refused",
-      "description": "A declared path that exists today as a directory. v1 owns an exact pathset, so a directory declaration has no meaning in it and is refused rather than expanded or silently owned.",
+      "description": "A declared path that exists today as a directory. v1 owns an exact pathset of regular files, so a directory declaration has no meaning in it.",
       "expect": {
         "exit_codes": [
           3
@@ -39,61 +74,45 @@
       }
     },
     {
-      "id": "symlink_owns_the_link",
-      "description": "A symlink is a path object in its own right. Declaring one owns the link, not what it resolves to - so a symlink pointing at a directory is accepted, because the declaration is about the link.",
+      "id": "symlink_refused",
+      "description": "A symlink to a file and a symlink to a directory. Both refused as links rather than judged by their targets: v1's owned-path and content semantics are defined over regular files.",
       "expect": {
         "exit_codes": [
-          0,
-          0,
-          0
+          3,
+          3
         ],
-        "owned_while_active": [
-          "linkdir",
-          "linkfile"
-        ],
-        "digest_while_active": "sha256:ba2e0bd5fb8abfe19045a21932a414006b6e1129b20161aa5cdca4c39073a8a9",
         "active_after_end": false,
+        "salt_created": false,
         "terminal_safe": true
       }
     },
     {
-      "id": "nonexistent_future_path",
-      "description": "Declaring a path that does not exist yet - the normal case when the task is about to create it. Scope is a declaration, not an observation.",
+      "id": "special_file_refused",
+      "description": "A FIFO. Not a regular file, so not something a v1 task can own.",
       "expect": {
-        "active_after_end": false,
-        "declared_path_exists": false,
-        "digest_while_active": "sha256:3abb060416a56f55f8262c68b23a7b1937f863663eedbd9fbb19a17bf2541ac9",
         "exit_codes": [
-          0,
-          0,
-          0
+          3
         ],
-        "owned_while_active": [
-          "src/new_module.py"
-        ],
+        "active_after_end": false,
+        "salt_created": false,
         "terminal_safe": true
       }
     },
     {
-      "id": "duplicate_scope",
-      "description": "The same path declared twice is one scope, and its digest equals the single-declaration digest.",
+      "id": "duplicate_declaration_refused",
+      "description": "Two spellings of one path in one declaration. Refused rather than merged: silently agreeing with half of what the user typed is not an answer.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
-          0,
-          0,
-          0
+          3
         ],
-        "owned_while_active": [
-          "src/strategy.py"
-        ],
+        "active_after_end": false,
+        "salt_created": false,
         "terminal_safe": true
       }
     },
     {
       "id": "lexical_parent_and_child",
-      "description": "'docs' and 'docs/guide.md' are two distinct declarations. Under exact ownership neither implies the other, so neither collapses into the other.",
+      "description": "'docs' and 'docs/guide.md' are two distinct declarations. Under exact ownership neither implies the other.",
       "expect": {
         "exit_codes": [
           0,
@@ -111,10 +130,8 @@
     },
     {
       "id": "trailing_separator",
-      "description": "'docs/', './docs' and 'docs//' are three spellings of one path. They collapse to one owned path with one digest.",
+      "description": "A trailing separator is not part of a path's identity, so 'docs//' is the path 'docs'.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:60f8bd4ec4f9d16f5b0d13e73fad57514c98dd48a5f399b693330570bc9aa024",
         "exit_codes": [
           0,
           0,
@@ -123,6 +140,8 @@
         "owned_while_active": [
           "docs"
         ],
+        "digest_while_active": "sha256:60f8bd4ec4f9d16f5b0d13e73fad57514c98dd48a5f399b693330570bc9aa024",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
@@ -130,8 +149,6 @@
       "id": "literal_metacharacter_names",
       "description": "Every declared name here is a filename, not a pattern: glob characters, pathspec magic, and arguments that look like flags. Nothing expands.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:3b363ad27e0a18a4530b25b75a46037a893bbea36379e62580a9f9b0e65e4f40",
         "exit_codes": [
           0,
           0,
@@ -146,6 +163,8 @@
           "?",
           "[abc]"
         ],
+        "digest_while_active": "sha256:3b363ad27e0a18a4530b25b75a46037a893bbea36379e62580a9f9b0e65e4f40",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
@@ -153,8 +172,6 @@
       "id": "whitespace_names",
       "description": "Names containing a space, a tab and a newline. Stored literally, rendered escaped, and the newline does not become a second output row.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:697fd84fd61d4bf49fb13e1362d08bffc9c198119737bca1d2346baff35dcfc8",
         "exit_codes": [
           0,
           0,
@@ -165,15 +182,15 @@
           "space name",
           "tab\\tname"
         ],
+        "digest_while_active": "sha256:697fd84fd61d4bf49fb13e1362d08bffc9c198119737bca1d2346baff35dcfc8",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
     {
       "id": "subdirectory_invocation",
-      "description": "'--own ../src/strategy.py' typed from tests/ means the same scope as declaring it from the root, and produces the same digest.",
+      "description": "'--own ../src/strategy.py' typed from tests/ means the same path as declaring it from the root, and produces the same digest.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0
@@ -181,6 +198,8 @@
         "owned_while_active": [
           "src/strategy.py"
         ],
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
@@ -188,7 +207,6 @@
       "id": "scope_rejections",
       "description": "Absolute paths, parent escapes, the repository root, the Git administrative directory, and '..' after a named component. All refused, and none leaves a task behind.",
       "expect": {
-        "active_after_rejections": false,
         "rejection_exit_codes": [
           3,
           3,
@@ -197,37 +215,86 @@
           3,
           3,
           3
-        ]
+        ],
+        "active_after_rejections": false
+      }
+    },
+    {
+      "id": "unborn_head_refused",
+      "description": "A repository with no commits. A task records the commit it started from, so starting one is refused - while doctor and status still answer, and nothing is written.",
+      "expect": {
+        "exit_codes": [
+          3,
+          0,
+          0
+        ],
+        "salt_created": false,
+        "state_root_created": false,
+        "terminal_safe": true
+      }
+    },
+    {
+      "id": "salt_created_only_on_write",
+      "description": "doctor, status and a refused start create no machine-local salt. The first successful start creates it: 32 bytes, readable by its owner alone.",
+      "expect": {
+        "exit_codes": [
+          0,
+          0,
+          3,
+          0
+        ],
+        "salt_after_doctor": false,
+        "salt_after_status": false,
+        "salt_after_refused_start": false,
+        "salt_after_start": true,
+        "salt_mode": 384,
+        "salt_bytes": 32,
+        "terminal_safe": true
+      }
+    },
+    {
+      "id": "foreign_staged_count_at_start",
+      "description": "Three staged entries the task never mentioned. The count is recorded informationally, the index is byte-identical across the lifecycle, and no filename reaches the output.",
+      "expect": {
+        "exit_codes": [
+          0,
+          0,
+          0
+        ],
+        "recorded_staged_count": 3,
+        "index_unchanged": true,
+        "staged_unchanged": true,
+        "staged_names_absent_from_output": true,
+        "active_after_end": false,
+        "terminal_safe": true
       }
     },
     {
       "id": "foreign_staged_preserved",
       "description": "A repository with staged work it did not ask AIQE about. The index is byte-identical across start, status and end.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
           0
         ],
-        "index_unchanged": true,
         "owned_while_active": [
           "src/strategy.py"
         ],
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
+        "active_after_end": false,
+        "terminal_safe": true,
+        "index_unchanged": true,
+        "staged_unchanged": true,
         "staged_paths": [
           "foreign.txt"
-        ],
-        "staged_unchanged": true,
-        "terminal_safe": true
+        ]
       }
     },
     {
       "id": "repository_defined_execution",
       "description": "A repository pointing at commands every way it can - clean filter, fsmonitor, shell aliases, an executable hook. Declaring a task runs none of them.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -236,16 +303,15 @@
         "owned_while_active": [
           "src/strategy.py"
         ],
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
     {
       "id": "linked_worktree_isolation",
-      "description": "Two linked worktrees hold two independent tasks. Ending one does not touch the other, and the main worktree has no task at all.",
+      "description": "Two linked worktrees share a common Git directory and have different per-worktree ones, so they derive different machine-local keys and hold two independent tasks. Neither writes inside any Git directory.",
       "expect": {
-        "b_survives_a_end": [
-          "src/b.py"
-        ],
         "exit_codes": [
           0,
           0,
@@ -253,23 +319,30 @@
           0,
           0
         ],
-        "main_worktree_has_no_task": true,
-        "task_ids_differ": true,
-        "terminal_safe": true,
+        "common_dirs_match": true,
+        "git_dirs_differ": true,
+        "derived_keys_differ": true,
+        "no_state_inside_git_dirs": true,
         "worktree_a_owned": [
           "src/a.py"
         ],
         "worktree_b_owned": [
           "src/b.py"
-        ]
+        ],
+        "task_ids_differ": true,
+        "b_survives_a_end": [
+          "src/b.py"
+        ],
+        "main_worktree_has_no_task": true,
+        "terminal_safe": true
       }
     },
     {
       "id": "concurrent_start",
       "description": "Two real processes racing to start a task in one worktree. One wins, one is refused, and exactly one valid record exists.",
       "expect": {
-        "refusals": 1,
         "successes": 1,
+        "refusals": 1,
         "unexpected_exits": 0,
         "valid_active_records": 1
       }
@@ -278,8 +351,6 @@
       "id": "interrupted_write",
       "description": "A process killed mid-write leaves a temporary file that was never renamed. It is not a task: status says so, and the next start succeeds.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -288,15 +359,16 @@
         "owned_while_active": [
           "src/strategy.py"
         ],
-        "status_before_recovery_shows_no_task": true,
-        "terminal_safe": true
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
+        "active_after_end": false,
+        "terminal_safe": true,
+        "status_before_recovery_shows_no_task": true
       }
     },
     {
       "id": "corrupt_record_recovery",
       "description": "An active record that cannot be read is unknown, not unsupported: status and start exit 2. 'task end' discards it, and that is the documented way out.",
       "expect": {
-        "active_after_end": false,
         "exit_codes": [
           2,
           2,
@@ -307,12 +379,13 @@
         "owned_while_active": [
           "src/strategy.py"
         ],
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
     {
-      "id": "schema_v1_fail_closed",
-      "description": "An active record written under the superseded schema, where a declared path owned its descendants. Reading it under exact semantics would quietly narrow a live task's authority, so it is refused and left untouched. 'task end' discards it and the user starts again; there is no migration.",
+      "id": "superseded_schema_fail_closed",
+      "description": "An active record written under a superseded schema. Reading it under today's semantics would say something untrue about a live task, so it is refused and left untouched. 'task end' discards it; there is no migration.",
       "expect": {
         "exit_codes": [
           2,
@@ -322,7 +395,7 @@
           0
         ],
         "record_untouched_while_refused": true,
-        "schema_after_restart": 2,
+        "schema_after_restart": 3,
         "owned_while_active": [
           "src/strategy.py"
         ],
@@ -332,7 +405,7 @@
     },
     {
       "id": "unsafe_state_location",
-      "description": "A symlink planted where AIQE's private state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
+      "description": "A symlink planted where this worktree's machine-local state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
       "expect": {
         "exit_codes": [
           3
@@ -345,8 +418,6 @@
       "description": "An owned path whose bytes are not valid UTF-8, declared through the real entry point with byte-preserving argv. The stored bytes equal the bytes typed.",
       "platform": "linux",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:3dbc045afd02d4dd48f413b67079d78557a5ed81c39cc0e9fd9e8e726afb6681",
         "exit_codes": [
           0,
           0,
@@ -355,8 +426,10 @@
         "owned_while_active": [
           "src/tracked-\\xe9\\xff.dat"
         ],
-        "raw_bytes_roundtrip": true,
-        "terminal_safe": true
+        "digest_while_active": "sha256:3dbc045afd02d4dd48f413b67079d78557a5ed81c39cc0e9fd9e8e726afb6681",
+        "active_after_end": false,
+        "terminal_safe": true,
+        "raw_bytes_roundtrip": true
       }
     }
   ]
