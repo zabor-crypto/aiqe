@@ -126,7 +126,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -279,7 +279,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -432,7 +432,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     present\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     present\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -587,7 +587,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       no commits yet \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      REPOSITORY_UNBORN_HEAD\n      HEAD points at a branch that has no commits yet.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 no commits yet \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      REPOSITORY_UNBORN_HEAD\n      HEAD points at a branch that has no commits yet.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -906,7 +906,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1059,7 +1059,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1212,7 +1212,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1365,7 +1365,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1518,7 +1518,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 1 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1671,7 +1671,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1824,7 +1824,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 1 staged \u00b7 2 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 1 staged \u00b7 2 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -1977,7 +1977,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -2133,7 +2133,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      merge in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_MERGE_IN_PROGRESS\n      A merge is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      merge in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_MERGE_IN_PROGRESS\n      A merge is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [
@@ -2292,7 +2292,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      rebase in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  FINDING      OPERATION_REBASE_IN_PROGRESS\n      A rebase is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  3 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 detached HEAD \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      rebase in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      HEAD_DETACHED\n      HEAD is detached rather than on a branch.\n\n  FINDING      OPERATION_REBASE_IN_PROGRESS\n      A rebase is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  3 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [
@@ -2450,7 +2450,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      cherry-pick in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_CHERRY_PICK_IN_PROGRESS\n      A cherry-pick is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 1 unmerged\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      cherry-pick in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      OPERATION_CHERRY_PICK_IN_PROGRESS\n      A cherry-pick is in progress. AIQE does not support a bounded completion\n      commit while the repository is mid-operation.\n\n  FINDING      UNMERGED_PATHS_PRESENT\n      The index contains unmerged paths.\n\n  2 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [
@@ -2607,7 +2607,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      linked worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        linked worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      LINKED_WORKTREE\n      This is a linked worktree sharing a Git directory with another worktree.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      linked worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        linked worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      LINKED_WORKTREE\n      This is a linked worktree sharing a Git directory with another worktree.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -2762,7 +2762,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout on\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      SPARSE_CHECKOUT_ACTIVE\n      Sparse checkout is enabled, so the worktree does not contain every\n      tracked path.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout on\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      SPARSE_CHECKOUT_ACTIVE\n      Sparse checkout is enabled, so the worktree does not contain every\n      tracked path.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -2917,7 +2917,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -3072,7 +3072,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   custom hooks path\n\n  FINDING      GIT_HOOKS_PATH_CONFIGURED\n      core.hooksPath is set in the repository configuration, so hooks are read\n      from a non-default location.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   custom hooks path\n\n  FINDING      GIT_HOOKS_PATH_CONFIGURED\n      core.hooksPath is set in the repository configuration, so hooks are read\n      from a non-default location.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -3227,7 +3227,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   hooks installed\n\n  FINDING      GIT_HOOKS_PRESENT\n      Executable Git hooks are installed. An active commit hook makes an AIQE\n      bounded commit unsupported, because AIQE will not bypass repository\n      governance to obtain one.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   hooks installed\n\n  FINDING      GIT_HOOKS_PRESENT\n      Executable Git hooks are installed. An active commit hook makes an AIQE\n      bounded commit unsupported, because AIQE will not bypass repository\n      governance to obtain one.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -3382,7 +3382,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   signing configured\n\n  FINDING      COMMIT_SIGNING_CONFIGURED\n      Commit signing is configured in the repository configuration. Effective\n      signing policy is resolved later, not by Doctor.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   signing configured\n\n  FINDING      COMMIT_SIGNING_CONFIGURED\n      Commit signing is configured in the repository configuration. Effective\n      signing policy is resolved later, not by Doctor.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -3552,7 +3552,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  2 unknown\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  2 unknown\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -3722,7 +3722,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  2 unknown\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  2 unknown\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -3893,7 +3893,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured \u00b7 tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      check-in filter configured in this repository, and Doctor executes\n      nothing the repository defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 2 findings\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured \u00b7 tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      check-in filter configured in this repository, and Doctor executes\n      nothing the repository defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 2 findings\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4048,7 +4048,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      FSMONITOR_CONFIGURED\n      core.fsmonitor is configured. Git would run it as a child process during\n      an index refresh; Doctor disables it for its own Git invocations.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      FSMONITOR_CONFIGURED\n      core.fsmonitor is configured. Git would run it as a child process during\n      an index refresh; Doctor disables it for its own Git invocations.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4203,7 +4203,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      EXECUTABLE_ALIAS_CONFIGURED\n      The repository configuration defines shell-executing Git aliases.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      EXECUTABLE_ALIAS_CONFIGURED\n      The repository configuration defines shell-executing Git aliases.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4356,7 +4356,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4511,7 +4511,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present, unconstrained \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      CLAUDE_PERMISSIONS_BROAD\n      Claude Code repository settings grant unconstrained command execution.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present, unconstrained \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  FINDING      CLAUDE_PERMISSIONS_BROAD\n      Claude Code repository settings grant unconstrained command execution.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4666,7 +4666,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present, permissions unknown \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  UNKNOWN      AGENT_CONFIG_UNREADABLE\n      A Claude Code settings file is present but could not be parsed, so its\n      permission surface is unknown.\n\n  1 unknown\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code present, permissions unknown \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  UNKNOWN      AGENT_CONFIG_UNREADABLE\n      A Claude Code settings file is present but could not be parsed, so its\n      permission surface is unknown.\n\n  1 unknown\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4819,7 +4819,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex present\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex present\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -4974,7 +4974,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex present, unconstrained\n  Commit policy   no local policy signals\n\n  FINDING      CODEX_PERMISSIONS_BROAD\n      Codex repository configuration disables the approval or sandbox\n      boundary.\n\n  1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex present, unconstrained\n  Commit policy   no local policy signals\n\n  FINDING      CODEX_PERMISSIONS_BROAD\n      Codex repository configuration disables the approval or sandbox\n      boundary.\n\n  1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5144,7 +5144,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: repository attributes bind a path to a\n      filter driver, and the driver's command can be defined anywhere, so\n      comparing content could execute it.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: repository attributes bind a path to a\n      filter driver, and the driver's command can be defined anywhere, so\n      comparing content could execute it.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  1 unknown \u00b7 1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5297,7 +5297,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 1 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5468,7 +5468,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes \u00b7 config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  2 unknown \u00b7 1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   tracked .gitattributes \u00b7 config includes unresolved\n\n  UNKNOWN      GIT_CONFIG_INCLUDE_UNRESOLVED\n      The repository configuration includes another file. Doctor does not\n      follow include chains, so the effective configuration here is\n      unresolved.\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: the repository configuration includes\n      another file that Doctor does not follow, so whether it defines an\n      executable filter driver is unresolved.\n\n  FINDING      TRACKED_GITATTRIBUTES\n      A tracked .gitattributes file is present. It can bind paths to filter\n      drivers that change content on check-in.\n\n  2 unknown \u00b7 1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5621,7 +5621,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5791,7 +5791,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      check-in filter configured in this repository, and Doctor executes\n      nothing the repository defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  1 unknown \u00b7 1 finding\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 ? unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   check-in filter configured\n\n  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN\n      The unstaged count is unknown: determining it would make Git run the\n      check-in filter configured in this repository, and Doctor executes\n      nothing the repository defines.\n\n  FINDING      CHECKIN_FILTER_CONFIGURED\n      A check-in filter driver is configured. Git runs it as a child process\n      when comparing worktree content, so Doctor does not make that\n      comparison.\n\n  1 unknown \u00b7 1 finding\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5944,7 +5944,7 @@
         true,
         true
       ],
-      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 submodule worktrees not counted\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 0 unstaged \u00b7 0 untracked \u00b7 submodule worktrees not counted\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
       "local_state_write_detail": [],
       "local_state_writes": 0,
       "operations_in_progress": [],
@@ -5973,6 +5973,159 @@
       }
     },
     {
+      "agent_surface": {
+        "claude_config_present": false,
+        "claude_permissions": "not_present",
+        "codex_config_present": false,
+        "codex_permissions": "not_present"
+      },
+      "aiqe": {
+        "config_present": false
+      },
+      "case": "env_command_config_filter_canary",
+      "commit_policy": {
+        "attributes_bind_filter": false,
+        "attributes_readable": true,
+        "checkin_filter_configured": false,
+        "config_include_present": false,
+        "hooks_path_configured": false,
+        "hooks_present": false,
+        "local_config_readable": true,
+        "signing_configured": false,
+        "submodules_present": false,
+        "tracked_gitattributes": false
+      },
+      "description": "A filter driver injected through GIT_CONFIG_COUNT and GIT_CONFIG_KEY_0/VALUE_0 in the process environment, with the binding in an external attributes file so that only the environment defence is under test. Silencing configuration files does not reach command-scope configuration; stripping it from the inherited environment does.",
+      "exit_code": 0,
+      "findings": [],
+      "fired_canaries": [],
+      "git_invocations": [
+        [
+          "git",
+          "--version"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "gc.auto=0",
+          "-c",
+          "maintenance.auto=false",
+          "rev-parse",
+          "--git-dir",
+          "--git-common-dir",
+          "--is-bare-repository",
+          "--is-inside-work-tree"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "gc.auto=0",
+          "-c",
+          "maintenance.auto=false",
+          "rev-parse",
+          "--show-toplevel"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "gc.auto=0",
+          "-c",
+          "maintenance.auto=false",
+          "symbolic-ref",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "gc.auto=0",
+          "-c",
+          "maintenance.auto=false",
+          "rev-parse",
+          "--verify",
+          "--quiet",
+          "HEAD"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "gc.auto=0",
+          "-c",
+          "maintenance.auto=false",
+          "ls-files",
+          "--cached",
+          "-z"
+        ],
+        [
+          "git",
+          "--no-optional-locks",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "gc.auto=0",
+          "-c",
+          "maintenance.auto=false",
+          "status",
+          "--porcelain=v2",
+          "-z",
+          "--untracked-files=normal",
+          "--no-renames",
+          "--ignore-submodules=dirty"
+        ]
+      ],
+      "git_invocations_config_isolated": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "human_output": "AIQE DOCTOR\n\n  Repository      ordinary worktree \u00b7 git 2.50.1\n  Git state       repository-safe view \u00b7 on a branch \u00b7 0 staged \u00b7 1 unstaged \u00b7 0 untracked\n  Topology        single worktree \u00b7 sparse checkout off\n  Operations      none in progress\n  AIQE config     absent\n  Agent surface   Claude Code absent \u00b7 Codex absent\n  Commit policy   no local policy signals\n\n  No findings.\n",
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "operations_in_progress": [],
+      "outcome": "PASS",
+      "problems": [],
+      "repository": {
+        "detected": true,
+        "head": "branch",
+        "kind": "worktree"
+      },
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "result": "PRODUCED",
+      "topology": {
+        "linked_worktree": false,
+        "sparse_checkout": "off"
+      },
+      "working_state": {
+        "determined": true,
+        "staged": 0,
+        "submodule_worktrees_excluded": false,
+        "unmerged": 0,
+        "unstaged": 1,
+        "untracked": 0
+      }
+    },
+    {
       "case": "non_utf8_path",
       "description": "A real repository whose tracked, staged and untracked paths are not valid UTF-8. Doctor carries paths as bytes end to end; if any layer decoded one, this is where it would raise.",
       "outcome": "SKIPPED_PLATFORM",
@@ -5981,12 +6134,12 @@
     }
   ],
   "cases_failed": 0,
-  "cases_passed": 39,
+  "cases_passed": 40,
   "cases_skipped_platform": 1,
   "cases_skipped_platform_ids": [
     "non_utf8_path"
   ],
-  "cases_total": 40,
+  "cases_total": 41,
   "family": "DOCTOR_FIRST_CONTACT",
   "negative_controls": [
     {
@@ -6094,10 +6247,28 @@
       "repository_defined_executions": 1,
       "repository_mutation_detail": [],
       "repository_mutations": 0
+    },
+    {
+      "control": "NC_DOCTOR_ENV_COMMAND_CONFIG_EXECUTION",
+      "control_reproduces_failure": true,
+      "description": "A filter driver injected through GIT_CONFIG_COUNT and GIT_CONFIG_KEY_0/VALUE_0 rather than written in any file. Silencing the configuration files is not enough: Git reads configuration at command scope from the environment, and it outranks every file, so an invocation hardened only at file level still runs the injected driver. This is why the isolated invocations strip command-scope configuration from the environment they inherit.",
+      "detects": "repository_defined_execution",
+      "fired_canaries": [
+        "env-command-config"
+      ],
+      "fixture": "env_command_config_filter_canary",
+      "invariant": "DOCTOR_REPOSITORY_DEFINED_EXECUTIONS = 0",
+      "naive_returncode": 0,
+      "naive_stdout_bytes": 124,
+      "naive_stdout_retained": false,
+      "naive_workflow": "naive_status_isolated_only",
+      "repository_defined_executions": 1,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0
     }
   ],
-  "negative_controls_reproducing": 6,
-  "negative_controls_total": 6,
+  "negative_controls_reproducing": 7,
+  "negative_controls_total": 7,
   "other_families": {
     "CHANGE_INTEGRITY": "NOT_RUN",
     "COMPLETION_EVIDENCE_TRUTH": "NOT_RUN",

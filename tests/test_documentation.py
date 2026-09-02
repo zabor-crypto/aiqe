@@ -32,26 +32,26 @@ class FindingCodeCoverageTests(unittest.TestCase):
         self.assertEqual(undocumented, [], "finding codes missing from docs/doctor.md")
 
     def test_no_documented_code_has_been_removed_from_the_code(self):
-        """The reverse direction: documentation for a code that no longer exists."""
-        reference = read(DOCTOR_REFERENCE)
-        # Only check the codes the reference lists in its code blocks, matched
-        # by shape: uppercase words with underscores, at least two segments.
+        """The reverse direction: documentation for a code that no longer exists.
+
+        Scoped to the reference's finding-code section. Elsewhere the document
+        legitimately names other SHOUTING_IDENTIFIERS - Git environment
+        variables, for instance - and treating those as finding codes was a
+        false positive waiting to happen.
+        """
         import re
 
+        reference = read(DOCTOR_REFERENCE)
+        start = reference.index("## Finding codes")
+        end = reference.index("## Exit status", start)
+        section = reference[start:end]
+
         documented = set()
-        for block in re.findall(r"^```\n(.*?)^```", reference, re.S | re.M):
+        for block in re.findall(r"^```\n(.*?)^```", section, re.S | re.M):
             for token in re.findall(r"\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b", block):
                 documented.add(token)
-        # Vocabulary and schema words appear in those blocks too; only assert
-        # about tokens that look like finding codes by being declared or by
-        # sharing a declared prefix family.
-        families = {code.split("_")[0] for code in findings.ALL_CODES}
-        candidates = {
-            token
-            for token in documented
-            if token.split("_")[0] in families and token not in ("OK",)
-        }
-        stale = sorted(candidates - findings.ALL_CODES)
+
+        stale = sorted(documented - findings.ALL_CODES)
         self.assertEqual(stale, [], "docs/doctor.md documents codes that do not exist")
 
 

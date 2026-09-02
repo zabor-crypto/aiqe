@@ -543,6 +543,43 @@ def build_submodule_filter_canary(case, env):
     return root
 
 
+#: Command-scope configuration injected into the Doctor process environment.
+#: This is the documented mechanism, not a trick: Git reads these and they
+#: outrank every configuration file.
+ENV_COMMAND_CONFIG_DRIVER = "envdriver"
+
+
+def build_env_command_config_filter_canary(case, env):
+    """Filter driver injected through the process environment, not a file.
+
+    The binding lives in an external attributes file, so the static refusal
+    does not apply and the case tests only the thing it is meant to: whether
+    silencing the configuration *files* is enough. It is not. Git accepts
+    configuration at command scope from the environment, and it outranks every
+    file, so pointing GIT_CONFIG_GLOBAL at the null device does nothing about
+    it.
+
+    The builder mutates the environment the harness will hand to Doctor, which
+    is exactly the threat: Doctor inherits whatever it is launched with.
+    """
+    root = init_repo(case.repo_path, env)
+    marker = case.marker("env-command-config")
+    driver = os.path.join(root, "cleanfilter.sh")
+    canary(driver, marker, body="exec cat")
+
+    attributes = os.path.join(env["XDG_CONFIG_HOME"], "git", "attributes")
+    write(attributes, "*.dat filter=%s\n" % (ENV_COMMAND_CONFIG_DRIVER,))
+
+    write(os.path.join(root, "series.dat"), "aaaa\n")
+    commit_all(root, "base", env)
+    write(os.path.join(root, "series.dat"), "bbbb\n")
+
+    env["GIT_CONFIG_COUNT"] = "1"
+    env["GIT_CONFIG_KEY_0"] = "filter.%s.clean" % (ENV_COMMAND_CONFIG_DRIVER,)
+    env["GIT_CONFIG_VALUE_0"] = driver
+    return root
+
+
 # --- Arbitrary-byte path ---------------------------------------------------
 
 # Filenames are byte strings on POSIX. Only some filesystems additionally
@@ -644,5 +681,6 @@ BUILDERS = {
     "global_attributes_filter_canary": build_global_attributes_filter_canary,
     "external_attributes_local_filter_canary": build_external_attributes_local_filter_canary,
     "submodule_filter_canary": build_submodule_filter_canary,
+    "env_command_config_filter_canary": build_env_command_config_filter_canary,
     "non_utf8_path": build_non_utf8_path,
 }

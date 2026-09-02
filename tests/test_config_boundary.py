@@ -33,6 +33,7 @@ BOUNDARY_CASES = {
     "global_attributes_filter_canary": ("configuration isolation", True),
     "external_attributes_local_filter_canary": ("static refusal", False),
     "submodule_filter_canary": ("no submodule descent", True),
+    "env_command_config_filter_canary": ("command-scope sanitisation", True),
 }
 
 
@@ -135,6 +136,112 @@ class IsolationMechanismTests(unittest.TestCase):
         observed = support.harness.run_case("submodule_filter_canary")
         self.assertTrue(observed["working_state"]["submodule_worktrees_excluded"])
         self.assertIn("submodule worktrees not counted", observed["human_output"])
+
+
+class CommandScopeSanitisationTests(unittest.TestCase):
+    """Git reads configuration from the environment, and it outranks files.
+
+    Silencing GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL says nothing about
+    GIT_CONFIG_COUNT / GIT_CONFIG_KEY_<n> / GIT_CONFIG_VALUE_<n> or
+    GIT_CONFIG_PARAMETERS, which is why the isolated invocations start from an
+    environment with those removed.
+    """
+
+    def strip(self, env):
+        from aiqe.gitq import strip_command_scope_config
+
+        return strip_command_scope_config(env)
+
+    def test_command_scope_variables_are_removed(self):
+        stripped = self.strip(
+            {
+                "GIT_CONFIG_COUNT": "2",
+                "GIT_CONFIG_KEY_0": "filter.x.clean",
+                "GIT_CONFIG_VALUE_0": "/tmp/evil",
+                "GIT_CONFIG_KEY_1": "core.fsmonitor",
+                "GIT_CONFIG_VALUE_1": "/tmp/evil",
+                "GIT_CONFIG_PARAMETERS": "'filter.x.clean'='/tmp/evil'",
+            }
+        )
+        self.assertEqual(stripped, {})
+
+    def test_unrelated_environment_is_left_alone(self):
+        """Bounded to command-scope configuration, not a Git denylist."""
+        env = {
+            "PATH": "/usr/bin",
+            "HOME": "/home/someone",
+            "GIT_CONFIG_GLOBAL": "/dev/null",
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_AUTHOR_NAME": "someone",
+            "GIT_DIR": "/somewhere/.git",
+            "GIT_TERMINAL_PROMPT": "0",
+        }
+        self.assertEqual(self.strip(env), env)
+
+    def test_isolated_invocations_do_not_inherit_command_scope_config(self):
+        import os
+
+        from aiqe.gitq import GitRunner
+
+        runner = GitRunner(
+            os.getcwd(),
+            env={
+                "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+                "GIT_CONFIG_COUNT": "1",
+                "GIT_CONFIG_KEY_0": "filter.x.clean",
+                "GIT_CONFIG_VALUE_0": "/tmp/evil",
+                "GIT_CONFIG_PARAMETERS": "'filter.x.clean'='/tmp/evil'",
+            },
+        )
+        isolated = runner._env(True)
+        for name in (
+            "GIT_CONFIG_COUNT",
+            "GIT_CONFIG_KEY_0",
+            "GIT_CONFIG_VALUE_0",
+            "GIT_CONFIG_PARAMETERS",
+        ):
+            self.assertNotIn(name, isolated, name)
+
+    def test_doctor_c_settings_are_not_environment_and_still_apply(self):
+        """The safety settings travel on the command line, not the environment."""
+        observed = support.harness.run_case("env_command_config_filter_canary")
+        status = [argv for argv in observed["git_invocations"] if "status" in argv]
+        self.assertTrue(status)
+        for argv in status:
+            self.assertIn("core.fsmonitor=false", argv)
+            self.assertIn("--no-optional-locks", argv)
+
+
+class WorkingStateScopeTests(unittest.TestCase):
+    """A number whose scope is not stated invites being read as another one."""
+
+    def test_scope_is_reported_when_working_state_was_inspected(self):
+        observed = support.harness.run_case("normal_repository")
+        self.assertEqual(
+            observed["json_output"]["working_state_scope"], "repository_safe_view"
+        )
+
+    def test_scope_appears_in_human_output(self):
+        observed = support.harness.run_case("normal_repository")
+        self.assertIn("repository-safe view", observed["human_output"])
+
+    def test_scope_is_not_applicable_without_a_worktree(self):
+        for case_id in ("non_repository", "bare_repository"):
+            observed = support.harness.run_case(case_id)
+            self.assertEqual(
+                observed["json_output"]["working_state_scope"],
+                "not_applicable",
+                case_id,
+            )
+            self.assertNotIn("repository-safe view", observed["human_output"], case_id)
+
+    def test_scope_is_reported_even_when_the_comparison_was_refused(self):
+        """An unknown count is still a count taken in a particular scope."""
+        observed = support.harness.run_case("checkin_filter_configured")
+        self.assertEqual(
+            observed["json_output"]["working_state_scope"], "repository_safe_view"
+        )
+        self.assertFalse(observed["working_state"]["determined"])
 
 
 class AttributeBindingTests(unittest.TestCase):

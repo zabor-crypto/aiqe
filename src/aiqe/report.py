@@ -64,6 +64,7 @@ def render_json(report, aiqe_version):
                 "submodule_worktrees_excluded"
             ],
         },
+        "working_state_scope": report.working_state_scope,
         "aiqe": {"config_present": report.aiqe["config_present"]},
         "commit_policy": dict(report.commit_policy),
         "agent_surface": dict(report.agent_surface),
@@ -139,7 +140,13 @@ def _repository_row(report):
 
 def _git_state_row(report):
     head = report.repository["head"]
-    parts = [
+    parts = []
+    if report.working_state_scope == "repository_safe_view":
+        # Leading, because it qualifies everything after it. These counts were
+        # taken with external configuration suppressed, and are not what
+        # `git status` prints under every user configuration.
+        parts.append("repository-safe view")
+    parts += [
         {
             "branch": "on a branch",
             "detached": "detached HEAD",

@@ -125,6 +125,7 @@ class FixtureCoverageTests(unittest.TestCase):
             "global_attributes_filter_canary",
             "external_attributes_local_filter_canary",
             "submodule_filter_canary",
+            "env_command_config_filter_canary",
             "non_utf8_path",
             "claude_bounded",
             "claude_broad",

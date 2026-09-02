@@ -718,6 +718,27 @@
       }
     },
     {
+      "id": "env_command_config_filter_canary",
+      "description": "A filter driver injected through GIT_CONFIG_COUNT and GIT_CONFIG_KEY_0/VALUE_0 in the process environment, with the binding in an external attributes file so that only the environment defence is under test. Silencing configuration files does not reach command-scope configuration; stripping it from the inherited environment does.",
+      "expect": {
+        "result": "PRODUCED",
+        "exit_code": 0,
+        "findings": [],
+        "report": {
+          "working_state": {
+            "determined": true,
+            "staged": 0,
+            "unstaged": 1,
+            "untracked": 0
+          },
+          "commit_policy": {
+            "attributes_bind_filter": false,
+            "checkin_filter_configured": false
+          }
+        }
+      }
+    },
+    {
       "id": "non_utf8_path",
       "description": "A real repository whose tracked, staged and untracked paths are not valid UTF-8. Doctor carries paths as bytes end to end; if any layer decoded one, this is where it would raise.",
       "platform": "linux",

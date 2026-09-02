@@ -49,9 +49,12 @@ the negative controls in the test suite, because a Git command that is widely
 Two defences follow, and between them they are the whole mechanism:
 
     Configuration isolation. Every invocation that reads the index or the
-    worktree runs with system and global configuration switched off, so an
+    worktree runs with system and global configuration switched off, and with
+    command-scope configuration stripped from the environment, so an
     externally defined driver has no command to run. Git cannot execute a
-    definition that is not in scope.
+    definition that is not in scope. Silencing the files alone was not enough:
+    Git reads configuration from the environment too, and it outranks every
+    file.
 
     Static refusal. Isolation cannot help when the definition is already in
     repository scope - a local `filter.<name>.clean`, an `include` whose
@@ -106,6 +109,40 @@ _CONFIG_ISOLATION = {
     "GIT_CONFIG_SYSTEM": os.devnull,
     "GIT_CONFIG_GLOBAL": os.devnull,
 }
+
+#: Silencing the configuration *files* is not the whole job. Git also accepts
+#: configuration from the process environment, at command scope, which outranks
+#: every file:
+#:
+#:     GIT_CONFIG_COUNT with GIT_CONFIG_KEY_<n> / GIT_CONFIG_VALUE_<n>
+#:     GIT_CONFIG_PARAMETERS
+#:
+#: An inherited `filter.<name>.clean` set that way is executed exactly as if it
+#: had been written in a config file, and pointing GIT_CONFIG_GLOBAL at the
+#: null device does nothing about it. Measured, not assumed: with the binding
+#: in an external attributes file, the canary fired straight through file-level
+#: isolation.
+#:
+#: So the isolated invocations start from an environment with command-scope
+#: configuration removed. This is bounded to the documented command-scope
+#: mechanism - it is not a denylist of Git environment variables in general,
+#: and it does not touch anything that cannot carry a config value.
+_COMMAND_SCOPE_CONFIG_NAMES = ("GIT_CONFIG_COUNT", "GIT_CONFIG_PARAMETERS")
+_COMMAND_SCOPE_CONFIG_PREFIXES = ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")
+
+
+def strip_command_scope_config(env):
+    """Remove command-scope Git configuration from an environment mapping.
+
+    Doctor's own `-c` settings are unaffected: they travel on the command line,
+    which outranks these variables anyway, and are not environment at all.
+    """
+    return {
+        name: value
+        for name, value in env.items()
+        if name not in _COMMAND_SCOPE_CONFIG_NAMES
+        and not name.startswith(_COMMAND_SCOPE_CONFIG_PREFIXES)
+    }
 
 #: Hardening applied to every invocation, ahead of the subcommand.
 #:
@@ -220,6 +257,7 @@ class GitRunner(object):
         env = dict(self._base_env)
         env.update(_ENV_OVERRIDES)
         if isolate_config:
+            env = strip_command_scope_config(env)
             env.update(_CONFIG_ISOLATION)
         return env
 

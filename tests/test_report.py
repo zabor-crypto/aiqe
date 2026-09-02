@@ -75,6 +75,7 @@ class SchemaTests(unittest.TestCase):
             "findings",
             "state_counts",
             "working_state",
+            "working_state_scope",
         ):
             self.assertIn(key, document)
         self.assertEqual(document["aiqe_version"], "1.2.3")
@@ -94,6 +95,41 @@ class SchemaTests(unittest.TestCase):
         document = json.loads(render_json(report, "0.0.0"))
         self.assertIsNone(document["working_state"]["unstaged"])
         self.assertFalse(document["working_state"]["determined"])
+
+
+class WorkingStateScopeRenderingTests(unittest.TestCase):
+    """The scope label is part of the contract, in both renderings."""
+
+    def test_json_carries_the_scope(self):
+        report = build([])
+        report.working_state_scope = "repository_safe_view"
+        document = json.loads(render_json(report, "0.0.0"))
+        self.assertEqual(document["working_state_scope"], "repository_safe_view")
+
+    def test_human_states_the_scope_beside_the_counts(self):
+        report = build([])
+        report.working_state_scope = "repository_safe_view"
+        rendered = render_human(report)
+        line = [row for row in rendered.splitlines() if "Git state" in row]
+        self.assertEqual(len(line), 1)
+        self.assertIn("repository-safe view", line[0])
+        self.assertIn("staged", line[0])
+
+    def test_no_scope_label_when_no_working_state_was_inspected(self):
+        report = build([])
+        report.working_state_scope = "not_applicable"
+        self.assertNotIn("repository-safe view", render_human(report))
+        self.assertEqual(
+            json.loads(render_json(report, "0.0.0"))["working_state_scope"],
+            "not_applicable",
+        )
+
+    def test_scope_values_are_the_declared_ones(self):
+        from aiqe.doctor import Report
+
+        self.assertEqual(Report.WORKING_STATE_SCOPE_SAFE_VIEW, "repository_safe_view")
+        self.assertEqual(Report.WORKING_STATE_SCOPE_NONE, "not_applicable")
+        self.assertEqual(Report().working_state_scope, "not_applicable")
 
 
 class VocabularyTests(unittest.TestCase):

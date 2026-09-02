@@ -23,6 +23,8 @@ decision in `aiqe.gitq` and `aiqe.doctor`:
                         configuration, and why an attributes binding alone is
                         enough to refuse the comparison
     submodule filter -> why status is invoked with --ignore-submodules=dirty
+    env command cfg  -> why the isolated invocations strip command-scope
+                        configuration out of the environment they inherit
 """
 
 import os
@@ -183,6 +185,22 @@ CONTROLS = [
             "--ignore-submodules=dirty."
         ),
         "fixture": "submodule_filter_canary",
+        "invariant": "DOCTOR_REPOSITORY_DEFINED_EXECUTIONS = 0",
+        "detects": EXECUTION,
+        "naive": naive_status_isolated_only,
+    },
+    {
+        "id": "NC_DOCTOR_ENV_COMMAND_CONFIG_EXECUTION",
+        "description": (
+            "A filter driver injected through GIT_CONFIG_COUNT and "
+            "GIT_CONFIG_KEY_0/VALUE_0 rather than written in any file. Silencing "
+            "the configuration files is not enough: Git reads configuration at "
+            "command scope from the environment, and it outranks every file, so "
+            "an invocation hardened only at file level still runs the injected "
+            "driver. This is why the isolated invocations strip command-scope "
+            "configuration from the environment they inherit."
+        ),
+        "fixture": "env_command_config_filter_canary",
         "invariant": "DOCTOR_REPOSITORY_DEFINED_EXECUTIONS = 0",
         "detects": EXECUTION,
         "naive": naive_status_isolated_only,

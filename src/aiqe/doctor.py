@@ -37,6 +37,14 @@ executes rather than by reasoning about what ought to:
 An unknown is the intended answer there, not a gap: an assurance layer that
 executed a repository-defined command in order to fill in a number would have
 broken its own first-contact contract to look complete.
+
+The counts that isolation does produce describe a *repository-safe view*, and
+the report says so rather than leaving it to be inferred. Suppressing external
+configuration changes some answers - a global `core.excludesFile` no longer
+hides files from the untracked count, and a filter bound outside the repository
+is not applied - so the number is well defined but is not the number
+`git status` prints under every user configuration. Reporting it without its
+scope would be the same class of mistake as reporting an unknown as a zero.
 """
 
 import json
@@ -83,8 +91,21 @@ class Report(object):
     identifier.
     """
 
+    #: What any reported working-state count actually describes.
+    #:
+    #: "repository_safe_view" - counted with system, global and command-scope
+    #: configuration suppressed. This is not what `git status` prints under
+    #: every user configuration, and saying so is the point of the field: a
+    #: number whose scope is not stated invites being read as the wrong one.
+    #:
+    #: "not_applicable" - no working state was inspected at all, because there
+    #: is no worktree to inspect.
+    WORKING_STATE_SCOPE_SAFE_VIEW = "repository_safe_view"
+    WORKING_STATE_SCOPE_NONE = "not_applicable"
+
     def __init__(self):
         self.result = "PRODUCED"
+        self.working_state_scope = Report.WORKING_STATE_SCOPE_NONE
         self.git = {"available": False, "version": None}
         self.repository = {
             "detected": False,
@@ -756,6 +777,7 @@ def _inspect_working_state(report, runner):
     and the unstaged count is reported as unknown.
     """
     state = report.working_state
+    report.working_state_scope = Report.WORKING_STATE_SCOPE_SAFE_VIEW
 
     risk = _filter_execution_risk(report)
     if risk is not None:

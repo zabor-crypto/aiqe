@@ -12,6 +12,14 @@ makes the change, not at release time.
 
 ### Security
 
+- **Doctor no longer inherits command-scope Git configuration.** Git reads
+  configuration from the process environment — `GIT_CONFIG_COUNT` with
+  `GIT_CONFIG_KEY_<n>`/`GIT_CONFIG_VALUE_<n>`, and `GIT_CONFIG_PARAMETERS` — and it
+  outranks every configuration file, so silencing `GIT_CONFIG_SYSTEM` and
+  `GIT_CONFIG_GLOBAL` said nothing about it. An injected `filter.<name>.clean` was
+  executed straight through file-level isolation. The invocations that read the index
+  or the worktree now start from an environment with those variables removed, bounded
+  to the documented command-scope mechanism. Negative control added; it reproduces.
 - **Doctor no longer executes a filter driver defined outside the repository.**
   A tracked `.gitattributes` can bind a path to a driver whose command lives in the
   user's global configuration or behind a local `include`; reading only the
@@ -44,6 +52,13 @@ makes the change, not at release time.
 - Working-state counts exclude submodule worktree changes and disclose that they do.
   They are computed under repository-scope configuration, so a custom global
   `core.excludesFile` no longer applies to the untracked count.
+- **Working-state counts are labelled with their scope.** JSON carries
+  `working_state_scope`, which is `"repository_safe_view"` whenever counts were taken
+  under configuration isolation and `"not_applicable"` when there was no worktree to
+  inspect; the human output says `repository-safe view` beside the counts. A
+  repository-safe view is not what `git status` prints under every user and global Git
+  configuration, and a number whose scope is unstated invites being read as the wrong
+  one. No finding family was added.
 - `working_state.submodule_worktrees_excluded` added to the JSON output, and
   `commit_policy` gained `attributes_bind_filter`, `attributes_readable` and
   `submodules_present`. No finding code was added or removed.

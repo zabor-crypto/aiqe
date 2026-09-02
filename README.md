@@ -25,7 +25,7 @@ from the retained result artifact, not typed by hand.
 AIQE DOCTOR
 
   Repository      ordinary worktree · git 2.50.1
-  Git state       on a branch · 0 staged · ? unstaged · 0 untracked
+  Git state       repository-safe view · on a branch · 0 staged · ? unstaged · 0 untracked
   Topology        single worktree · sparse checkout off
   Operations      none in progress
   AIQE config     absent
@@ -53,6 +53,12 @@ That `UNKNOWN` is the product working. The repository configures a check-in filt
 determining the unstaged count would make Git execute that filter as a child process.
 Doctor does not execute what a repository defines, so it does not ask the question, and
 it says so instead of printing a confident zero.
+
+`repository-safe view` is the other half of the same honesty. Doctor counts the working
+state with configuration from outside the repository suppressed, so nothing external can
+be executed while it looks. That is a well-defined question, but it is *not* the question
+`git status` answers under every user and global Git configuration, and the label says so
+rather than leaving it to be assumed. Details: [`docs/doctor.md`](docs/doctor.md).
 
 macOS is the supported target for v1 · Linux support is a later proof obligation · Windows is out of scope for v1
 

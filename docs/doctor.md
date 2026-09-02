@@ -88,10 +88,29 @@ the superproject's configuration does not reach it.
 
 **Configuration isolation.** Every invocation that reads the index or the
 worktree — `status`, `diff-index`, `ls-files` — runs with system and global
-configuration switched off. Git cannot execute a definition that is not in
-scope. Discovery invocations are deliberately *not* isolated: they answer
+configuration switched off, *and* with command-scope configuration stripped
+from the environment it inherits. Git cannot execute a definition that is not
+in scope. Discovery invocations are deliberately *not* isolated: they answer
 "which repository is this", and answering that differently from the user's own
 Git would be its own defect.
+
+Silencing the configuration *files* is not the whole job. Git also reads
+configuration from the process environment, at command scope, and it outranks
+every file:
+
+```
+GIT_CONFIG_COUNT with GIT_CONFIG_KEY_<n> / GIT_CONFIG_VALUE_<n>
+GIT_CONFIG_PARAMETERS
+```
+
+An inherited `filter.<name>.clean` set that way is executed exactly as if it
+had been written in a config file, and pointing `GIT_CONFIG_GLOBAL` at the null
+device does nothing about it — measured, not assumed. The isolated invocations
+therefore start from an environment with those variables removed. This is
+bounded to the documented command-scope mechanism; it is not a denylist of Git
+environment variables in general. Doctor's own `-c` safety settings are
+unaffected: they travel on the command line, which outranks these variables in
+any case.
 
 **Static refusal.** Isolation cannot help once a definition is already in
 repository scope. Doctor therefore declines to compare worktree content, and
@@ -118,19 +137,44 @@ exclude submodule worktree changes, and say so.
 obtained by running a repository's own command is not a better answer; it is
 the wrong answer to a different question.
 
-### What isolation costs
+### What isolation costs, and the name for it
 
 Stated rather than hidden. A working-state count is computed under
-repository-scope configuration only, so:
+repository-scope configuration only, and Doctor labels it:
 
-- a custom global `core.excludesFile` does not apply, and the untracked count
+```
+working_state_scope = "repository_safe_view"
+```
+
+**A repository-safe view is not what `git status` prints under every user and
+global Git configuration.** It is a different, well-defined question — what the
+working state is when nothing outside the repository is allowed to influence
+the answer — and the label exists so the number is not read as the other one.
+Concretely:
+
+- a custom global `core.excludesFile` does not apply, so the untracked count
   may exceed what plain `git status` reports;
 - a repository whose access depends on a global `safe.directory` entry yields
   an unknown working state rather than a wrong one;
-- where a filter is bound entirely outside the repository — the binding in a
-  global attributes file as well as the driver — Doctor cannot detect the
+- where a filter is bound entirely outside the repository — the binding in an
+  external attributes file as well as the driver — Doctor cannot detect the
   binding at all. Isolation still prevents the execution, but the comparison is
-  then made on raw bytes, ignoring a filter the user's own Git would apply.
+  then made on raw bytes, ignoring a filter the user's own Git would apply;
+- submodule worktree changes are not counted.
+
+Doctor does not emulate any of that. Recovering those semantics means reading
+and trusting configuration from outside the repository, which is the thing
+first-contact inspection exists not to do.
+
+The human rendering carries the same label, beside the numbers it qualifies:
+
+```
+Git state       repository-safe view · on a branch · 1 staged · 2 unstaged · 1 untracked
+```
+
+Where even the safe view cannot determine the state without executing
+something, the answer remains `UNKNOWN`. The scope label says which question
+was asked; `UNKNOWN` says it could not be answered safely.
 
 ## The configuration boundary
 
@@ -291,6 +335,7 @@ topology                { linked_worktree, sparse_checkout }
 operations_in_progress  [ finding codes ]
 working_state           { determined, staged, unstaged, untracked, unmerged,
                           submodule_worktrees_excluded }
+working_state_scope     "repository_safe_view" | "not_applicable"
 aiqe                    { config_present }
 commit_policy           { ... booleans ... }
 agent_surface           { ... presence and permission categories ... }
@@ -322,11 +367,10 @@ into each submodule and running its filters. A changed submodule *pointer* is
 still reported, and the output says when the counts exclude submodule
 worktrees.
 
-**Working-state counts use repository-scope configuration only.** A custom
-global `core.excludesFile` does not apply to the untracked count; a repository
-reachable only through a global `safe.directory` entry yields an unknown
-working state; and a filter bound entirely outside the repository is invisible
-to Doctor, so the comparison ignores it. See "What isolation costs" above.
+**Working-state counts use repository-scope configuration only**, and are
+labelled `working_state_scope = "repository_safe_view"`. That is not the same
+question as `git status` under every user and global Git configuration. See
+"What isolation costs, and the name for it" above.
 
 **Effective Git configuration is not resolved.** Doctor reports the presence of
 an include chain and nothing about its contents. A repository whose real policy
