@@ -28,7 +28,7 @@ def _make_test(control):
 
 class TaskNegativeControlTests(unittest.TestCase):
     def test_controls_exist(self):
-        self.assertEqual(len(support.task_controls.CONTROLS), 3)
+        self.assertEqual(len(support.task_controls.CONTROLS), 4)
 
 
 for _control in support.task_controls.CONTROLS:
@@ -40,6 +40,15 @@ del _control
 
 class ControlVersusProductTests(unittest.TestCase):
     """The same fixture, measured twice: naive implementation, then AIQE."""
+
+    def test_prefix_ownership_versus_exact_ownership(self):
+        """A prefix rule authorises a file that was never declared."""
+        observation = support.task_harness.run_control(
+            "NC_TASK_PREFIX_OWNERSHIP_BROADENING"
+        )
+        self.assertTrue(observation["naive_authorises_undeclared"])
+        self.assertFalse(observation["aiqe_authorises_undeclared"])
+        self.assertEqual(observation["aiqe_start_exit"], 0)
 
     def test_pathspec_expansion_versus_literal_ownership(self):
         observation = support.task_harness.run_control("NC_TASK_PATHSPEC_EXPANSION")

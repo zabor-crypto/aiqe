@@ -106,12 +106,15 @@ Declare what a piece of work owns, before doing it:
 .venv/bin/aiqe task end
 ```
 
-Owning `src` owns `src/anything`, and does not own `srcfoo`. A declared path is
-literal — `--own '*'` declares a file named `*`, not a pattern — and it need not exist
-yet, because declaring `src/new_module.py` before writing it is the normal case. Task
-state lives in the worktree's own Git directory, so two linked worktrees hold two
-independent tasks, and starting a task changes nothing else in the repository: staged
-work you never mentioned is byte-identical afterwards.
+Ownership is **exact**: owning `foo` owns `foo`, and not `foo/bar` or `foobar`. There is
+no directory scope in v1, and declaring one is refused — a prefix rule would let a task
+authorise files that did not exist when the scope was declared, which is the widening an
+owned scope exists to prevent. A declared path is literal — `--own '*'` declares a file
+named `*`, not a pattern — and it need not exist yet, because declaring
+`src/new_module.py` before writing it is the normal case. Task state lives in the
+worktree's own Git directory, so two linked worktrees hold two independent tasks, and
+starting a task changes nothing else in the repository: staged work you never mentioned
+is byte-identical afterwards.
 
 Reference for the scope rules, the state schema and the exit status:
 [`docs/task.md`](docs/task.md).
@@ -161,8 +164,8 @@ A design target is not registered as a command. Running `aiqe init` today exits 
 `unknown command`, because a command that parses and does nothing advertises a
 capability that does not exist.
 
-The owned scope is fixed when a task starts and cannot widen — that part exists today.
-Checks run against that scope. The receipt reports one of three verdicts — `REVIEWABLE`, `INCOMPLETE`, or
+The owned scope is fixed when a task starts and cannot widen — that part exists today,
+as an exact pathset. Checks run against that scope. The receipt reports one of three verdicts — `REVIEWABLE`, `INCOMPLETE`, or
 `NOT_REVIEWABLE` — and never invents a fourth, softer one.
 
 Full command surface and exit semantics: [`docs/architecture.md`](docs/architecture.md).
@@ -171,7 +174,8 @@ Full command surface and exit semantics: [`docs/architecture.md`](docs/architect
 
 AIQE bounds what a completion commit is allowed to contain.
 
-- The owned scope is immutable from task start and uses exact literal file paths in v1.
+- The owned scope is immutable from task start and uses exact literal file paths in v1:
+  a declared path owns itself and nothing else.
 - Git caller paths use literal-pathspec semantics, so a filename containing a glob
   character cannot silently expand the change.
 - Foreign staged state — anything staged outside the owned scope — is observed before

@@ -113,14 +113,14 @@ def owned_display(record):
         return []
     return [
         display_bytes(base64.b64decode(entry["path_b64"]))
-        for entry in record["owned_scope"]
+        for entry in record["owned_paths"]
     ]
 
 
 def owned_raw(record):
     if record is None:
         return []
-    return [base64.b64decode(entry["path_b64"]) for entry in record["owned_scope"]]
+    return [base64.b64decode(entry["path_b64"]) for entry in record["owned_paths"]]
 
 
 def terminal_safe(*completed):
@@ -155,7 +155,7 @@ def _lifecycle(case, env, target, *owned):
     return {
         "exit_codes": [started.returncode, shown.returncode, ended.returncode],
         "owned_while_active": owned_display(record),
-        "digest_while_active": None if record is None else record["owned_scope_digest"],
+        "digest_while_active": None if record is None else record["owned_pathset_digest"],
         "active_after_end": read_active(target, env) is not None,
         "terminal_safe": terminal_safe(started, shown, ended),
     }
@@ -172,8 +172,15 @@ def operate_simple_file(case, env, target):
     return _lifecycle(case, env, target, b"src/strategy.py")
 
 
-def operate_directory_scope(case, env, target):
-    return _lifecycle(case, env, target, b"src")
+def operate_existing_directory_refused(case, env, target):
+    """v1 owns an exact pathset. A directory declaration has no meaning in it."""
+    refused = run_cli(target, env, b"task", b"start", b"--own", b"src")
+    return {
+        "exit_codes": [refused.returncode],
+        "active_after_end": read_active(target, env) is not None,
+        "refusal_names_the_directory": b"exists as a directory" in refused.stderr,
+        "terminal_safe": terminal_safe(refused),
+    }
 
 
 def operate_nonexistent_path(case, env, target):
@@ -189,14 +196,14 @@ def operate_duplicate_scope(case, env, target):
     return _lifecycle(case, env, target, b"src/strategy.py", b"src/strategy.py")
 
 
-def operate_overlapping_scopes(case, env, target):
-    """`src` and `src/bar` both stay: the narrower one was written on purpose."""
-    return _lifecycle(case, env, target, b"src", b"src/strategy.py")
+def operate_lexical_parent_and_child(case, env, target):
+    """Two distinct paths. Under exact ownership neither implies the other."""
+    return _lifecycle(case, env, target, b"docs", b"docs/guide.md")
 
 
 def operate_trailing_separator(case, env, target):
-    """Three spellings of one path collapse to one owned root."""
-    return _lifecycle(case, env, target, b"src/", b"./src", b"src//")
+    """Three spellings of one path collapse to one owned path."""
+    return _lifecycle(case, env, target, b"docs/", b"./docs", b"docs//")
 
 
 def operate_literal_metacharacters(case, env, target):
@@ -235,7 +242,7 @@ def operate_subdirectory(case, env, target):
     return {
         "exit_codes": [started.returncode, ended.returncode],
         "owned_while_active": owned_display(record),
-        "digest_while_active": None if record is None else record["owned_scope_digest"],
+        "digest_while_active": None if record is None else record["owned_pathset_digest"],
         "active_after_end": read_active(repository, env) is not None,
         "terminal_safe": terminal_safe(started, ended),
     }
@@ -403,7 +410,7 @@ def operate_concurrent_start(case, env, target):
 
     record = read_active(target, env)
     valid = 0
-    if record is not None and record.get("schema_version") == 1 and record.get("task_id"):
+    if record is not None and record.get("schema_version") == 2 and record.get("task_id"):
         valid = 1
 
     return {
@@ -435,7 +442,7 @@ def operate_interrupted_write(case, env, target):
         "exit_codes": [shown.returncode, started.returncode, ended.returncode],
         "status_before_recovery_shows_no_task": b"No active task" in shown.stdout,
         "owned_while_active": owned_display(record),
-        "digest_while_active": None if record is None else record["owned_scope_digest"],
+        "digest_while_active": None if record is None else record["owned_pathset_digest"],
         "active_after_end": read_active(target, env) is not None,
         "terminal_safe": terminal_safe(shown, started, ended),
     }
@@ -490,6 +497,77 @@ def operate_unsafe_state_location(case, env, target):
     }
 
 
+def build_symlink(case, env):
+    root = base_repo(case.repo_path, env)
+    os.symlink("src", os.path.join(root, "linkdir"))
+    os.symlink("src/strategy.py", os.path.join(root, "linkfile"))
+    return root
+
+
+def operate_symlink(case, env, target):
+    """A declaration owns the link, not whatever it resolves to.
+
+    `linkdir` points at a directory, and is still accepted: the declared path
+    is the link. Nothing here follows it.
+    """
+    return _lifecycle(case, env, target, b"linkdir", b"linkfile")
+
+
+_SCHEMA_V1_RECORD = (
+    '{"schema_version": 1, "task_id": "%s", "aiqe_version": "0.0.0.dev0", '
+    '"started_at": "2026-09-01T00:00:00Z", "start_head_state": "unborn", '
+    '"start_head_sha": null, "owned_scope": [{"path_b64": "c3Jj"}], '
+    '"owned_scope_digest": "sha256:superseded", "label": null}\n' % ("0" * 32,)
+)
+
+
+def build_schema_v1_record(case, env):
+    """An active record written when a declared path owned its descendants."""
+    root = base_repo(case.repo_path, env)
+    state = os.path.join(root, ".git", "aiqe")
+    os.makedirs(state, exist_ok=True)
+    write(os.path.join(state, "task.json"), _SCHEMA_V1_RECORD)
+    return root
+
+
+def operate_schema_v1_record(case, env, target):
+    """Refused, not reinterpreted, and never silently migrated.
+
+    Reading a version-1 record under exact semantics would quietly narrow a
+    live task's authority. There is no migration; `end` discards it and the
+    user starts again.
+    """
+    record_path = state_path(target, env)
+    with open(record_path, "rb") as handle:
+        before = handle.read()
+
+    shown = run_cli(target, env, b"task")
+    blocked = run_cli(target, env, b"task", b"start", b"--own", b"src/strategy.py")
+
+    with open(record_path, "rb") as handle:
+        after = handle.read()
+
+    discarded = run_cli(target, env, b"task", b"end")
+    restarted = run_cli(target, env, b"task", b"start", b"--own", b"src/strategy.py")
+    record = read_active(target, env)
+    ended = run_cli(target, env, b"task", b"end")
+
+    return {
+        "exit_codes": [
+            shown.returncode,
+            blocked.returncode,
+            discarded.returncode,
+            restarted.returncode,
+            ended.returncode,
+        ],
+        "record_untouched_while_refused": before == after,
+        "schema_after_restart": None if record is None else record["schema_version"],
+        "owned_while_active": owned_display(record),
+        "active_after_end": read_active(target, env) is not None,
+        "terminal_safe": terminal_safe(shown, blocked, discarded, restarted, ended),
+    }
+
+
 #: Path components that are valid on POSIX and invalid UTF-8.
 NON_UTF8_OWNED = b"src/tracked-\xe9\xff.dat"
 
@@ -519,7 +597,7 @@ def operate_non_utf8(case, env, target):
         "exit_codes": [started.returncode, shown.returncode, ended.returncode],
         "owned_while_active": owned_display(record),
         "raw_bytes_roundtrip": owned_raw(record) == [NON_UTF8_OWNED],
-        "digest_while_active": None if record is None else record["owned_scope_digest"],
+        "digest_while_active": None if record is None else record["owned_pathset_digest"],
         "active_after_end": read_active(target, env) is not None,
         "terminal_safe": terminal_safe(started, shown, ended),
     }
@@ -527,10 +605,21 @@ def operate_non_utf8(case, env, target):
 
 SCENARIOS = {
     "simple_file_scope": {"build": build_base, "operate": operate_simple_file},
-    "directory_component_scope": {"build": build_base, "operate": operate_directory_scope},
+    "existing_directory_refused": {
+        "build": build_base,
+        "operate": operate_existing_directory_refused,
+    },
+    "symlink_owns_the_link": {"build": build_symlink, "operate": operate_symlink},
+    "schema_v1_fail_closed": {
+        "build": build_schema_v1_record,
+        "operate": operate_schema_v1_record,
+    },
     "nonexistent_future_path": {"build": build_base, "operate": operate_nonexistent_path},
     "duplicate_scope": {"build": build_base, "operate": operate_duplicate_scope},
-    "overlapping_scopes": {"build": build_base, "operate": operate_overlapping_scopes},
+    "lexical_parent_and_child": {
+        "build": build_base,
+        "operate": operate_lexical_parent_and_child,
+    },
     "trailing_separator": {"build": build_base, "operate": operate_trailing_separator},
     "literal_metacharacter_names": {
         "build": build_base,

@@ -16,30 +16,38 @@ from aiqe import scope
 
 
 class MembershipTests(unittest.TestCase):
-    """Component-prefix, not string-prefix. The distinction is the point."""
+    """Exact byte equality. There is no prefix rule, and that is the point.
 
-    def test_a_root_owns_itself(self):
+    A prefix rule would let a task authorise files that did not exist when the
+    scope was declared, which is the thing an owned scope exists to bound.
+    """
+
+    def test_a_declared_path_owns_itself(self):
         self.assertTrue(scope.owns(b"foo", b"foo"))
 
-    def test_a_root_owns_what_is_under_it(self):
-        self.assertTrue(scope.owns(b"foo", b"foo/bar"))
-        self.assertTrue(scope.owns(b"foo", b"foo/bar/baz"))
+    def test_a_declared_path_does_not_own_its_descendants(self):
+        for descendant in (b"foo/bar", b"foo/bar/baz", b"foo/"):
+            self.assertFalse(scope.owns(b"foo", descendant), descendant)
 
-    def test_a_root_does_not_own_a_name_it_merely_prefixes(self):
+    def test_a_declared_path_does_not_own_a_name_it_merely_prefixes(self):
         for other in (b"foobar", b"foo-other", b"foo.py", b"foox/bar"):
             self.assertFalse(scope.owns(b"foo", other), other)
 
-    def test_a_file_scope_owns_only_itself(self):
-        self.assertTrue(scope.owns(b"src/a.py", b"src/a.py"))
-        self.assertFalse(scope.owns(b"src/a.py", b"src/a.pyc"))
+    def test_a_declared_path_does_not_own_its_parent(self):
         self.assertFalse(scope.owns(b"src/a.py", b"src"))
 
-    def test_owned_by_any(self):
-        roots = [b"src", b"docs/guide.md"]
-        self.assertTrue(scope.owned_by_any(roots, b"src/deep/file.py"))
-        self.assertTrue(scope.owned_by_any(roots, b"docs/guide.md"))
-        self.assertFalse(scope.owned_by_any(roots, b"docs/other.md"))
-        self.assertFalse(scope.owned_by_any(roots, b"srcfoo"))
+    def test_a_file_declaration_owns_only_itself(self):
+        self.assertTrue(scope.owns(b"src/a.py", b"src/a.py"))
+        self.assertFalse(scope.owns(b"src/a.py", b"src/a.pyc"))
+
+    def test_owned_by_any_is_exact_across_the_pathset(self):
+        owned = [b"src/a.py", b"docs/guide.md"]
+        self.assertTrue(scope.owned_by_any(owned, b"src/a.py"))
+        self.assertTrue(scope.owned_by_any(owned, b"docs/guide.md"))
+        for other in (b"src", b"src/b.py", b"docs/guide.md.bak", b"docs"):
+            self.assertFalse(scope.owned_by_any(owned, other), other)
+
+
 
 
 class CanonicalisationTests(unittest.TestCase):
@@ -170,17 +178,69 @@ class SymlinkTests(unittest.TestCase):
         self.assertEqual(scope.canonicalise(b"link/file.py", []), b"link/file.py")
 
 
+class DirectoryRejectionTests(unittest.TestCase):
+    """A directory declaration has no meaning under exact ownership."""
+
+    def setUp(self):
+        self.worktree = os.fsencode(tempfile.mkdtemp(prefix="aiqe-dir-"))
+        self.addCleanup(shutil.rmtree, self.worktree, True)
+
+    def make(self, relative, kind):
+        path = os.path.join(self.worktree, relative)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if kind == "dir":
+            os.makedirs(path)
+        else:
+            with open(path, "wb") as handle:
+                handle.write(b"x\n")
+        return path
+
+    def test_an_existing_directory_is_refused(self):
+        self.make(b"src", "dir")
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.reject_directories([b"src"], self.worktree)
+        self.assertEqual(caught.exception.code, scope.OWNED_PATH_IS_DIRECTORY)
+
+    def test_an_existing_file_is_accepted(self):
+        self.make(b"src/a.py", "file")
+        scope.reject_directories([b"src/a.py"], self.worktree)
+
+    def test_a_path_that_does_not_exist_is_accepted(self):
+        """Declaring a file before creating it is the normal case."""
+        scope.reject_directories([b"src/future.py"], self.worktree)
+
+    def test_a_symlink_to_a_directory_is_accepted(self):
+        """The declaration owns the link, not what it resolves to."""
+        self.make(b"real", "dir")
+        os.symlink(b"real", os.path.join(self.worktree, b"link"))
+        scope.reject_directories([b"link"], self.worktree)
+
+    def test_only_the_offending_path_is_named(self):
+        self.make(b"src", "dir")
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.reject_directories([b"a.py", b"src", b"b.py"], self.worktree)
+        self.assertIn("src", caught.exception.message)
+
+    def test_a_control_character_in_the_name_is_escaped_in_the_refusal(self):
+        self.make(b"weird\nname", "dir")
+        with self.assertRaises(scope.ScopeError) as caught:
+            scope.reject_directories([b"weird\nname"], self.worktree)
+        self.assertIn("weird\\nname", caught.exception.message)
+        self.assertNotIn("\n", caught.exception.message.replace("\\n", ""))
+
+
 class ResolveTests(unittest.TestCase):
     def test_exact_duplicates_collapse(self):
         self.assertEqual(
             scope.resolve([b"src/a.py", b"src/a.py", b"./src/a.py"], []), [b"src/a.py"]
         )
 
-    def test_overlapping_declarations_are_both_kept(self):
-        """The narrower declaration was written on purpose."""
+    def test_a_lexical_parent_and_child_are_two_distinct_paths(self):
+        """Neither implies the other, so neither collapses into it."""
         self.assertEqual(
-            scope.resolve([b"src", b"src/a.py"], []), [b"src", b"src/a.py"]
+            scope.resolve([b"docs", b"docs/guide.md"], []), [b"docs", b"docs/guide.md"]
         )
+        self.assertNotEqual(scope.digest([b"docs"]), scope.digest([b"docs", b"docs/guide.md"]))
 
     def test_order_does_not_matter(self):
         self.assertEqual(
@@ -209,6 +269,18 @@ class DigestTests(unittest.TestCase):
         composed = b"caf\xc3\xa9"
         decomposed = b"cafe\xcc\x81"
         self.assertNotEqual(scope.digest([composed]), scope.digest([decomposed]))
+
+    def test_domain_is_bound_to_exact_pathset_authority(self):
+        """A digest of the same bytes under another domain must differ."""
+        import hashlib
+
+        stream = bytearray(b"aiqe.owned-pathset.v1\0")
+        stream += b"src"
+        stream += b"\0"
+        self.assertEqual(
+            scope.digest([b"src"]),
+            "sha256:" + hashlib.sha256(bytes(stream)).hexdigest(),
+        )
 
     def test_shape(self):
         value = scope.digest([b"src"])

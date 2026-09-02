@@ -1,37 +1,41 @@
-"""Owned-scope path semantics.
+"""Owned pathset semantics.
 
-A task declares which repository paths it owns. That declaration is the whole
-point of the product, so the rules below are deliberately strict and boring.
+A task declares an exact set of repository paths it owns. That declaration is
+the whole point of the product, so the rules below are deliberately strict and
+boring.
 
 Three properties matter, and each rules out a class of mistake:
 
+**Ownership is exact.** Owning `foo` owns `foo`, and nothing else. Not
+`foo/bar`, not `foobar`. There is no descendant ownership and no directory
+scope in v1, on purpose: a prefix rule would let a task authorise files that
+did not exist when the scope was declared, which is precisely the thing the
+owned scope is supposed to bound. The public claim is the strong one - AIQE
+knows the exact declared owned pathset - and a prefix rule cannot support it.
+
 **Paths are literal.** A declared path is data, never a pattern. `*`, `?`,
 `[abc]`, `:(top)`, `--help` and a name containing a newline are all just
-names. Nothing here consults the filesystem to decide what a name means, and
-nothing hands a declared path to Git as a pathspec without the literal
-discipline that keeps it a path.
-
-**Ownership is component-prefix, not string-prefix.** Owning `foo` owns
-`foo/bar` and `foo/bar/baz`. It does not own `foobar`. The distinction looks
-pedantic written down and is the difference between a bounded change and a
-silently widened one.
+names. Nothing hands a declared path to Git as a pattern.
 
 **Paths are bytes.** A repository path is a byte string. Decoding one to
 decide what it is means a repository with an unusual filename gets a different
 answer, or an error, from the tool whose job is to be exact about which files
 changed.
 
-Scope is a *declaration*, not an observation. A path that does not exist yet
-can be owned - that is the normal case when the task is about to create it -
-so nothing here requires a path to exist, and nothing infers whether a path
-will become a file or a directory.
+A declaration is not an observation. A path that does not exist yet can be
+owned - that is the normal case when the task is about to create it - so
+nothing here requires a path to exist. The one thing the filesystem is
+consulted for is refusal: a path that exists *and is a directory today* is
+refused rather than quietly meaning something a user might read as a scope.
 """
 
 import hashlib
+import stat as _stat_module
 
 #: Domain separator, so this digest cannot collide with a digest of the same
-#: bytes computed for some other purpose later.
-_DIGEST_DOMAIN = b"aiqe.owned-scope.v1\0"
+#: bytes computed for some other purpose later. The name says what the digest
+#: is authority over: an exact pathset, not a scope with descendants.
+_DIGEST_DOMAIN = b"aiqe.owned-pathset.v1\0"
 
 #: The Git administrative directory. Owning it, or anything inside it, is
 #: never a declaration about project content.
@@ -61,6 +65,7 @@ OWNERSHIP_PATH_ESCAPES_REPOSITORY = "OWNERSHIP_PATH_ESCAPES_REPOSITORY"
 OWNERSHIP_PATH_PARENT_AMBIGUOUS = "OWNERSHIP_PATH_PARENT_AMBIGUOUS"
 OWNERSHIP_PATH_ADMINISTRATIVE = "OWNERSHIP_PATH_ADMINISTRATIVE"
 OWNERSHIP_PATH_INVALID = "OWNERSHIP_PATH_INVALID"
+OWNED_PATH_IS_DIRECTORY = "OWNED_PATH_IS_DIRECTORY"
 
 
 def canonicalise(raw, cwd_components):
@@ -135,12 +140,12 @@ def canonicalise(raw, cwd_components):
 
 
 def resolve(raw_paths, cwd_components):
-    """Canonicalise every declared path into the task's owned scope.
+    """Canonicalise every declared path into the task's owned pathset.
 
-    Exact duplicates collapse: declaring the same path twice is one scope, not
-    two. Overlapping declarations do not collapse - declaring both `foo` and
-    `foo/bar` keeps both, because the narrower declaration is something the
-    user wrote on purpose and may still mean after `foo` is removed.
+    Exact duplicates collapse: declaring the same path twice is one pathset
+    entry, not two. Two *distinct* paths never collapse, even when one is a
+    lexical parent of the other - `foo` and `foo/bar` are two declarations of
+    two paths, and with exact ownership neither implies the other.
 
     The result is sorted by raw bytes, which is what makes the digest stable
     regardless of the order the paths were typed in.
@@ -158,39 +163,94 @@ def resolve(raw_paths, cwd_components):
     return sorted(resolved)
 
 
-def owns(root, path):
-    """Does an owned root contain this repository path?
+def owns(owned, path):
+    """Is this repository path the declared owned path?
 
-    Component-prefix containment: `foo` owns `foo` and `foo/bar`, and does not
-    own `foobar`. Both arguments are canonical repository-relative bytes.
+    Exact raw-byte equality, and nothing else:
+
+        owns(foo, foo)      True
+        owns(foo, foo/bar)  False
+        owns(foo, foobar)   False
+
+    Both arguments are canonical repository-relative bytes. The absence of a
+    prefix rule here is the whole ownership semantics: a task owns what it
+    named, and a file that appears later under a declared path's name was
+    never declared.
     """
-    return path == root or path.startswith(root + SEPARATOR)
+    return path == owned
 
 
-def owned_by_any(roots, path):
-    for root in roots:
-        if owns(root, path):
+def owned_by_any(owned_paths, path):
+    for owned in owned_paths:
+        if owns(owned, path):
             return True
     return False
 
 
-def digest(roots):
-    """A deterministic digest binding the exact owned-scope authority.
+def digest(owned_paths):
+    """A deterministic digest binding the exact owned pathset.
 
     The construction is documented so a reviewer can recompute it by hand:
 
-        SHA-256( "aiqe.owned-scope.v1\\0" + concat(root + "\\0" for sorted roots) )
+        SHA-256( "aiqe.owned-pathset.v1\\0" + concat(path + "\\0" for sorted paths) )
 
     It binds the raw path bytes, the component boundaries and the canonical
-    ordering, and nothing else. It does not bind display text: two scopes that
-    render identically but differ in bytes must produce different digests, and
-    a change to how paths are printed must not change the digest.
+    ordering, and nothing else. It does not bind display text: two pathsets
+    that render identically but differ in bytes must produce different
+    digests, and a change to how paths are printed must not change the digest.
 
     NUL is a safe delimiter because a POSIX path - and therefore a Git path -
     cannot contain one.
     """
     stream = bytearray(_DIGEST_DOMAIN)
-    for root in sorted(roots):
-        stream += root
+    for path in sorted(owned_paths):
+        stream += path
         stream += b"\0"
     return "sha256:" + hashlib.sha256(bytes(stream)).hexdigest()
+
+
+def reject_directories(owned_paths, worktree):
+    """Refuse a declared path that exists today as a directory.
+
+    v1 ownership is an exact pathset of files. A directory declaration has no
+    meaning under exact semantics, and the tempting readings are both wrong:
+    expanding it would authorise files nobody declared, and treating it as a
+    single path would silently own something that cannot be a file.
+
+    `lstat`, not `stat`. A symlink is a path object in its own right, and
+    declaring one owns the link, not whatever it currently resolves to. A
+    symlink pointing at a directory is therefore accepted - the declaration is
+    about the link.
+
+    A path that does not exist is accepted: declaring a file before creating
+    it is the normal case. If it later materialises as a directory, a later
+    operation resolving path identity must fail closed rather than reinterpret
+    the declaration - the recorded pathset says a path was declared, not that
+    a directory was.
+    """
+    if worktree is None:
+        return
+    import os
+
+    for path in owned_paths:
+        try:
+            stat = os.lstat(os.path.join(worktree, path))
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        except OSError:
+            # Unreadable is not the same as "is a directory". Leave it to the
+            # operations that must resolve identity to fail closed.
+            continue
+        if _stat_module.S_ISDIR(stat.st_mode):
+            raise ScopeError(
+                OWNED_PATH_IS_DIRECTORY,
+                "an owned path must be a file path; %s exists as a directory. "
+                "AIQE v1 owns an exact pathset, so declare the files this task "
+                "owns rather than a directory." % (_render(path),),
+            )
+
+
+def _render(path):
+    from .textsafe import display_bytes
+
+    return display_bytes(path)

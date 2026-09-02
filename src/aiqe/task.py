@@ -16,9 +16,16 @@ Three properties are load-bearing.
 **A task works before init.** `aiqe doctor` then `aiqe task start` must work on
 a repository AIQE has never seen. Nothing here reads or requires `aiqe.toml`.
 
-**Scope is a declaration, not an observation.** An owned path need not exist:
-declaring `src/new_module.py` before writing it is the normal case. Nothing
-here consults the filesystem to decide what a declared path means.
+**Ownership is exact.** Owning `foo` owns `foo`, and nothing else - not
+`foo/bar`, not `foobar`. There is no descendant ownership and no directory
+scope in v1: a prefix rule would let a task authorise files that did not exist
+when the scope was declared, which is the thing an owned scope exists to
+bound.
+
+**A declaration is not an observation.** An owned path need not exist:
+declaring `src/new_module.py` before writing it is the normal case. The
+filesystem is consulted for one thing only - refusing a path that exists today
+as a directory, which has no meaning under exact ownership.
 
 **AIQE writes only its own state.** Starting, showing or ending a task must
 not touch tracked files, untracked files, the index, refs, HEAD, hooks or Git
@@ -37,7 +44,11 @@ from .textsafe import display_bytes, display_text
 
 #: Bump when a reader of an older record would misread a newer one. This is
 #: local internal state, not a public integration surface.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = taskstate.SUPPORTED_SCHEMA_VERSION
+
+#: Recorded in every task, so a reader never has to infer from the version
+#: number alone what a declared path meant.
+OWNERSHIP_SEMANTICS = "exact_literal_pathset_v1"
 
 REPOSITORY_ABSENT = "REPOSITORY_ABSENT"
 UNSUPPORTED_TOPOLOGY = "UNSUPPORTED_TOPOLOGY"
@@ -172,7 +183,8 @@ def start(cwd, owned, label=None, env=None):
         return failure
 
     try:
-        roots = scope_module.resolve(owned, repository.cwd_components)
+        owned_paths = scope_module.resolve(owned, repository.cwd_components)
+        scope_module.reject_directories(owned_paths, repository.worktree)
     except scope_module.ScopeError as error:
         return TaskOutcome(error.code, 3, ["aiqe: " + error.message])
 
@@ -188,7 +200,7 @@ def start(cwd, owned, label=None, env=None):
                         "End it with `aiqe task end` before starting another.",
                     ],
                 )
-            record = _build_record(repository, roots, label)
+            record = _build_record(repository, owned_paths, label)
             taskstate.write_active(repository.git_dir, record)
     except taskstate.CorruptState as error:
         return _corrupt_outcome(error)
@@ -236,7 +248,13 @@ def end(cwd, env=None):
         with taskstate.TaskLock(repository.git_dir):
             try:
                 record = taskstate.read_active(repository.git_dir)
-            except taskstate.CorruptState:
+            except taskstate.CorruptState as error:
+                # The record is present and this build will not interpret it -
+                # whether because it is malformed or because it was written
+                # under different ownership semantics. Either way `end` is the
+                # operation that means "there should be no active task", and
+                # saying which of the two it was is more useful than a generic
+                # line.
                 taskstate.clear_active(repository.git_dir)
                 return TaskOutcome(
                     TASK_RECORD_DISCARDED,
@@ -244,7 +262,8 @@ def end(cwd, env=None):
                     [
                         "AIQE TASK",
                         "",
-                        "  Discarded an unreadable active task record.",
+                        "  Discarded an active task record this build cannot",
+                        "  interpret: " + error.message,
                         "  A new task can now be started in this worktree.",
                     ],
                 )
@@ -275,7 +294,7 @@ def _corrupt_outcome(error):
 # --- The record ------------------------------------------------------------
 
 
-def _build_record(repository, roots, label):
+def _build_record(repository, owned_paths, label):
     """The active task record.
 
     Deliberately absent: the worktree path, the remote URL, the repository
@@ -292,13 +311,14 @@ def _build_record(repository, roots, label):
 
     return {
         "schema_version": SCHEMA_VERSION,
+        "ownership_semantics": OWNERSHIP_SEMANTICS,
         "task_id": _task_id(),
         "aiqe_version": __version__,
         "started_at": _timestamp(),
         "start_head_state": repository.head_state,
         "start_head_sha": repository.head_sha,
-        "owned_scope": [{"path_b64": _encode(root)} for root in roots],
-        "owned_scope_digest": scope_module.digest(roots),
+        "owned_paths": [{"path_b64": _encode(path)} for path in owned_paths],
+        "owned_pathset_digest": scope_module.digest(owned_paths),
         "label": label,
     }
 
@@ -324,11 +344,11 @@ def _encode(raw):
     return base64.b64encode(raw).decode("ascii")
 
 
-def decode_scope(record):
-    """The owned roots of a record, back as raw bytes."""
+def decode_owned_paths(record):
+    """The owned pathset of a record, back as raw bytes."""
     import base64
 
-    return [base64.b64decode(entry["path_b64"]) for entry in record["owned_scope"]]
+    return [base64.b64decode(entry["path_b64"]) for entry in record["owned_paths"]]
 
 
 # --- Rendering -------------------------------------------------------------
@@ -342,7 +362,7 @@ def _render(record, state):
     escape sequence, and the tool that reports what is in scope must not be
     the one that lets a filename draw a fake row.
     """
-    roots = decode_scope(record)
+    owned_paths = decode_owned_paths(record)
     lines = ["AIQE TASK", ""]
     lines.append("  Task            %s" % (state,))
     lines.append("  Started         %s" % (record["started_at"],))
@@ -353,10 +373,10 @@ def _render(record, state):
         % ("no commits yet" if record["start_head_state"] == "unborn" else "recorded",)
     )
     lines.append(
-        "  Owned scope     %d %s"
-        % (len(roots), "path" if len(roots) == 1 else "paths")
+        "  Owned pathset   %d exact %s"
+        % (len(owned_paths), "path" if len(owned_paths) == 1 else "paths")
     )
-    for root in roots:
-        lines.append("      %s" % (display_bytes(root),))
-    lines.append("  Scope digest    %s" % (record["owned_scope_digest"],))
+    for path in owned_paths:
+        lines.append("      %s" % (display_bytes(path),))
+    lines.append("  Pathset digest  %s" % (record["owned_pathset_digest"],))
     return lines

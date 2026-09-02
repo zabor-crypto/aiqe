@@ -65,7 +65,7 @@ class TaskReferenceTests(unittest.TestCase):
         codes = [
             value
             for name, value in vars(scope).items()
-            if name.startswith("OWNERSHIP_") and isinstance(value, str)
+            if name.startswith(("OWNERSHIP_", "OWNED_")) and isinstance(value, str)
         ]
         self.assertTrue(codes)
         undocumented = sorted(code for code in codes if code not in reference)
@@ -81,16 +81,39 @@ class TaskReferenceTests(unittest.TestCase):
         reference = read(TASK_REFERENCE)
         for field in (
             "schema_version",
+            "ownership_semantics",
             "task_id",
             "aiqe_version",
             "started_at",
             "start_head_state",
             "start_head_sha",
-            "owned_scope",
-            "owned_scope_digest",
+            "owned_paths",
+            "owned_pathset_digest",
             "label",
         ):
             self.assertIn(field, reference, field)
+
+    def test_documented_fields_are_the_fields_actually_written(self):
+        """The reference must not drift from the record the product writes."""
+        import inspect
+
+        from aiqe import task
+
+        source = inspect.getsource(task._build_record)
+        reference = read(TASK_REFERENCE)
+        for line in source.splitlines():
+            stripped = line.strip()
+            if not stripped.startswith('"') or '":' not in stripped:
+                continue
+            field = stripped.split('"')[1]
+            self.assertIn(field, reference, field)
+
+    def test_the_ownership_rule_is_stated(self):
+        """A reader must not have to infer that ownership is exact."""
+        reference = read(TASK_REFERENCE)
+        self.assertIn("owns(foo, foo/bar)  FALSE", reference)
+        self.assertIn("exact", reference.lower())
+        self.assertNotIn("component-prefix ownership", reference)
 
 
 class ReadmeClaimTests(unittest.TestCase):

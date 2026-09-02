@@ -15,7 +15,7 @@ repository and nothing else.
 
 A task answers exactly one question:
 
-> Which repository paths does this AIQE task own?
+> Which exact repository paths does this AIQE task own?
 
 It does not answer whether checks passed, whether evidence is fresh, whether
 the work is reviewable, or whether it can be committed. Those belong to
@@ -25,35 +25,75 @@ justifies them exists.
 
 One worktree holds one active task. Starting a second is refused.
 
-## Owned scope
+## Owned pathset
 
-**Ownership is component-prefix, not string-prefix.** Owning `foo` owns `foo`,
-`foo/bar` and `foo/bar/baz`. It does not own `foobar` or `foo-other`. The
-distinction looks pedantic written down and is the difference between a
-bounded change and a silently widened one.
+**Ownership is exact.** Owning `foo` owns `foo`, and nothing else:
+
+```
+owns(foo, foo)      TRUE
+owns(foo, foo/bar)  FALSE
+owns(foo, foobar)   FALSE
+```
+
+There is no descendant ownership and no directory scope in v1. That is a
+deliberate limitation, not an omission. A prefix rule would let a task
+authorise files that did not exist when the scope was declared — declare
+`build` today, and every file that appears under it tomorrow is inside the
+scope — which is exactly the widening an owned scope exists to prevent. The
+benchmark's `NC_TASK_PREFIX_OWNERSHIP_BROADENING` control demonstrates it
+happening.
+
+The claim the product makes is the strong one:
+
+> AIQE knows the exact declared owned pathset.
+
+A prefix rule cannot support that sentence. Directory ergonomics may be
+reconsidered later, on measured demand; they are not in v1.
 
 **Declared paths are literal.** A path is data, never a pattern:
 
 ```
 --own '*'          declares a file named *
 --own ':(top)'     declares a file named :(top)
---own -- help      is not special; --own --help declares a file named --help
+--own --help       declares a file named --help
 ```
 
 Nothing is expanded, and no declared path reaches Git as a pathspec. The
-benchmark's `NC_TASK_PATHSPEC_EXPANSION` control shows what the alternative
-does: in a repository containing a file legally named `*`, pathspec handling
-turns one declaration into ownership of every tracked file.
+benchmark's `NC_TASK_PATHSPEC_EXPANSION` control shows the alternative: in a
+repository containing a file legally named `*`, pathspec handling turns one
+declaration into ownership of every tracked file.
 
-**Scope is a declaration, not an observation.** An owned path need not exist:
+**A declaration is not an observation.** An owned path need not exist:
 
 ```
 aiqe task start --own src/new_module.py
 ```
 
-is the normal case when the task is about to create it. Nothing consults the
-filesystem to decide what a declared path means, and nothing infers whether it
-will become a file or a directory.
+is the normal case when the task is about to create it.
+
+The filesystem is consulted for exactly one thing — refusing a path that
+exists **today as a directory**:
+
+```
+aiqe task start --own src        # src/ exists
+  -> OWNED_PATH_IS_DIRECTORY, exit 3
+```
+
+A directory declaration has no meaning under exact ownership, and both
+tempting readings are wrong: expanding it would authorise files nobody
+declared, and treating it as one path would own something that cannot be a
+file. Declare the files the task owns instead. There is no flag to bypass
+this.
+
+If a declared path that did not exist later materialises as a directory, a
+future operation that must resolve path identity fails closed rather than
+reinterpreting the declaration as a scope. The record says a path was
+declared, never that a directory was.
+
+**Symlinks are path objects.** `--own link` owns `link`, not whatever it
+resolves to. A symlink pointing at a directory is therefore accepted: the
+declaration is about the link. Nothing follows a link to decide what is
+owned.
 
 **Paths keep their bytes.** A repository path is a byte string. Declared paths
 round-trip exactly, including bytes that are not valid UTF-8 — proven end to
@@ -70,10 +110,11 @@ Canonicalisation is limited to what is safe without touching the filesystem:
 duplicate declarations become one. There is deliberately **no** Unicode
 normalisation and **no** case folding — both would make two different
 filenames look like one — and **no** symlink resolution, because the owned
-identity is the repository path, not whatever it currently points at.
+identity is the repository path.
 
-Overlapping declarations do not collapse. Declaring both `src` and
-`src/a.py` keeps both: the narrower one was written on purpose.
+Two *distinct* paths never collapse, even when one is a lexical parent of the
+other. Declaring both `docs` and `docs/guide.md` records two paths: under
+exact ownership neither implies the other, so neither can absorb it.
 
 ### Refusals
 
@@ -86,11 +127,11 @@ OWNERSHIP_PATH_ADMINISTRATIVE      inside the Git administrative directory
 OWNERSHIP_PATH_INVALID             a path containing a NUL byte
 OWNERSHIP_SCOPE_TOO_BROAD          the repository root
 OWNERSHIP_SCOPE_EMPTY              no owned path declared
+OWNED_PATH_IS_DIRECTORY            a path that exists today as a directory
 ```
 
-`--own .` is refused. AIQE's purpose is an explicit bounded scope, and owning
-everything is not one; declare the top-level directories the task actually
-owns. There is no flag to bypass this.
+`--own .` is refused. AIQE's purpose is an explicit bounded pathset, and
+owning everything is not one.
 
 `src/../etc` is refused rather than silently treated as `etc`: the two are
 only the same if `src` is not a symlink, and AIQE does not resolve symlinks to
@@ -128,58 +169,79 @@ writes somewhere it never promised to write.
 
 ```
 LOCAL INTERNAL STATE SCHEMA
-versioned · not user-edited · not a public integration surface before 1.0
+version 2 · not user-edited · not a public integration surface before 1.0
 ```
 
 Do not build on this shape yet. It is documented so the state is auditable,
 not so it can be integrated against.
 
 ```
-schema_version        integer; bumped when an older reader would misread it
+schema_version        2
+ownership_semantics   "exact_literal_pathset_v1"
 task_id               opaque random local identifier
 aiqe_version
 started_at            UTC, to the second
 start_head_state      "commit" | "unborn"
 start_head_sha        the commit, or null when HEAD is unborn
-owned_scope           [ { "path_b64": base64(raw repository-relative bytes) } ]
-owned_scope_digest    "sha256:<hex>"
+owned_paths           [ { "path_b64": base64(raw repository-relative bytes) } ]
+owned_pathset_digest  "sha256:<hex>"
 label                 the text given to --label, or null
 ```
 
-Paths are base64-encoded because the record is JSON and JSON is text. A path
-is bytes, and round-tripping it through a text encoding is exactly the lossy
-step this product cannot afford.
+`ownership_semantics` is recorded in every task so a reader never has to infer
+from a version number what a declared path meant.
 
-Deliberately absent: the worktree path, the remote URL, the repository owner
-or name, the branch, the hostname, the username and the email address. None is
+Paths are base64-encoded because the record is JSON and JSON is text. A path is
+bytes, and round-tripping it through a text encoding is exactly the lossy step
+this product cannot afford.
+
+Deliberately absent: the worktree path, the remote URL, the repository owner or
+name, the branch, the hostname, the username and the email address. None is
 needed to say which paths a task owns, and every one turns a local state file
 into something that identifies a person or a project if it is ever shared.
 
 `task_id` is random and nothing but random. It encodes no username, hostname,
 repository, branch or readable timestamp.
 
-### The owned-scope digest
+### Schema version 1 is refused, not migrated
+
+Version 1 recorded ownership under different semantics: a declared path owned
+its descendants. Reading such a record as an exact pathset would quietly narrow
+a live task's authority, so this build refuses it:
+
+```
+aiqe task            -> exit 2, naming the schema mismatch
+aiqe task start      -> exit 2, the record is left untouched
+aiqe task end        -> discards it; a new task can then be started
+```
+
+There is no migration and no migration framework. This is local pre-release
+state, and a sentence telling the user to end the task and start it again is a
+better answer than machinery that guesses what an older record would have meant.
+
+### The owned-pathset digest
 
 Deterministic, and documented so a reviewer can recompute it:
 
 ```
-SHA-256( "aiqe.owned-scope.v1\0" + concat(root + "\0" for each sorted root) )
+SHA-256( "aiqe.owned-pathset.v1\0" + concat(path + "\0" for each sorted path) )
 ```
 
 It binds the raw path bytes, the component boundaries and the canonical
-ordering — and nothing else. It does not bind display text: two scopes that
+ordering — and nothing else. It does not bind display text: two pathsets that
 render alike but differ in bytes must produce different digests, and changing
 how paths are printed must not change the digest. NUL is a safe delimiter
 because a POSIX path cannot contain one.
 
-Two spellings of the same scope produce the same digest. `--own src/` and
-`--own ./src` and `--own src//` are one root; declaring a path twice is one
-scope.
+Two spellings of the same path produce the same digest. `--own docs/` and
+`--own ./docs` and `--own docs//` are one path; declaring a path twice is one
+pathset entry. Two distinct paths never merge, so `docs` and `docs/guide.md`
+digest differently from `docs` alone.
 
-`start_head_sha` is recorded as the state the task began from. A task is
-**not** invalidated in this slice because HEAD later changed — evidence
-freshness belongs to `check`, and enforcing it here would be inventing a
-completion rule ahead of the evidence.
+`start_head_sha` is recorded as the state the task began from. A task is **not**
+invalidated in this slice because HEAD later changed — evidence freshness
+belongs to `check`, and enforcing it here would be inventing a completion rule
+ahead of the evidence.
 
 ## Atomicity and concurrency
 
@@ -264,7 +326,20 @@ content is compared, so nothing can trigger a filter driver.
 the same file on a case-insensitive or normalising filesystem is not decided at
 task start, because it depends on state that does not exist yet. It becomes a
 question when a later operation must resolve path identity against actual
-changes, and it fails closed there.
+changes, and it fails closed there. The same applies to a declared path that
+did not exist and later materialises as a directory.
+
+**No directory ownership.** v1 owns an exact pathset. Declaring a directory is
+refused, and declaring a path does not own anything under it. Directory
+ergonomics may be reconsidered on measured demand; they are not in v1.
+
+**Task end is not proven durable against power loss.** `clear_active` unlinks
+the record and then fsyncs the containing directory, which is the mechanism
+that would make the deletion survive, and a test asserts that fsync happens.
+Demonstrating power-loss durability needs power loss, so the classification
+stays `TASK_END_POWER_LOSS_DURABILITY = NOT_PROVEN` rather than being upgraded
+by assertion. The frozen requirement — that a process crash never leaves a
+half-written record a reader accepts — is met and tested separately.
 
 **No task history.** Ending a task removes the active record. Retaining an
 ended one would be the first row of a task history database, which is out of

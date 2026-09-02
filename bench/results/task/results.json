@@ -6,7 +6,7 @@
       "aiqe_state_changes": 2,
       "case": "simple_file_scope",
       "description": "One file declared, shown, and ended. The shape every other case is a deviation from.",
-      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
         0,
@@ -28,10 +28,30 @@
     },
     {
       "active_after_end": false,
+      "aiqe_state_changes": 0,
+      "case": "existing_directory_refused",
+      "description": "A declared path that exists today as a directory. v1 owns an exact pathset, so a directory declaration has no meaning in it and is refused rather than expanded or silently owned.",
+      "exit_codes": [
+        3
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "refusal_names_the_directory": true,
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "terminal_safe": true
+    },
+    {
+      "active_after_end": false,
       "aiqe_state_changes": 2,
-      "case": "directory_component_scope",
-      "description": "A directory scope. Owning 'src' owns everything under it by component, which the membership tests pin down separately.",
-      "digest_while_active": "sha256:06052847344cabe113bebcde29ce63d5e92ba3ec3caaa2898d467671a3300297",
+      "case": "symlink_owns_the_link",
+      "description": "A symlink is a path object in its own right. Declaring one owns the link, not what it resolves to - so a symlink pointing at a directory is accepted, because the declaration is about the link.",
+      "digest_while_active": "sha256:ba2e0bd5fb8abfe19045a21932a414006b6e1129b20161aa5cdca4c39073a8a9",
       "exit_codes": [
         0,
         0,
@@ -43,7 +63,8 @@
       "other_changes": [],
       "outcome": "PASS",
       "owned_while_active": [
-        "src"
+        "linkdir",
+        "linkfile"
       ],
       "problems": [],
       "repository_defined_executions": 0,
@@ -57,7 +78,7 @@
       "case": "nonexistent_future_path",
       "declared_path_exists": false,
       "description": "Declaring a path that does not exist yet - the normal case when the task is about to create it. Scope is a declaration, not an observation.",
-      "digest_while_active": "sha256:3a746521682e2b63bbd74539768f9a3bdc2cc3c6c81d5de8bf987585fdd6ec88",
+      "digest_while_active": "sha256:3abb060416a56f55f8262c68b23a7b1937f863663eedbd9fbb19a17bf2541ac9",
       "exit_codes": [
         0,
         0,
@@ -82,7 +103,7 @@
       "aiqe_state_changes": 2,
       "case": "duplicate_scope",
       "description": "The same path declared twice is one scope, and its digest equals the single-declaration digest.",
-      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
         0,
@@ -105,9 +126,9 @@
     {
       "active_after_end": false,
       "aiqe_state_changes": 2,
-      "case": "overlapping_scopes",
-      "description": "'src' and 'src/strategy.py' both stay. The narrower declaration was written on purpose and does not disappear into the wider one.",
-      "digest_while_active": "sha256:1edb39494c73b3ce38941446f30e83866bd29ea0fc2d7d6195fdcc8c950b14e6",
+      "case": "lexical_parent_and_child",
+      "description": "'docs' and 'docs/guide.md' are two distinct declarations. Under exact ownership neither implies the other, so neither collapses into the other.",
+      "digest_while_active": "sha256:fdbad0b19082141263a28754b6870b60dce885e8e1f59047f3c8304475a3186e",
       "exit_codes": [
         0,
         0,
@@ -119,8 +140,8 @@
       "other_changes": [],
       "outcome": "PASS",
       "owned_while_active": [
-        "src",
-        "src/strategy.py"
+        "docs",
+        "docs/guide.md"
       ],
       "problems": [],
       "repository_defined_executions": 0,
@@ -132,8 +153,8 @@
       "active_after_end": false,
       "aiqe_state_changes": 2,
       "case": "trailing_separator",
-      "description": "'src/', './src' and 'src//' are three spellings of one path. They collapse to one root with the plain directory digest.",
-      "digest_while_active": "sha256:06052847344cabe113bebcde29ce63d5e92ba3ec3caaa2898d467671a3300297",
+      "description": "'docs/', './docs' and 'docs//' are three spellings of one path. They collapse to one owned path with one digest.",
+      "digest_while_active": "sha256:60f8bd4ec4f9d16f5b0d13e73fad57514c98dd48a5f399b693330570bc9aa024",
       "exit_codes": [
         0,
         0,
@@ -145,7 +166,7 @@
       "other_changes": [],
       "outcome": "PASS",
       "owned_while_active": [
-        "src"
+        "docs"
       ],
       "problems": [],
       "repository_defined_executions": 0,
@@ -158,7 +179,7 @@
       "aiqe_state_changes": 2,
       "case": "literal_metacharacter_names",
       "description": "Every declared name here is a filename, not a pattern: glob characters, pathspec magic, and arguments that look like flags. Nothing expands.",
-      "digest_while_active": "sha256:9a88843e9e48a9d52ec85becdd2ec14612162a99dce1af4cfbab9c6b61a2311b",
+      "digest_while_active": "sha256:3b363ad27e0a18a4530b25b75a46037a893bbea36379e62580a9f9b0e65e4f40",
       "exit_codes": [
         0,
         0,
@@ -189,7 +210,7 @@
       "aiqe_state_changes": 2,
       "case": "whitespace_names",
       "description": "Names containing a space, a tab and a newline. Stored literally, rendered escaped, and the newline does not become a second output row.",
-      "digest_while_active": "sha256:1c45725bd613b8d6dbe26aaf38d620de701582ead74173e941c0f4f8fc3f77e6",
+      "digest_while_active": "sha256:697fd84fd61d4bf49fb13e1362d08bffc9c198119737bca1d2346baff35dcfc8",
       "exit_codes": [
         0,
         0,
@@ -216,7 +237,7 @@
       "aiqe_state_changes": 2,
       "case": "subdirectory_invocation",
       "description": "'--own ../src/strategy.py' typed from tests/ means the same scope as declaring it from the root, and produces the same digest.",
-      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
         0
@@ -264,7 +285,7 @@
       "aiqe_state_changes": 2,
       "case": "foreign_staged_preserved",
       "description": "A repository with staged work it did not ask AIQE about. The index is byte-identical across start, status and end.",
-      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
         0,
@@ -294,7 +315,7 @@
       "aiqe_state_changes": 2,
       "case": "repository_defined_execution",
       "description": "A repository pointing at commands every way it can - clean filter, fsmonitor, shell aliases, an executable hook. Declaring a task runs none of them.",
-      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
         0,
@@ -373,7 +394,7 @@
       "aiqe_state_changes": 1,
       "case": "interrupted_write",
       "description": "A process killed mid-write leaves a temporary file that was never renamed. It is not a task: status says so, and the next start succeeds.",
-      "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+      "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
       "exit_codes": [
         0,
         0,
@@ -421,6 +442,34 @@
       "terminal_safe": true
     },
     {
+      "active_after_end": false,
+      "aiqe_state_changes": 2,
+      "case": "schema_v1_fail_closed",
+      "description": "An active record written under the superseded schema, where a declared path owned its descendants. Reading it under exact semantics would quietly narrow a live task's authority, so it is refused and left untouched. 'task end' discards it and the user starts again; there is no migration.",
+      "exit_codes": [
+        2,
+        2,
+        0,
+        0,
+        0
+      ],
+      "fired_canaries": [],
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_while_active": [
+        "src/strategy.py"
+      ],
+      "problems": [],
+      "record_untouched_while_refused": true,
+      "repository_defined_executions": 0,
+      "repository_mutation_detail": [],
+      "repository_mutations": 0,
+      "schema_after_restart": 2,
+      "terminal_safe": true
+    },
+    {
       "aiqe_state_changes": 0,
       "case": "unsafe_state_location",
       "description": "A symlink planted where AIQE's private state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
@@ -447,14 +496,27 @@
     }
   ],
   "cases_failed": 0,
-  "cases_passed": 17,
+  "cases_passed": 19,
   "cases_skipped_platform": 1,
   "cases_skipped_platform_ids": [
     "non_utf8_owned_path"
   ],
-  "cases_total": 18,
+  "cases_total": 20,
   "family": "TASK_SCOPE_CORE",
   "negative_controls": [
+    {
+      "aiqe_authorises_undeclared": false,
+      "aiqe_start_exit": 0,
+      "control": "NC_TASK_PREFIX_OWNERSHIP_BROADENING",
+      "control_reproduces_failure": true,
+      "declared": [
+        "build"
+      ],
+      "description": "Component-prefix ownership. A task declares a path that does not exist yet; the path later materialises as a directory with files in it, and the prefix rule silently authorises every one of them - files that did not exist when the scope was fixed. AIQE v1 owns an exact pathset, so it authorises only what was declared.",
+      "invariant": "OWNERSHIP_IS_AN_EXACT_LITERAL_PATHSET",
+      "naive_authorises_undeclared": true,
+      "undeclared_path_that_appeared": "build/artifact.o"
+    },
     {
       "aiqe_owned": [
         "*"
@@ -489,8 +551,8 @@
       "naive_successes": 2
     }
   ],
-  "negative_controls_reproducing": 3,
-  "negative_controls_total": 3,
+  "negative_controls_reproducing": 4,
+  "negative_controls_total": 4,
   "other_families": {
     "BOUNDED_COMMIT": "NOT_RUN",
     "CHECK": "NOT_RUN",

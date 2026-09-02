@@ -10,29 +10,50 @@ makes the change, not at release time.
 
 ## [Unreleased]
 
+### Changed
+
+- **Ownership is an exact literal pathset**, correcting the component-prefix semantics
+  that landed in the previous entry. Owning `foo` owns `foo`, and not `foo/bar` or
+  `foobar`. A prefix rule would let a task authorise files that did not exist when the
+  scope was declared, which is the widening an owned scope exists to prevent, and it
+  cannot support the claim the product makes: AIQE knows the exact declared owned
+  pathset.
+- **A declared path that exists today as a directory is refused**
+  (`OWNED_PATH_IS_DIRECTORY`, exit 3). It is not expanded and not owned as a single
+  path. A path that does not exist is still accepted, and a symlink is owned as the
+  link rather than as its target.
+- **Task state schema version 2**, with `ownership_semantics`, `owned_paths` and
+  `owned_pathset_digest` replacing the ambiguous version-1 names. A version-1 record is
+  refused and left untouched rather than reinterpreted — reading it under exact
+  semantics would quietly narrow a live task's authority. `aiqe task end` discards it;
+  there is no migration.
+- The owned-pathset digest is domain-separated as `aiqe.owned-pathset.v1`.
+- Added `NC_TASK_PREFIX_OWNERSHIP_BROADENING`: a task declares a path that does not
+  exist, the path later materialises as a directory, and the prefix rule silently
+  authorises files inside it. It reproduces; exact ownership does not.
+
 ### Added
 
 - **`aiqe task` is implemented**: `task start --own <path>... [--label <text>]`,
   `task`, and `task end`. One active task per worktree, working before `aiqe init`,
   which still does not exist.
-- Owned scope with **component-prefix** semantics: owning `foo` owns `foo/bar` and not
-  `foobar`. Declared paths are literal data — glob characters, pathspec magic and
-  arguments that look like flags are all just filenames — and never reach Git as a
-  pathspec.
+- Owned scope as an exact literal pathset. Declared paths are literal data — glob
+  characters, pathspec magic and arguments that look like flags are all just filenames —
+  and never reach Git as a pathspec.
 - Scope is a declaration, not an observation: an owned path need not exist yet.
 - Owned paths round-trip as raw bytes, stored base64-encoded in the record and proven
   end to end on Linux with a path that is not valid UTF-8.
-- A documented deterministic owned-scope digest binding the exact path bytes, component
-  boundaries and canonical ordering.
+- A documented deterministic owned-pathset digest binding the exact path bytes,
+  component boundaries and canonical ordering.
 - Task state in `<worktree git directory>/aiqe/`, so two linked worktrees hold two
   independent tasks. Atomic writes with fsync and rename; an exclusive `flock` over
   start and end, so two concurrent starts produce one winner and one refusal.
 - Terminal-safe rendering of owned paths and labels: a filename containing a newline or
   an escape sequence cannot forge an output row or repaint the terminal, and the stored
   value is untouched.
-- Task benchmark family under `bench/fixtures/task/`, with 18 cases and three negative
-  controls — pathspec expansion, shared worktree state, and a lost start race — all
-  reproducing.
+- Task benchmark family under `bench/fixtures/task/`, with 20 cases and four negative
+  controls — prefix-ownership broadening, pathspec expansion, shared worktree state, and
+  a lost start race — all reproducing.
 - Reference documentation for the task surface and its local state schema:
   [`docs/task.md`](docs/task.md).
 

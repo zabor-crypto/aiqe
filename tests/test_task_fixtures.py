@@ -74,10 +74,12 @@ class FixtureCoverageTests(unittest.TestCase):
         """Every condition the task contract names must have a case."""
         required = {
             "simple_file_scope",
-            "directory_component_scope",
+            "existing_directory_refused",
+            "symlink_owns_the_link",
             "nonexistent_future_path",
             "duplicate_scope",
-            "overlapping_scopes",
+            "lexical_parent_and_child",
+            "schema_v1_fail_closed",
             "literal_metacharacter_names",
             "whitespace_names",
             "subdirectory_invocation",

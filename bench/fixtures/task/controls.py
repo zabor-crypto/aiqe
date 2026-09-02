@@ -11,6 +11,8 @@ recorded per control rather than assumed.
 
 The three here are the reasons for three specific decisions:
 
+    prefix ownership   -> why ownership is an exact literal pathset, with no
+                          descendant or directory scope
     pathspec ownership -> why owned paths are literal data and never reach Git
                           as a pattern
     common-dir state   -> why task state lives in the worktree's own Git
@@ -27,6 +29,7 @@ import time
 from ..repobuild import commit_all, git, init_repo, write
 from . import builders
 
+PREFIX_OWNERSHIP_BROADENING = "prefix_ownership_broadening"
 PATHSPEC_EXPANSION = "pathspec_expansion"
 SHARED_TASK_STATE = "shared_task_state"
 LOST_START_RACE = "lost_start_race"
@@ -41,6 +44,46 @@ def _repo_with_metacharacter_names(case, env):
     write(os.path.join(root, "*"), "literally named star\n")
     commit_all(root, "base", env)
     return root
+
+
+def _naive_component_prefix_owns(declared, path):
+    """The rejected rule: a declared path owns everything under it."""
+    return path == declared or path.startswith(declared + b"/")
+
+
+def run_prefix_ownership_broadening(case, env):
+    """Prefix ownership authorises files that did not exist when it was declared.
+
+    The sequence is the ordinary one, not a contrived one. A task declares a
+    path that does not exist yet - which is allowed, and is how you declare
+    something you are about to create. Later the path materialises as a
+    directory with files in it. Under a component-prefix rule the task now
+    authorises every one of those files, none of which was declared when the
+    scope was fixed. That is precisely the widening an owned scope exists to
+    prevent, and it is why v1 ownership is exact.
+    """
+    root = builders.base_repo(case.repo_path, env)
+
+    declared = b"build"
+    started = builders.run_cli(root, env, b"task", b"start", b"--own", declared)
+    record = builders.read_active(root, env)
+    owned = builders.owned_raw(record)
+
+    # The declared path materialises after the fact, as directories do.
+    write(os.path.join(root, "build", "artifact.o"), "generated\n")
+    appeared = b"build/artifact.o"
+
+    naive = any(_naive_component_prefix_owns(path, appeared) for path in owned)
+    exact = any(path == appeared for path in owned)
+
+    builders.run_cli(root, env, b"task", b"end")
+    return {
+        "declared": [builders.display_bytes(path) for path in owned],
+        "undeclared_path_that_appeared": builders.display_bytes(appeared),
+        "naive_authorises_undeclared": naive,
+        "aiqe_authorises_undeclared": exact,
+        "aiqe_start_exit": started.returncode,
+    }
 
 
 def run_pathspec_expansion(case, env):
@@ -155,6 +198,19 @@ def run_lost_start_race(case, env):
 
 CONTROLS = [
     {
+        "id": "NC_TASK_PREFIX_OWNERSHIP_BROADENING",
+        "description": (
+            "Component-prefix ownership. A task declares a path that does not "
+            "exist yet; the path later materialises as a directory with files in "
+            "it, and the prefix rule silently authorises every one of them - "
+            "files that did not exist when the scope was fixed. AIQE v1 owns an "
+            "exact pathset, so it authorises only what was declared."
+        ),
+        "invariant": "OWNERSHIP_IS_AN_EXACT_LITERAL_PATHSET",
+        "detects": PREFIX_OWNERSHIP_BROADENING,
+        "run": run_prefix_ownership_broadening,
+    },
+    {
         "id": "NC_TASK_PATHSPEC_EXPANSION",
         "description": (
             "Ownership handled as a Git pathspec. A file legally named '*' is a "
@@ -194,6 +250,11 @@ CONTROLS = [
 
 def violated(control, observation):
     """Did the naive implementation actually breach the invariant this time?"""
+    if control["detects"] == PREFIX_OWNERSHIP_BROADENING:
+        return (
+            observation["naive_authorises_undeclared"] is True
+            and observation["aiqe_authorises_undeclared"] is False
+        )
     if control["detects"] == PATHSPEC_EXPANSION:
         return observation["naive_matched_count"] > 1
     if control["detects"] == SHARED_TASK_STATE:

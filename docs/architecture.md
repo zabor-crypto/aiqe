@@ -47,8 +47,8 @@ implemented. The rest are design targets: invoking one exits 3 with `unknown com
 because a command that parses and does nothing advertises a capability the product has
 not built.
 
-The task boundary answers which repository paths a unit of work owns, and deliberately
-nothing else — not whether checks passed, whether evidence is fresh, or whether the work
+The task boundary answers which exact repository paths a unit of work owns — a declared
+path owns itself and nothing else — and deliberately nothing further — not whether checks passed, whether evidence is fresh, or whether the work
 is reviewable. Reference: [`task.md`](task.md).
 
 Doctor runs before init. That ordering is intentional: nothing is written into a

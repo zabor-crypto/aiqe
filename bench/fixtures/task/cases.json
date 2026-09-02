@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "family": "TASK_SCOPE_CORE",
-  "note": "Expected outcomes are written from the frozen task contract, not recorded from a run. Owned paths are compared as escaped display text, which is unambiguous and reviewable; the raw byte round-trip is asserted separately by the arbitrary-byte case. Where two spellings of one scope are expected to produce the same authority, the digests below are equal on purpose.",
+  "note": "Expected outcomes are written from the frozen task contract, not recorded from a run. Ownership is an exact literal pathset: a declared path owns itself and nothing else. Owned paths are compared as escaped display text, which is unambiguous and reviewable; the raw byte round-trip is asserted separately by the arbitrary-byte case. Where two spellings of one path are expected to produce the same authority, the digests below are equal on purpose.",
   "zero_tolerance": [
     "repository_mutations",
     "local_state_writes",
@@ -14,7 +14,7 @@
       "description": "One file declared, shown, and ended. The shape every other case is a deviation from.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -27,19 +27,32 @@
       }
     },
     {
-      "id": "directory_component_scope",
-      "description": "A directory scope. Owning 'src' owns everything under it by component, which the membership tests pin down separately.",
+      "id": "existing_directory_refused",
+      "description": "A declared path that exists today as a directory. v1 owns an exact pathset, so a directory declaration has no meaning in it and is refused rather than expanded or silently owned.",
       "expect": {
+        "exit_codes": [
+          3
+        ],
         "active_after_end": false,
-        "digest_while_active": "sha256:06052847344cabe113bebcde29ce63d5e92ba3ec3caaa2898d467671a3300297",
+        "refusal_names_the_directory": true,
+        "terminal_safe": true
+      }
+    },
+    {
+      "id": "symlink_owns_the_link",
+      "description": "A symlink is a path object in its own right. Declaring one owns the link, not what it resolves to - so a symlink pointing at a directory is accepted, because the declaration is about the link.",
+      "expect": {
         "exit_codes": [
           0,
           0,
           0
         ],
         "owned_while_active": [
-          "src"
+          "linkdir",
+          "linkfile"
         ],
+        "digest_while_active": "sha256:ba2e0bd5fb8abfe19045a21932a414006b6e1129b20161aa5cdca4c39073a8a9",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
@@ -49,7 +62,7 @@
       "expect": {
         "active_after_end": false,
         "declared_path_exists": false,
-        "digest_while_active": "sha256:3a746521682e2b63bbd74539768f9a3bdc2cc3c6c81d5de8bf987585fdd6ec88",
+        "digest_while_active": "sha256:3abb060416a56f55f8262c68b23a7b1937f863663eedbd9fbb19a17bf2541ac9",
         "exit_codes": [
           0,
           0,
@@ -66,7 +79,7 @@
       "description": "The same path declared twice is one scope, and its digest equals the single-declaration digest.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -79,36 +92,36 @@
       }
     },
     {
-      "id": "overlapping_scopes",
-      "description": "'src' and 'src/strategy.py' both stay. The narrower declaration was written on purpose and does not disappear into the wider one.",
+      "id": "lexical_parent_and_child",
+      "description": "'docs' and 'docs/guide.md' are two distinct declarations. Under exact ownership neither implies the other, so neither collapses into the other.",
       "expect": {
-        "active_after_end": false,
-        "digest_while_active": "sha256:1edb39494c73b3ce38941446f30e83866bd29ea0fc2d7d6195fdcc8c950b14e6",
         "exit_codes": [
           0,
           0,
           0
         ],
         "owned_while_active": [
-          "src",
-          "src/strategy.py"
+          "docs",
+          "docs/guide.md"
         ],
+        "digest_while_active": "sha256:fdbad0b19082141263a28754b6870b60dce885e8e1f59047f3c8304475a3186e",
+        "active_after_end": false,
         "terminal_safe": true
       }
     },
     {
       "id": "trailing_separator",
-      "description": "'src/', './src' and 'src//' are three spellings of one path. They collapse to one root with the plain directory digest.",
+      "description": "'docs/', './docs' and 'docs//' are three spellings of one path. They collapse to one owned path with one digest.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:06052847344cabe113bebcde29ce63d5e92ba3ec3caaa2898d467671a3300297",
+        "digest_while_active": "sha256:60f8bd4ec4f9d16f5b0d13e73fad57514c98dd48a5f399b693330570bc9aa024",
         "exit_codes": [
           0,
           0,
           0
         ],
         "owned_while_active": [
-          "src"
+          "docs"
         ],
         "terminal_safe": true
       }
@@ -118,7 +131,7 @@
       "description": "Every declared name here is a filename, not a pattern: glob characters, pathspec magic, and arguments that look like flags. Nothing expands.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:9a88843e9e48a9d52ec85becdd2ec14612162a99dce1af4cfbab9c6b61a2311b",
+        "digest_while_active": "sha256:3b363ad27e0a18a4530b25b75a46037a893bbea36379e62580a9f9b0e65e4f40",
         "exit_codes": [
           0,
           0,
@@ -141,7 +154,7 @@
       "description": "Names containing a space, a tab and a newline. Stored literally, rendered escaped, and the newline does not become a second output row.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:1c45725bd613b8d6dbe26aaf38d620de701582ead74173e941c0f4f8fc3f77e6",
+        "digest_while_active": "sha256:697fd84fd61d4bf49fb13e1362d08bffc9c198119737bca1d2346baff35dcfc8",
         "exit_codes": [
           0,
           0,
@@ -160,7 +173,7 @@
       "description": "'--own ../src/strategy.py' typed from tests/ means the same scope as declaring it from the root, and produces the same digest.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0
@@ -192,7 +205,7 @@
       "description": "A repository with staged work it did not ask AIQE about. The index is byte-identical across start, status and end.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -214,7 +227,7 @@
       "description": "A repository pointing at commands every way it can - clean filter, fsmonitor, shell aliases, an executable hook. Declaring a task runs none of them.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -266,7 +279,7 @@
       "description": "A process killed mid-write leaves a temporary file that was never renamed. It is not a task: status says so, and the next start succeeds.",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:75d833ec34bdcfabc212125d65cf79801e0d301da979ccd7d5163f2c37db9486",
+        "digest_while_active": "sha256:962add6b88224d9c1eea984b4f00c071786b7ec46714ba3e8bcfafb38c1dec7b",
         "exit_codes": [
           0,
           0,
@@ -298,6 +311,26 @@
       }
     },
     {
+      "id": "schema_v1_fail_closed",
+      "description": "An active record written under the superseded schema, where a declared path owned its descendants. Reading it under exact semantics would quietly narrow a live task's authority, so it is refused and left untouched. 'task end' discards it and the user starts again; there is no migration.",
+      "expect": {
+        "exit_codes": [
+          2,
+          2,
+          0,
+          0,
+          0
+        ],
+        "record_untouched_while_refused": true,
+        "schema_after_restart": 2,
+        "owned_while_active": [
+          "src/strategy.py"
+        ],
+        "active_after_end": false,
+        "terminal_safe": true
+      }
+    },
+    {
       "id": "unsafe_state_location",
       "description": "A symlink planted where AIQE's private state belongs. AIQE refuses rather than writing through it to somewhere it never promised to write.",
       "expect": {
@@ -313,7 +346,7 @@
       "platform": "linux",
       "expect": {
         "active_after_end": false,
-        "digest_while_active": "sha256:f2911f2b7866ccd8dc7ce8903c7ce8191ab539404005831b53c5b9dce35f86ac",
+        "digest_while_active": "sha256:3dbc045afd02d4dd48f413b67079d78557a5ed81c39cc0e9fd9e8e726afb6681",
         "exit_codes": [
           0,
           0,

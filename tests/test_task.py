@@ -17,7 +17,7 @@ from . import support
 
 from aiqe import exits, taskstate
 from aiqe.cli import main
-from aiqe.task import decode_scope
+from aiqe.task import OWNERSHIP_SEMANTICS, decode_owned_paths
 from aiqe.textsafe import display_bytes, display_text, is_safe
 
 
@@ -71,7 +71,7 @@ class LifecycleTests(TaskTestCase):
         status, _out, err = run(["task", "start", "--own", "other.py"], self.repo, self.env)
         self.assertEqual(status, exits.UNSUPPORTED)
         self.assertIn("already active", err)
-        self.assertEqual(decode_scope(self.active()), [b"src/strategy.py"])
+        self.assertEqual(decode_owned_paths(self.active()), [b"src/strategy.py"])
 
     def test_end_without_a_task_is_refused(self):
         status, _out, err = run(["task", "end"], self.repo, self.env)
@@ -106,17 +106,20 @@ class RecordTests(TaskTestCase):
         record = self.active()
         for key in (
             "schema_version",
+            "ownership_semantics",
             "task_id",
             "aiqe_version",
             "started_at",
             "start_head_state",
             "start_head_sha",
-            "owned_scope",
-            "owned_scope_digest",
+            "owned_paths",
+            "owned_pathset_digest",
             "label",
         ):
             self.assertIn(key, record, key)
-        self.assertEqual(record["schema_version"], 1)
+        self.assertEqual(record["schema_version"], 2)
+        self.assertEqual(record["ownership_semantics"], OWNERSHIP_SEMANTICS)
+        self.assertEqual(record["ownership_semantics"], "exact_literal_pathset_v1")
         self.assertEqual(record["label"], "refactor")
         self.assertEqual(record["start_head_state"], "commit")
 
@@ -147,7 +150,7 @@ class RecordTests(TaskTestCase):
     def test_paths_round_trip_as_bytes(self):
         self.start("src/strategy.py", "weird\nname")
         self.assertEqual(
-            sorted(decode_scope(self.active())), [b"src/strategy.py", b"weird\nname"]
+            sorted(decode_owned_paths(self.active())), [b"src/strategy.py", b"weird\nname"]
         )
 
     def test_unborn_head_is_recorded_as_such(self):
@@ -186,7 +189,7 @@ class CommandSurfaceTests(TaskTestCase):
             ["task", "start", "--own", "--help", "--own", "-a"], self.repo, self.env
         )
         self.assertEqual(status, exits.OK)
-        self.assertEqual(sorted(decode_scope(self.active())), [b"--help", b"-a"])
+        self.assertEqual(sorted(decode_owned_paths(self.active())), [b"--help", b"-a"])
 
     def test_unimplemented_commands_stay_unimplemented(self):
         for command in ("init", "check", "commit", "receipt"):
@@ -196,9 +199,121 @@ class CommandSurfaceTests(TaskTestCase):
             self.assertIn("unknown command", err, command)
 
 
+class ExactOwnershipTests(TaskTestCase):
+    """v1 owns an exact pathset. No descendants, no directory scope."""
+
+    def test_an_existing_directory_is_refused(self):
+        status, _out, err = run(
+            ["task", "start", "--own", "src"], self.repo, self.env
+        )
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertIn("exists as a directory", err)
+        self.assertIsNone(self.active())
+
+    def test_a_file_inside_that_directory_is_accepted(self):
+        status, _out, _err = run(
+            ["task", "start", "--own", "src/strategy.py"], self.repo, self.env
+        )
+        self.assertEqual(status, exits.OK)
+        self.assertEqual(decode_owned_paths(self.active()), [b"src/strategy.py"])
+
+    def test_a_path_that_does_not_exist_yet_is_accepted(self):
+        status, _out, _err = run(
+            ["task", "start", "--own", "src/future.py"], self.repo, self.env
+        )
+        self.assertEqual(status, exits.OK)
+
+    def test_a_symlink_to_a_directory_owns_the_link(self):
+        os.symlink("src", os.path.join(self.repo, "linkdir"))
+        status, _out, _err = run(
+            ["task", "start", "--own", "linkdir"], self.repo, self.env
+        )
+        self.assertEqual(status, exits.OK)
+        self.assertEqual(decode_owned_paths(self.active()), [b"linkdir"])
+
+    def test_a_lexical_parent_and_child_are_both_recorded(self):
+        status, _out, _err = run(
+            ["task", "start", "--own", "docs", "--own", "docs/guide.md"],
+            self.repo,
+            self.env,
+        )
+        self.assertEqual(status, exits.OK)
+        self.assertEqual(
+            sorted(decode_owned_paths(self.active())), [b"docs", b"docs/guide.md"]
+        )
+
+    def test_the_recorded_pathset_authorises_nothing_further(self):
+        from aiqe import scope
+
+        run(["task", "start", "--own", "src/strategy.py"], self.repo, self.env)
+        owned = decode_owned_paths(self.active())
+        self.assertTrue(scope.owned_by_any(owned, b"src/strategy.py"))
+        for other in (b"src", b"src/other.py", b"src/strategy.pyc"):
+            self.assertFalse(scope.owned_by_any(owned, other), other)
+
+
+class SchemaTransitionTests(TaskTestCase):
+    """An older record meant something else, so it is refused, not reread."""
+
+    def write_v1_record(self):
+        state = os.path.join(self.repo, ".git", "aiqe")
+        os.makedirs(state, exist_ok=True)
+        with open(os.path.join(state, "task.json"), "w") as handle:
+            json.dump(
+                {
+                    "schema_version": 1,
+                    "task_id": "0" * 32,
+                    "aiqe_version": "0.0.0.dev0",
+                    "started_at": "2026-09-01T00:00:00Z",
+                    "start_head_state": "unborn",
+                    "start_head_sha": None,
+                    "owned_scope": [{"path_b64": "c3Jj"}],
+                    "owned_scope_digest": "sha256:whatever",
+                    "label": None,
+                },
+                handle,
+            )
+
+    def test_status_fails_closed(self):
+        self.write_v1_record()
+        status, _out, err = run(["task"], self.repo, self.env)
+        self.assertEqual(status, exits.INCOMPLETE)
+        self.assertIn("schema version 1", err)
+        self.assertIn("refused rather than reinterpreted", err)
+
+    def test_start_fails_closed(self):
+        self.write_v1_record()
+        status, _out, _err = run(
+            ["task", "start", "--own", "src/strategy.py"], self.repo, self.env
+        )
+        self.assertEqual(status, exits.INCOMPLETE)
+
+    def test_no_silent_migration(self):
+        """The old record must not be rewritten or reinterpreted in place."""
+        self.write_v1_record()
+        path = os.path.join(self.repo, ".git", "aiqe", "task.json")
+        with open(path) as handle:
+            before = handle.read()
+        run(["task"], self.repo, self.env)
+        run(["task", "start", "--own", "src/strategy.py"], self.repo, self.env)
+        with open(path) as handle:
+            self.assertEqual(handle.read(), before)
+
+    def test_end_discards_it_and_a_new_task_can_start(self):
+        self.write_v1_record()
+        status, out, _err = run(["task", "end"], self.repo, self.env)
+        self.assertEqual(status, exits.OK)
+        self.assertIn("cannot", out)
+        status, _out, _err = run(
+            ["task", "start", "--own", "src/strategy.py"], self.repo, self.env
+        )
+        self.assertEqual(status, exits.OK)
+        self.assertEqual(self.active()["schema_version"], 2)
+
+
 class ExitVocabularyTests(TaskTestCase):
     def test_invalid_scope_is_unsupported(self):
-        for path in ("/etc/passwd", "..", ".", ".git/config"):
+        for path in ("/etc/passwd", "..", ".", ".git/config", "src"):
             status, _out, _err = run(
                 ["task", "start", "--own", path], self.repo, self.env
             )
@@ -262,7 +377,7 @@ class TerminalSafetyTests(TaskTestCase):
         # The escaped path legitimately *contains* that text, on one line.
         # What must not happen is a second row: a line beginning at the
         # report's own label column, which is what a raw newline would create.
-        rows = [line for line in out.splitlines() if line.startswith("  Owned scope")]
+        rows = [line for line in out.splitlines() if line.startswith("  Owned pathset")]
         self.assertEqual(len(rows), 1, out)
         self.assertIn("\\n", out)
         for line in out.splitlines():
@@ -287,7 +402,7 @@ class TerminalSafetyTests(TaskTestCase):
 
     def test_display_does_not_change_what_is_stored(self):
         run(["task", "start", "--own", "weird\nname"], self.repo, self.env)
-        self.assertEqual(decode_scope(self.active()), [b"weird\nname"])
+        self.assertEqual(decode_owned_paths(self.active()), [b"weird\nname"])
         self.assertEqual(display_bytes(b"weird\nname"), "weird\\nname")
 
     def test_display_is_injective_on_the_escape_character(self):
@@ -317,7 +432,37 @@ class AtomicWriteTests(TaskTestCase):
         self.assertTrue(hasattr(taskstate, "_atomic_replace"))
         run(["task", "start", "--own", "src/x.py"], self.repo, self.env)
         record = self.active()
-        self.assertEqual(record["schema_version"], 1)
+        self.assertEqual(record["schema_version"], 2)
+
+    def test_clear_syncs_the_containing_directory(self):
+        """The mechanism, not a durability claim.
+
+        `clear_active` unlinks the record and then fsyncs the directory. That
+        is necessary for the deletion to survive power loss, and it is what
+        this asserts. It is *not* a proof of power-loss durability, which
+        needs power loss; the documented classification stays NOT_PROVEN.
+        """
+        run(["task", "start", "--own", "src/x.py"], self.repo, self.env)
+
+        synced = []
+        real_fsync = os.fsync
+
+        def recording_fsync(descriptor):
+            try:
+                if os.fstat(descriptor).st_mode & 0o170000 == 0o040000:
+                    synced.append(descriptor)
+            except OSError:
+                pass
+            return real_fsync(descriptor)
+
+        os.fsync = recording_fsync
+        try:
+            taskstate.clear_active(self.git_dir())
+        finally:
+            os.fsync = real_fsync
+
+        self.assertTrue(synced, "the state directory was not fsynced after unlink")
+        self.assertIsNone(self.active())
 
     def test_lock_is_per_worktree_and_released_on_exit(self):
         git_dir = self.git_dir()

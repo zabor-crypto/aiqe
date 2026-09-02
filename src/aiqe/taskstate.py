@@ -46,9 +46,20 @@ LOCK_NAME = b"task.lock"
 LOCK_TIMEOUT_SECONDS = 5.0
 _LOCK_POLL_SECONDS = 0.02
 
+#: The only record shape this build interprets.
+#:
+#: Version 1 encoded a different ownership meaning: a declared path owned its
+#: descendants. Reading such a record under exact-pathset semantics would
+#: quietly narrow a live task's authority, so it is refused rather than
+#: reinterpreted. There is no migration, by design - this is local pre-release
+#: state, and a migration framework for it would be machinery in place of a
+#: sentence telling the user to end the task and start it again.
+SUPPORTED_SCHEMA_VERSION = 2
+
 STATE_DIRECTORY_UNSAFE = "STATE_DIRECTORY_UNSAFE"
 STATE_UNREADABLE = "STATE_UNREADABLE"
 STATE_LOCK_UNAVAILABLE = "STATE_LOCK_UNAVAILABLE"
+TASK_STATE_SCHEMA_UNSUPPORTED = "TASK_STATE_SCHEMA_UNSUPPORTED"
 
 
 class StateError(Exception):
@@ -65,6 +76,15 @@ class CorruptState(StateError):
 
     Distinguished from the other state errors because it means "unknown", not
     "unsupported": something is there, and AIQE will not guess what.
+    """
+
+
+class UnsupportedSchema(CorruptState):
+    """An active record written by a build whose meaning differs from this one.
+
+    A subclass of `CorruptState` because the consequence is identical - a
+    record is present and this build will not interpret it - and because
+    `task end` should discard it by the same route.
     """
 
 
@@ -168,6 +188,15 @@ def read_active(git_dir):
         raise CorruptState(
             STATE_UNREADABLE,
             "the active AIQE task record is not an AIQE task record",
+        )
+    if record["schema_version"] != SUPPORTED_SCHEMA_VERSION:
+        raise UnsupportedSchema(
+            TASK_STATE_SCHEMA_UNSUPPORTED,
+            "the active AIQE task record uses state schema version %r, and "
+            "this build interprets version %d. Ownership meant something "
+            "different in an earlier schema, so the record is refused rather "
+            "than reinterpreted."
+            % (record["schema_version"], SUPPORTED_SCHEMA_VERSION),
         )
     return record
 
