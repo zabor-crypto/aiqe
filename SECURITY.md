@@ -46,6 +46,19 @@ evidence, and checks that silently do not exist.
 
 This is a summary. It is not a reproduction of the full internal threat model.
 
+## AIQE core write boundary
+
+Outside `aiqe init` — which writes exactly one repository path, `./aiqe.toml`, after
+showing you the file and asking — AIQE core writes no repository path at all. `check`
+and `receipt` write only AIQE's own machine-local state.
+
+That claim is scoped, and the scope matters: it is about **AIQE core's own writes**. It
+is not a claim that a validator cannot modify your worktree, that Git cannot mutate its
+own internal state, or that another process cannot change files while AIQE runs. The
+benchmark attributes every observed repository change to one cause — an authorised
+`init` write, a validator, the fixture, or AIQE core — and only the last is
+zero-tolerance.
+
 ## Doctor trust boundary
 
 `aiqe doctor` is the first thing that touches an unfamiliar repository, so its boundary
@@ -64,9 +77,27 @@ These are benchmark gates with zero tolerance, not aspirations.
 Repository-native validators are ordinary child processes, launched after explicit local
 consent.
 
-AIQE makes **no sandbox claim** and **no network-restriction claim** about them. A
-validator can do anything your shell can do, including modifying files outside the owned
-scope and reaching the network.
+`aiqe.toml` is tracked content, so anyone who can land a commit can declare a validator
+naming any command on your machine. AIQE therefore treats a declaration as a proposal,
+never as authorization. Consent is:
+
+- **machine-local** — never written into `aiqe.toml`, tracked content, or `.git`;
+- **bound to a definition digest** over the validator's id, argument vector, timeout,
+  required flag and contracts, so changing any of them revokes it by identity mismatch;
+- **never assumed** — a non-interactive or `--format json` check does not prompt and
+  reports `UNKNOWN` / `CONSENT_REQUIRED` rather than running anything.
+
+`--allow <id>` authorises one run and records nothing. The measured invariant is
+`UNCONSENTED_VALIDATOR_EXECUTIONS = 0`, and it is a benchmark gate with zero tolerance.
+
+Timeouts are mandatory, and a timeout is a `FAIL`. The timeout ends the validator's
+whole process group, so a validator that spawns children cannot outlive the bound it was
+given.
+
+AIQE makes **no sandbox claim**, **no filesystem-restriction claim** and **no
+network-restriction claim** about a validator. It runs as you, with your environment,
+and can do anything your shell can do — including modifying files outside the owned
+scope and reaching the network. The consent prompt states this before it asks.
 
 Correspondingly:
 
@@ -81,7 +112,17 @@ A stale bytecode or build cache can make a validator report success against sour
 never read. That is a real failure mode, it is a documented limitation of validator
 trust, and it is outside AIQE's guarantee.
 
+What AIQE *does* detect is a validator that changes the thing it was checking. The
+bounded authority — the owned path binding, HEAD, the raw `aiqe.toml` bytes and the
+validator definition digests — is measured immediately before and after execution, and
+if any of it moved, the result is not current evidence. A validator's writes elsewhere
+in the worktree are outside that boundary and are attributed to the validator, not to
+AIQE core.
+
 ## `aiqe commit` boundary
+
+`aiqe commit` is not implemented. This section describes the boundary it will have; the
+paragraphs below are a statement of intent, not of current behaviour.
 
 `aiqe commit` is optional. When used, it creates a bounded completion commit and nothing
 else. It never pushes.
@@ -116,9 +157,17 @@ say so than imply a defence we have not built.
 ## Privacy and local evidence
 
 - All evidence is local. Nothing is transmitted.
-- The default receipt is correlation-minimised.
+- The default receipt is correlation-minimised: counts, states, reason ids and a
+  verdict, and no path, filename, repository name, remote, branch, commit id, validator
+  command line, validator output, username, hostname or task label. The exclusion list
+  is property-tested against real fixture values, and the serialiser is bound to a
+  named redaction policy.
+- Validator output is captured within a fixed budget, retained locally only for
+  failures, and never reaches the default receipt. A passing validator's output is
+  discarded.
 - `--local` produces richer evidence. It is opt-in, allowlisted, and bounded.
-- AIQE stores its local state outside the repository.
+- AIQE stores its local state outside the repository. Recorded validator consent lives
+  there too, and outlives the task it was granted during.
 
 ## Network behaviour
 

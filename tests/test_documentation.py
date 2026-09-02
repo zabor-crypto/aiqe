@@ -15,7 +15,11 @@ from aiqe import findings
 
 DOCTOR_REFERENCE = os.path.join(support.ROOT, "docs", "doctor.md")
 TASK_REFERENCE = os.path.join(support.ROOT, "docs", "task.md")
+CONFIG_REFERENCE = os.path.join(support.ROOT, "docs", "config.md")
+CHECK_REFERENCE = os.path.join(support.ROOT, "docs", "check.md")
+RECEIPT_REFERENCE = os.path.join(support.ROOT, "docs", "receipt.md")
 README = os.path.join(support.ROOT, "README.md")
+ARCHITECTURE = os.path.join(support.ROOT, "docs", "architecture.md")
 
 
 def read(path):
@@ -123,6 +127,141 @@ class TaskReferenceTests(unittest.TestCase):
         self.assertNotIn("component-prefix ownership", reference)
 
 
+class ConfigReferenceTests(unittest.TestCase):
+    def test_every_configuration_refusal_code_is_documented(self):
+        """A user who meets a refusal must be able to look it up."""
+        from aiqe import config
+
+        reference = read(CONFIG_REFERENCE)
+        codes = [
+            value
+            for name, value in vars(config).items()
+            if name.startswith("CONFIG_") and isinstance(value, str)
+            and value == name
+        ]
+        self.assertTrue(codes)
+        undocumented = sorted(code for code in codes if code not in reference)
+        self.assertEqual(undocumented, [], "reason codes missing from docs/config.md")
+
+    def test_the_pattern_grammar_is_documented(self):
+        reference = read(CONFIG_REFERENCE)
+        for element in ("`*`", "`?`", "`**`", "[abc]"):
+            self.assertIn(element.strip("`"), reference, element)
+        self.assertIn("not Git pathspec", reference)
+
+    def test_every_launch_contract_is_documented(self):
+        from aiqe import contracts
+
+        reference = read(CONFIG_REFERENCE)
+        for contract in contracts.LAUNCH_CONTRACTS:
+            self.assertIn(contract, reference, contract)
+
+    def test_init_write_confinement_is_stated(self):
+        reference = read(CONFIG_REFERENCE)
+        self.assertIn("exactly one repository path", reference)
+        self.assertIn("`.gitignore`", reference)
+        self.assertIn("never overwritten", reference)
+
+
+class CheckReferenceTests(unittest.TestCase):
+    def test_every_owned_path_state_is_documented(self):
+        from aiqe import pathstate
+
+        reference = read(CHECK_REFERENCE)
+        for state in (
+            pathstate.TRACKED_UNCHANGED,
+            pathstate.TRACKED_MODIFIED,
+            pathstate.TRACKED_DELETED,
+            pathstate.NEW,
+            pathstate.PENDING_ABSENT,
+        ):
+            self.assertIn(state, reference, state)
+
+    def test_every_classification_and_coverage_state_is_documented(self):
+        from aiqe import classify
+
+        reference = read(CHECK_REFERENCE)
+        for state in (
+            classify.UNCLASSIFIED,
+            classify.QUANT_SURFACE,
+            classify.EXPLICIT_NON_QUANT_SURFACE,
+            classify.CONFIG_CONFLICT,
+            classify.CLASSIFICATION_GAP,
+            classify.COVERED,
+            classify.COVERAGE_GAP,
+            classify.CONTRACT_FAILED,
+            classify.CONTRACT_UNKNOWN,
+        ):
+            self.assertIn(state, reference, state)
+
+    def test_every_validator_outcome_is_documented(self):
+        from aiqe import validators
+
+        reference = read(CHECK_REFERENCE)
+        for outcome in validators.OUTCOMES:
+            self.assertIn(outcome, reference, outcome)
+
+    def test_the_load_bearing_rules_are_stated(self):
+        reference = read(CHECK_REFERENCE)
+        self.assertIn("A timeout is a `FAIL`", reference)
+        self.assertIn("never the first one that matches", reference)
+        self.assertIn("adding a surface can never reduce", reference)
+        self.assertIn("no sandbox", reference)
+        self.assertIn("REVIEWABLE_CANDIDATE", reference)
+
+    def test_the_evidence_schema_version_is_stated(self):
+        from aiqe import evidence
+
+        reference = read(CHECK_REFERENCE)
+        self.assertIn(
+            "EVIDENCE_SCHEMA_VERSION = %d" % (evidence.EVIDENCE_SCHEMA_VERSION,),
+            reference,
+        )
+
+
+class ReceiptReferenceTests(unittest.TestCase):
+    def test_every_staleness_reason_is_documented(self):
+        from aiqe import evidence
+
+        reference = read(RECEIPT_REFERENCE)
+        for reason in evidence.STALENESS_REASONS:
+            self.assertIn(reason, reference, reason)
+
+    def test_the_redaction_policies_are_named(self):
+        from aiqe import receipt
+
+        reference = read(RECEIPT_REFERENCE)
+        self.assertIn(receipt.DEFAULT_REDACTION_POLICY, reference)
+        self.assertIn(receipt.LOCAL_REDACTION_POLICY, reference)
+
+    def test_the_unreachable_verdict_is_stated(self):
+        reference = read(RECEIPT_REFERENCE)
+        self.assertIn("No pre-commit state", reference)
+        self.assertIn("BOUNDED_COMMIT_NOT_CREATED", reference)
+
+    def test_the_exclusion_list_is_documented(self):
+        reference = read(RECEIPT_REFERENCE)
+        for excluded in (
+            "absolute paths",
+            "the branch",
+            "any commit identifier",
+            "validator argument vectors",
+            "the username",
+            "the hostname",
+        ):
+            self.assertIn(excluded, reference, excluded)
+
+
+class ArchitectureTests(unittest.TestCase):
+    def test_implemented_commands_are_not_described_as_intent(self):
+        reference = read(ARCHITECTURE)
+        self.assertIn("except `aiqe commit`", reference)
+
+    def test_the_one_remaining_design_target_is_named(self):
+        reference = read(ARCHITECTURE)
+        self.assertIn("`aiqe commit` is the one remaining design", reference)
+
+
 class ReadmeClaimTests(unittest.TestCase):
     def test_readme_does_not_claim_doctor_is_unimplemented(self):
         readme = read(README)
@@ -134,14 +273,17 @@ class ReadmeClaimTests(unittest.TestCase):
         self.assertIn("design target", readme.lower())
 
     def test_readme_does_not_mark_implemented_commands_as_design_targets(self):
-        """`task` left the design-target list when it acquired an implementation."""
+        """A command leaves the design-target list when it acquires an
+        implementation. `commit` is what remains."""
         readme = read(README)
         for line in readme.splitlines():
             lowered = line.lower()
             if "design target" not in lowered:
                 continue
             self.assertFalse(
-                lowered.strip().startswith(("doctor ", "task ")),
+                lowered.strip().startswith(
+                    ("doctor ", "task ", "init ", "check ", "receipt ")
+                ),
                 "an implemented command is still marked a design target: %r" % (line,),
             )
 
@@ -172,6 +314,39 @@ class ReadmeClaimTests(unittest.TestCase):
             readme,
             "the README example is not the retained output for its case",
         )
+
+    def test_readme_workflow_output_matches_the_retained_artifact(self):
+        """The check and receipt blocks are copied, not typed.
+
+        The receipt block is the one that matters most: it shows `INCOMPLETE`
+        on a completely green check, and a hand-typed approximation of that
+        would be the first place the claim and the product diverged.
+        """
+        import json
+
+        artifact = os.path.join(
+            support.ROOT, "bench", "results", "check", "results.json"
+        )
+        with open(artifact) as handle:
+            results = json.load(handle)
+        retained = {case["case"]: case for case in results["cases"]}
+
+        readme = read(README)
+        self.assertIn(
+            retained["causality_coverage_gap"]["check_output"].strip(),
+            readme,
+            "the README check example is not the retained output for its case",
+        )
+        self.assertIn(
+            retained["causality_covered"]["receipt_output"].strip(),
+            readme,
+            "the README receipt example is not the retained output for its case",
+        )
+
+    def test_readme_states_that_a_green_check_is_still_incomplete(self):
+        readme = read(README)
+        self.assertIn("BOUNDED_COMMIT_NOT_CREATED", readme)
+        self.assertIn("COVERAGE_GAP", readme)
 
 
 if __name__ == "__main__":

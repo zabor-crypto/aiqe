@@ -72,13 +72,25 @@ working state rather than a wrong one.
 import os
 import subprocess
 
-#: Git subcommands Doctor is permitted to invoke. Every one of these has been
-#: shown zero-write under the mutation harness with the hardening below. A
-#: subcommand outside this set is a programming error, not a runtime
+#: Git subcommands AIQE core is permitted to invoke. Every one of these has
+#: been shown zero-write under the mutation harness with the hardening below.
+#: A subcommand outside this set is a programming error, not a runtime
 #: condition: the guard raises rather than degrading quietly.
 #:
 #: The set is also the network-behaviour argument. None of these commands
 #: contacts a remote, and no code path in AIQE core can invoke any other.
+#:
+#: `ls-tree` and `cat-file` were added for `aiqe check`, which has to know what
+#: an owned path looked like at the task's baseline commit without letting a
+#: repository-defined filter driver decide the answer. Both read the object
+#: database and nothing else: `ls-tree` reads tree objects, `cat-file blob`
+#: writes an object's stored bytes to a pipe. Neither consults
+#: `.gitattributes`, neither applies a smudge or clean filter, and neither
+#: touches the index or the worktree - which is exactly why check compares raw
+#: stored bytes against raw worktree bytes itself rather than asking Git
+#: whether a file changed. That comparison is conservative in the safe
+#: direction: under a check-in filter a file Git would call unchanged may read
+#: as changed here, which adds obligations rather than removing them.
 ALLOWED_SUBCOMMANDS = frozenset(
     {
         "--version",
@@ -87,6 +99,8 @@ ALLOWED_SUBCOMMANDS = frozenset(
         "ls-files",
         "status",
         "diff-index",
+        "ls-tree",
+        "cat-file",
     }
 )
 
@@ -94,7 +108,9 @@ ALLOWED_SUBCOMMANDS = frozenset(
 #: system and global configuration switched off. Discovery subcommands are
 #: deliberately not in this set: they answer "which repository is this", and
 #: answering it differently from the user's own Git would be its own defect.
-CONFIG_ISOLATED_SUBCOMMANDS = frozenset({"status", "diff-index", "ls-files"})
+CONFIG_ISOLATED_SUBCOMMANDS = frozenset(
+    {"status", "diff-index", "ls-files", "ls-tree", "cat-file"}
+)
 
 #: Configuration isolation for those subcommands. `GIT_CONFIG_SYSTEM` and
 #: `GIT_CONFIG_GLOBAL` pointing at the null device is the documented way to

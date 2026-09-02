@@ -250,6 +250,10 @@ def start(cwd, owned, label=None, env=None):
                 )
             record = _build_record(repository, owned_paths, label, staged)
             taskstate.write_active(state_directory, record)
+            # Evidence belongs to a task. A record left behind by a task that
+            # ended badly must not be inherited by this one, so it goes now
+            # rather than being ignored later on a technicality.
+            _discard_check_evidence(state_directory)
     except taskstate.CorruptState as error:
         return _corrupt_outcome(error)
     except taskstate.StateError as error:
@@ -309,6 +313,7 @@ def end(cwd, env=None):
                 # saying which of the two it was is more useful than a generic
                 # line.
                 taskstate.clear_active(state_directory)
+                _discard_check_evidence(state_directory)
                 return TaskOutcome(
                     TASK_RECORD_DISCARDED,
                     0,
@@ -327,10 +332,34 @@ def end(cwd, env=None):
                     ["aiqe: no active task in this worktree."],
                 )
             taskstate.clear_active(state_directory)
+            _discard_check_evidence(state_directory)
     except taskstate.StateError as error:
         return TaskOutcome(error.code, 3, ["aiqe: " + error.message])
 
     return TaskOutcome(TASK_ENDED, 0, _render(record, "ended"), record)
+
+
+def _discard_check_evidence(state_directory):
+    """Remove the active task's check evidence.
+
+    Completion evidence is *about* a task. When the task is gone the evidence
+    describes nothing, and keeping it would be the first row of the evidence
+    history this product does not build. Recorded validator consent is
+    deliberately not touched: consenting to run a command is a statement about
+    that command, not about one unit of work.
+
+    This is the whole of the task lifecycle's knowledge of evidence. Task Core
+    semantics, its record and its schema are unchanged.
+    """
+    from . import evidence
+
+    try:
+        evidence.remove(state_directory)
+    except taskstate.StateError:
+        # Ending a task must not be blocked by the removal of a file that is
+        # already unreadable. The record itself is gone, which is what `end`
+        # promises.
+        pass
 
 
 def _existing_state_directory(repository, env):

@@ -3,10 +3,11 @@
 This document is the public statement of AIQE's frozen v1 architecture. It describes
 what the product does and where its guarantees stop.
 
-It remains a specification, with two exceptions: `aiqe doctor` and `aiqe task` are now
-implemented. Every other command below is a design target, is not registered by the
-command-line interface, and is not stubbed. Where this document describes behaviour that exists, it is marked;
-where it does not, it is a statement of intent.
+Most of it is now implemented. `aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check`
+and `aiqe receipt` exist and are tested. `aiqe commit` is the one remaining design
+target: it is not registered by the command-line interface and is not stubbed. Where
+this document describes behaviour that exists, it is marked; where it does not, it is
+a statement of intent.
 
 ## Product
 
@@ -42,10 +43,22 @@ aiqe commit  -m <message>
 aiqe receipt [--local] [--format json]
 ```
 
-`aiqe --version`, `aiqe doctor [--format json]` and the three `aiqe task` forms are
-implemented. The rest are design targets: invoking one exits 3 with `unknown command`,
-because a command that parses and does nothing advertises a capability the product has
-not built.
+Everything above is implemented except `aiqe commit`, which is a design target:
+invoking it exits 3 with `unknown command`, because a command that parses and does
+nothing advertises a capability the product has not built.
+
+The first complete pre-commit workflow therefore exists today:
+
+```
+aiqe init
+aiqe task start --own <path>...
+    change the owned files
+aiqe check
+aiqe receipt
+```
+
+References: [`config.md`](config.md) for `aiqe.toml` and `init`,
+[`check.md`](check.md), [`receipt.md`](receipt.md).
 
 The task boundary answers which exact repository paths a unit of work owns — a declared
 path owns itself and nothing else — and deliberately nothing further — not whether checks passed, whether evidence is fresh, or whether the work
@@ -92,9 +105,17 @@ aiqe doctor
      repository topology that cannot be diagnosed
 ```
 
-Doctor is the one implemented command. It never exits 1 or 2: those codes belong to
-commands that adjudicate completion, and Doctor adjudicates nothing. A finding is part
-of a valid diagnostic, not a process failure. Full reference: [`doctor.md`](doctor.md).
+Doctor never exits 1 or 2: those codes belong to commands that adjudicate completion,
+and Doctor adjudicates nothing. A finding is part of a valid diagnostic, not a process
+failure. Full reference: [`doctor.md`](doctor.md).
+
+`aiqe init` exits 0 or 3 only, for the same reason: it writes a file or it does not,
+and it adjudicates nothing either.
+
+`aiqe receipt` exits 0 for `REVIEWABLE`, which **no pre-commit state can reach**. A
+completely green check yields `INCOMPLETE` with reason `BOUNDED_COMMIT_NOT_CREATED`,
+because `REVIEWABLE` is a claim about a commit whose content is provably the checked
+content, and no commit exists. See [`receipt.md`](receipt.md).
 
 Machine-readable reason codes carry the detail that the exit code deliberately does not:
 
@@ -163,9 +184,12 @@ The claim that is made:
 Equal path sets are not sufficient to turn a passing pre-commit check into post-commit
 evidence. The same paths can hold different bytes.
 
-At `check`, AIQE records a bounded cryptographic state binding for every owned path,
-covering regular-file content state, new-file state, deletion markers, relevant mode and
-type, and the digests of the configuration and evidence definitions in force.
+At `check` — implemented — AIQE records a bounded cryptographic state binding for
+every owned path, covering regular-file content state, new-file state, deletion
+markers, relevant mode and type, and the digests of the configuration and evidence
+definitions in force. That binding is also measured immediately before and after
+validator execution, so a validator that edits the file it is checking cannot leave
+behind evidence that calls itself current.
 
 At `commit`, before any mutation, that binding is recomputed:
 
@@ -206,7 +230,10 @@ with ordinary Git.
 
 Quant surfaces are classified as `QUANT_SURFACE`, `EXPLICIT_NON_QUANT_SURFACE`, or
 `UNCLASSIFIED`. All matching surfaces are evaluated and their contract obligations
-union. A path declared both quant and non-quant is a `CONFIG_CONFLICT` and fails closed.
+union, so adding a surface can never reduce an obligation. A path declared both quant
+and non-quant is a `CONFIG_CONFLICT` and fails closed. Surface patterns are AIQE's own
+small documented grammar over raw path bytes, and are never handed to Git.
+Implemented; see [`config.md`](config.md) and [`check.md`](check.md).
 
 Six umbrella contracts ship at launch:
 
@@ -218,8 +245,13 @@ ACCOUNTING  TRAIN_TEST_SEPARATION  DETERMINISM
 Every required validator bound to an applicable contract must pass. An applicable
 contract with **zero** required validators is a `COVERAGE_GAP` — never a pass.
 
-Validators are plain child processes run after explicit local consent. There is no
-sandbox claim and no network-restriction claim.
+Validators are plain child processes run after explicit local consent, recorded
+machine-locally per validator definition digest and never in tracked content. A
+definition change revokes it by identity mismatch. Timeouts are mandatory, and a
+timeout is a `FAIL`. There is no sandbox claim, no filesystem-restriction claim and no
+network-restriction claim. The measured invariant is
+`UNCONSENTED_VALIDATOR_EXECUTIONS = 0`, not the absence of repository-defined
+execution: here that execution is expected, after consent.
 
 ## Receipt semantics
 
@@ -289,7 +321,11 @@ Directory layout follows from that choice:
 src/aiqe/     the package
 tests/        the deterministic suite
 bench/        fixture builders, expected outcomes, retained results
+docs/         the command references
 ```
+
+`aiqe.toml` is read with the standard library's `tomllib`, which is why Python 3.11 is
+the support floor. No third-party dependency was added for it.
 
 Task state is machine-local, under `$XDG_STATE_HOME/aiqe/`, in a directory named by an
 HMAC of the repository's canonical Git directories under a machine-local salt. Not the

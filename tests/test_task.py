@@ -470,7 +470,7 @@ class CommandSurfaceTests(TaskTestCase):
         self.assertEqual(sorted(decode_owned_paths(self.active())), [b"--help", b"-a"])
 
     def test_unimplemented_commands_stay_unimplemented(self):
-        for command in ("init", "check", "commit", "receipt"):
+        for command in ("commit",):
             status, out, err = run([command], self.repo, self.env)
             self.assertEqual(status, exits.UNSUPPORTED, command)
             self.assertEqual(out, "", command)

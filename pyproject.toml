@@ -15,10 +15,11 @@ dynamic = ["version"]
 # This is deliberate: an assurance layer that drags in a dependency tree is
 # harder to audit than the thing it is auditing.
 #
-# The 3.11 floor is a support boundary, not a claim that older interpreters
-# fail. 3.9 is end of life and 3.10 reaches it within the year, and an
-# unreleased product should not open by advertising a floor it intends to
-# raise before anyone depends on it.
+# The 3.11 floor is now a hard requirement rather than only a support
+# boundary: `aiqe.toml` is read with the standard library's `tomllib`, which
+# arrived in 3.11. That was the choice with the smallest auditable surface -
+# the alternative was a third-party TOML parser in the one component whose job
+# is to refuse configuration it does not understand.
 dependencies = []
 
 classifiers = [

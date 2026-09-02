@@ -8,8 +8,8 @@ aiqe task
 aiqe task end
 ```
 
-It works before `aiqe init`, which does not exist yet. A task needs a
-repository and nothing else.
+It works before `aiqe init`. A task needs a repository and nothing else:
+nothing here reads or requires `aiqe.toml`.
 
 ## What a task is, and is not
 
@@ -19,9 +19,10 @@ A task answers exactly one question:
 
 It does not answer whether checks passed, whether evidence is fresh, whether
 the work is reviewable, or whether it can be committed. Those belong to
-`check`, `receipt` and `commit`, none of which is implemented. Answering them
-now would mean inventing completion semantics before the evidence that
-justifies them exists.
+[`check`](check.md), [`receipt`](receipt.md) and `commit`. The first two are
+implemented and answer those questions from their own evidence; `commit` is
+not. Answering them here would mean the task boundary adjudicating completion,
+which is not what a boundary is for.
 
 One worktree holds one active task. Starting a second is refused.
 
@@ -402,7 +403,9 @@ the same file on a case-insensitive or normalising filesystem is not decided at
 task start, because it depends on state that does not exist yet. It becomes a
 question when a later operation must resolve path identity against actual
 changes, and it fails closed there. The same applies to a declared path that
-did not exist and later materialises as something other than a regular file.
+did not exist and later materialises as something other than a regular file:
+[`aiqe check`](check.md) refuses it rather than reinterpreting the
+declaration.
 
 **No directory ownership, and no links.** v1 owns an exact pathset of regular
 files. Declaring a directory, a symlink or a special file is refused, and

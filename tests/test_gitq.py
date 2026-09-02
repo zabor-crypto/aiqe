@@ -111,10 +111,27 @@ class ResultTests(unittest.TestCase):
 
 class AllowlistTests(unittest.TestCase):
     def test_allowlist_contains_only_local_read_subcommands(self):
+        """The allowlist is closed, and every member is local and read-only.
+
+        `ls-tree` and `cat-file` joined it for `aiqe check`, which has to read
+        an owned path's baseline content without letting a check-in filter
+        decide the answer. Both read the object database only: neither
+        consults `.gitattributes`, applies a filter, or touches the index or
+        the worktree.
+        """
         self.assertEqual(
             ALLOWED_SUBCOMMANDS,
             frozenset(
-                {"--version", "rev-parse", "symbolic-ref", "ls-files", "status", "diff-index"}
+                {
+                    "--version",
+                    "rev-parse",
+                    "symbolic-ref",
+                    "ls-files",
+                    "status",
+                    "diff-index",
+                    "ls-tree",
+                    "cat-file",
+                }
             ),
         )
 

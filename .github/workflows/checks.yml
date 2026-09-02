@@ -90,6 +90,10 @@ jobs:
         run: python bench/run-task-fixtures.py --output "${RUNNER_TEMP}/task.json"
       - name: Compare the Task run against the retained artifact
         run: python bench/compare-results.py "${RUNNER_TEMP}/task.json"
+      - name: Run the check, evidence and receipt benchmark family
+        run: python bench/run-check-fixtures.py --output "${RUNNER_TEMP}/check.json"
+      - name: Compare the check run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/check.json"
 
   install:
     name: install from a clean environment (${{ matrix.os }}, python ${{ matrix.python }})
@@ -118,6 +122,20 @@ jobs:
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task start --own README.md --label "install proof"
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task
+          # The pre-commit workflow, through the installed entry point. The
+          # exit codes are the assertion: `init --print` writes nothing and
+          # succeeds; `check` refuses with 3 because this repository has no
+          # aiqe.toml; `receipt` reports INCOMPLETE with 2 because a task
+          # without a check is an ordinary state, not a refusal.
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" init --print > /dev/null
+          test ! -e aiqe.toml
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" check && rc=0 || rc=$?
+          test "$rc" -eq 3
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" receipt && rc=0 || rc=$?
+          test "$rc" -eq 2
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" receipt --local --format json > /dev/null \
+            && rc=0 || rc=$?
+          test "$rc" -eq 2
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task end
           echo "Installed console script works."
       - name: Confirm no third-party dependency was installed

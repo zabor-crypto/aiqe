@@ -92,7 +92,9 @@ class IsolationMechanismTests(unittest.TestCase):
 
         self.assertEqual(
             CONFIG_ISOLATED_SUBCOMMANDS,
-            frozenset({"status", "diff-index", "ls-files"}),
+            frozenset(
+                {"status", "diff-index", "ls-files", "ls-tree", "cat-file"}
+            ),
         )
 
     def test_discovery_subcommands_are_not_isolated(self):

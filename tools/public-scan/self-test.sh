@@ -82,6 +82,8 @@ cat > "$negative/benign.txt" <<'BENIGN'
 A repository .claude/settings.local.json file is agent configuration.
 Reading .claude/settings.json and .claude/settings.local.json is bounded.
 The relative path tools/public-scan/patterns.txt is not a hostname.
+The identifier receipt.LOCAL_REDACTION_POLICY is a dotted attribute reference.
+A local receipt names policy aiqe.receipt.local.v1 in its own output.
 BENIGN
 
 negative_output=$("$negative/tools/public-scan/public-scan.sh" 2>&1)

@@ -23,6 +23,9 @@ from fixtures.doctor import builders, controls, harness  # noqa: E402,F401
 from fixtures.task import builders as task_builders  # noqa: E402,F401
 from fixtures.task import controls as task_controls  # noqa: E402,F401
 from fixtures.task import harness as task_harness  # noqa: E402,F401
+from fixtures.check import builders as check_builders  # noqa: E402,F401
+from fixtures.check import controls as check_controls  # noqa: E402,F401
+from fixtures.check import harness as check_harness  # noqa: E402,F401
 
 
 def cases():
@@ -39,3 +42,11 @@ def task_cases():
 
 def task_case_ids():
     return [case["id"] for case in task_cases()]
+
+
+def check_cases():
+    return check_harness.load_cases()["cases"]
+
+
+def check_case_ids():
+    return [case["id"] for case in check_cases()]

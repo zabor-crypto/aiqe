@@ -73,6 +73,8 @@ a suite that is not measuring anything.
 Required negative-control classes:
 
 - shared-index absorption of unrelated staged work;
+- validator execution from tracked configuration without local consent;
+- a validator that edits the owned file it is checking and then exits 0;
 - pathspec expansion via metacharacters in filenames;
 - the check-then-edit-then-commit staleness window;
 - missing-validator silent-green (coverage gap) for each contract family;

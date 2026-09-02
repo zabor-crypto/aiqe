@@ -1,26 +1,29 @@
 # Benchmarks
 
-This directory holds the benchmark protocol, and — for the one implemented product
-surface — the fixture builders and the retained results.
+This directory holds the benchmark protocol and, for each implemented product
+surface, the fixture builders and the retained results.
 
 ```
 protocol/           the method, the families, and the release gates      PRESENT
 fixtures/           shared measurement and fixture-construction helpers  PRESENT
 fixtures/doctor/    deterministic builders, controls, expected outcomes  PRESENT
 fixtures/task/      deterministic builders, controls, expected outcomes  PRESENT
+fixtures/check/     deterministic builders, controls, expected outcomes  PRESENT
 results/doctor/     retained result artifact                             PRESENT
 results/task/       retained result artifact                             PRESENT
+results/check/      retained result artifact                             PRESENT
 ```
 
-Nothing is present here for a surface that does not exist. `doctor` and `task` are
-implemented, so their families are materialised; `check`, `receipt` and bounded commit
-have no fixtures because there is nothing to point them at.
+Nothing is present here for a surface that does not exist. `doctor`, `init`, `task`,
+`check` and `receipt` are implemented, so their families are materialised; bounded
+commit has no fixtures because there is nothing to point them at.
 
 ## Running a family
 
 ```
 python3 bench/run-doctor-fixtures.py
 python3 bench/run-task-fixtures.py
+python3 bench/run-check-fixtures.py
 ```
 
 Every case is built from nothing in an isolated temporary directory, with an isolated
@@ -33,6 +36,31 @@ case disagrees with its expectation or any negative control stops reproducing.
 The Task family drives the real command-line entry point as subprocesses. Concurrency,
 crash-atomicity and byte-preserving argv cannot be measured in-process, and putting every
 case through the same door means no case is proven against a path the user does not take.
+
+The check family does the same, and its safety claim is narrower than the other two,
+so it is stated exactly. Doctor changes nothing; a task operation changes AIQE's own
+machine-local state and nothing else; `aiqe check` runs code the repository declared,
+and that code can write wherever the user can. "The repository did not change" is
+therefore not available as a claim, and pretending otherwise would be the overstatement
+this product exists to refuse. Instead every observed repository change is attributed
+to exactly one cause — an authorised `aiqe init` write, a fixture validator's declared
+side effect, the scenario's own declared action, or AIQE core — and only the last is
+zero-tolerance:
+
+```
+AIQE_CORE_REPOSITORY_WRITES         = 0
+UNCONSENTED_VALIDATOR_EXECUTIONS    = 0
+PRECOMMIT_REVIEWABLE_VERDICTS       = 0
+```
+
+The attribution lists are declared per scenario in the builders, so a case cannot
+quietly acquire permission to write by writing somewhere new. Every fixture validator
+records the fact that it ran, in a directory outside every snapshot root, so the second
+quantity is counted rather than argued.
+
+Each of the six launch contract families has its own three fixtures — covered, failed,
+and coverage gap. One family standing in for six would leave five with no evidence at
+all.
 
 `compare-results.py` selects the retained artifact from the family the fresh run names,
 and checks it on headline numbers rather than bytes, because the artifact records the Git version it was produced
@@ -58,10 +86,10 @@ that passes.
 ```
 Doctor family         RUN       (results retained here)
 Task scope family     RUN       (results retained here)
-Check                 NOT_RUN   (no implementation exists)
-Receipt               NOT_RUN   (no implementation exists)
+Check / receipt /
+  evidence family     RUN       (results retained here)
+Numerical routing     RUN       (six contract families, in the check family)
 Bounded commit        NOT_RUN   (no implementation exists)
-Numerical routing     NOT_RUN   (no implementation exists)
 Product friction      NOT_RUN   (no implementation exists)
 Context efficiency    NOT_RUN   (deferred; methodology not yet defensible)
 
@@ -70,8 +98,12 @@ Linux baseline        exercised in CI, not a release claim
 Windows               out of scope for v1
 ```
 
-Only the Doctor and Task families have moved off `NOT_RUN`, and only for the cases that
-exist. No aggregate benchmark completion is claimed.
+Three families have moved off `NOT_RUN`, and only for the cases that exist. No
+aggregate benchmark completion is claimed.
+
+Numerical routing is `RUN` for the pre-commit half only: classification, contract
+applicability and coverage are measured for all six families, and the post-commit half
+of family B waits on a bounded commit.
 
 The provisional macOS baseline was observed during protocol development. It is **not**
 published as an authority and no number from it appears in the README, because the

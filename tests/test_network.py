@@ -12,10 +12,17 @@ limits of each are stated rather than glossed over.
     replaced with a function that records the attempt and raises. A full
     Doctor run then executes against a real fixture. Nothing is recorded.
 
-3.  Child-process argument proof. AIQE core spawns exactly one program, Git,
-    through a single choke point, and only with subcommands on a frozen
-    allowlist. None of those subcommands contacts a remote, and the fixture
-    suite asserts the actual argument vectors.
+3.  Child-process argument proof. AIQE core spawns programs from exactly two
+    modules. `gitq` spawns Git, through a single choke point, and only with
+    subcommands on a frozen allowlist; none of those contacts a remote, and
+    the fixture suite asserts the actual argument vectors. `validators` spawns
+    what the repository declared, and only after explicit machine-local
+    consent - which is a validator's behaviour, not AIQE core's, and is
+    documented as such rather than folded into this claim.
+
+    A validator may use the network. That is the user's decision, made
+    knowingly: the consent prompt states that AIQE applies no network
+    restriction before it asks.
 
 The limitation, stated plainly: this is not kernel-level enforcement. No
 network namespace or packet filter is applied, because installing one to run
@@ -88,6 +95,9 @@ class DependencyProofTests(unittest.TestCase):
             "baseline = set(sys.modules)\n"
             "import aiqe.cli, aiqe.doctor, aiqe.report, aiqe.gitq, aiqe.gitconfig\n"
             "import aiqe.task, aiqe.taskstate, aiqe.scope, aiqe.textsafe\n"
+            "import aiqe.config, aiqe.patterns, aiqe.contracts, aiqe.classify\n"
+            "import aiqe.pathstate, aiqe.validators, aiqe.evidence\n"
+            "import aiqe.check, aiqe.receipt, aiqe.init\n"
             "added = set(sys.modules) - baseline\n"
             "print(','.join(sorted(added)))\n"
         )
@@ -163,6 +173,50 @@ class ChildProcessProofTests(unittest.TestCase):
             "submodule", "send-email", "request-pull", "credential",
         }
         self.assertEqual(ALLOWED_SUBCOMMANDS & remote_subcommands, set())
+
+    def test_only_two_modules_can_spawn_a_program(self):
+        """Process creation has exactly two doors, and they are named.
+
+        A third one appearing somewhere in the package is how a network call,
+        or an unconsented execution, would arrive without anyone deciding to
+        add it.
+        """
+        spawners = []
+        for name in sorted(os.listdir(SOURCE_DIRECTORY)):
+            if not name.endswith(".py"):
+                continue
+            path = os.path.join(SOURCE_DIRECTORY, name)
+            with open(path) as handle:
+                tree = ast.parse(handle.read(), filename=path)
+            for node in ast.walk(tree):
+                imported = []
+                if isinstance(node, ast.Import):
+                    imported = [alias.name for alias in node.names]
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    imported = [node.module]
+                if any(
+                    module.split(".")[0] in ("subprocess", "multiprocessing")
+                    for module in imported
+                ):
+                    spawners.append(name)
+        self.assertEqual(sorted(set(spawners)), ["gitq.py", "validators.py"])
+
+    def test_a_validator_is_only_spawned_after_a_consent_decision(self):
+        """The consent decision is taken before anything is created.
+
+        Not started and killed, not run with its output discarded. The
+        `UNCONSENTED_VALIDATOR_EXECUTIONS = 0` claim is about process
+        creation, so the branch that skips execution has to come first.
+        """
+        import inspect
+
+        from aiqe import check
+
+        source = inspect.getsource(check._execute)
+        consent_gate = source.index("consents.granted(digest)")
+        first_execute = source.index("validators_module.execute")
+        self.assertLess(consent_gate, first_execute)
+        self.assertIn("prompt is None", source)
 
     def test_allowlist_is_enforced_not_merely_documented(self):
         from aiqe.gitq import GitRunner

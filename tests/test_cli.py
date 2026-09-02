@@ -53,9 +53,10 @@ class InvalidInvocationTests(unittest.TestCase):
 
         A command that accepts its arguments and does nothing advertises a
         capability the product has not built. `task` left this list when it
-        acquired an implementation.
+        acquired an implementation, and `init`, `check` and `receipt` left it
+        when they acquired theirs. `commit` is what remains.
         """
-        for command in ("init", "check", "commit", "receipt"):
+        for command in ("commit",):
             status, out, err = run([command])
             self.assertEqual(status, exits.UNSUPPORTED, command)
             self.assertEqual(out, "", command)

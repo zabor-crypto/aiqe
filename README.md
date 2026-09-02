@@ -8,12 +8,13 @@ runs your project-native checks, and shows what remains unknown.
 
 ---
 
-**Status: `doctor` and `task` are implemented and tested. The rest of the surface is still specification.**
+**Status: the complete pre-commit workflow is implemented and tested. `commit` is still specification.**
 
-`aiqe doctor` and `aiqe task` are real: they run, they are covered by a deterministic
-test suite, and their safety contracts are measured from outside the process rather than
-self-reported. `init`, `check`, `commit` and `receipt` remain design targets, are not
-implemented, and are not stubbed. Nothing here is released and no version is tagged.
+`aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check` and `aiqe receipt` are real: they
+run, they are covered by a deterministic test suite, and their safety contracts are
+measured from outside the process rather than self-reported. `aiqe commit` remains a
+design target, is not implemented, and is not stubbed. Nothing here is released and no
+version is tagged.
 
 The output below was produced by `aiqe doctor` against benchmark case
 `checkin_filter_configured`, a synthetic fixture built from nothing by
@@ -90,6 +91,133 @@ and makes no network request.
 Reference for the output, the finding codes and the exit status:
 [`docs/doctor.md`](docs/doctor.md).
 
+### The pre-commit workflow
+
+```bash
+.venv/bin/aiqe init
+```
+
+`init` writes exactly one repository path — `./aiqe.toml` — after showing you the
+complete file and asking. Nothing else: not `.gitignore`, not a hook, not your shell
+profile. `aiqe init --print` renders the same file and writes nothing at all.
+
+The scaffold it writes declares **no** surfaces and **no** validators, because AIQE has
+no safe way to discover what in your repository is quant-critical. A guess that
+happened to be wrong would be a configuration nobody wrote and everybody trusts.
+Reference: [`docs/config.md`](docs/config.md).
+
+Declare what a piece of work owns, change those files, and check them:
+
+```bash
+.venv/bin/aiqe task start --own src/strategy/alpha.py
+.venv/bin/aiqe check
+```
+
+The output below is `aiqe check` against benchmark case `causality_coverage_gap`, a
+synthetic fixture built from nothing by
+[`bench/fixtures/check/builders.py`](bench/fixtures/check/builders.py). It is copied
+from the retained result artifact, not typed by hand.
+
+```
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              COVERAGE_GAP   no required validator declares it
+
+  Validators
+      unit                   required  PASS
+      causality              optional  PASS
+
+  Evidence        CURRENT
+  Completion      INCOMPLETE
+  Reasons         COVERAGE_GAP
+```
+
+Every validator the repository declares **passed**. The unit suite is green, and so is
+an optional causality validator. The answer is still not a pass, because the changed
+file sits on a surface declared to carry `CAUSALITY` and **no required validator is
+bound to that contract**. Nothing in the repository was written to detect a lookahead
+defect, so the contract is unmeasured — and unmeasured looks exactly like passing to
+every other tool.
+
+An optional validator never closes that gap, and neither does a generic test suite. A
+suite that was not written to detect a lookahead defect does not become evidence about
+lookahead by succeeding.
+
+Reference: [`docs/check.md`](docs/check.md).
+
+### The receipt, and the verdict it will not give you
+
+With the contract properly covered, every pre-commit obligation is discharged. Here is
+what `aiqe receipt` says anyway — again, copied from the retained artifact for case
+`causality_covered`:
+
+```
+AIQE RECEIPT
+
+  Owned scope     CHECKED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  OBSERVED
+  Evidence        CURRENT
+  Commit          NONE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
+  Validators      2 applicable · 2 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        2 of them · 2 passed
+
+  Verdict         INCOMPLETE
+  Reason          BOUNDED_COMMIT_NOT_CREATED
+
+  Receipt schema  1 · policy aiqe.receipt.default.v1
+  AIQE            0.0.0.dev0
+```
+
+`INCOMPLETE`, on a completely green check. That is the product working. `REVIEWABLE` is
+a claim about a commit whose content is provably the checked content, and `aiqe commit`
+does not exist yet, so no pre-commit state can reach it — a property the test suite
+asserts over every combination of classification, coverage, consent, staleness and
+validator outcome this build can produce.
+
+The default receipt is what you paste into a pull request, so it carries counts,
+states, reason ids and a verdict, and nothing else: no path, no filename, no repository
+name, no branch, no commit id, no validator command line, no output, no username, no
+hostname. The exclusion list is property-tested against the fixture's real values.
+`aiqe receipt --local` shows you the rest, locally.
+
+Reference: [`docs/receipt.md`](docs/receipt.md).
+
+### Validators run only after you say so
+
+`aiqe.toml` is tracked content: anyone who can land a commit can declare a validator
+naming any command on your machine. So a declaration is a proposal, not authorization.
+AIQE runs nothing until you consent, on this machine, to that **exact** validator
+definition — its id, argument vector, timeout, required flag and contracts, bound by a
+digest. Change any of them and the consent no longer applies.
+
+Consent is never stored in `aiqe.toml`, in tracked content, or in `.git`. `--allow
+<id>` authorises one run and records nothing. A non-interactive or `--format json`
+check never prompts: the outcome is `UNKNOWN` with `CONSENT_REQUIRED`, which is neither
+a pass nor a failure.
+
+AIQE makes **no sandbox, filesystem or network claim** about a validator — it runs as
+you — and the consent prompt says so before it asks.
+
+### Evidence that expires
+
+A check binds the exact content of every owned path, the commit, the raw `aiqe.toml`
+bytes and the validator definitions. `aiqe receipt` recomputes that binding rather than
+trusting a stored verdict, so editing an owned file, moving HEAD, or editing the
+configuration turns `CURRENT` into `STALE` — without re-running a single validator, and
+without fingerprinting your whole worktree.
+
+The same measurement happens on both sides of validator execution. A validator that
+edits the file it was checking and exits 0 does not produce current evidence, whatever
+its exit status says.
+
 ### A bounded unit of work
 
 Declare what a piece of work owns, before doing it:
@@ -155,23 +283,27 @@ AIQE is deterministic. It contains no model calls.
 
 ```
 doctor    inspect the environment before anything is changed   IMPLEMENTED
+init      write ./aiqe.toml                                    IMPLEMENTED
 task      declare an immutable owned scope for a unit of work  IMPLEMENTED
-init      write ./aiqe.toml                                    design target
-check     run the validators bound to the applicable contracts design target
-commit    create a bounded completion commit, or refuse        design target
+check     run the validators bound to the applicable contracts IMPLEMENTED
 receipt   render what is proven, what is excluded, and what is unknown
-                                                               design target
+                                                               IMPLEMENTED
+commit    create a bounded completion commit, or refuse        design target
 ```
 
-A design target is not registered as a command. Running `aiqe init` today exits 3 with
-`unknown command`, because a command that parses and does nothing advertises a
+A design target is not registered as a command. Running `aiqe commit` today exits 3
+with `unknown command`, because a command that parses and does nothing advertises a
 capability that does not exist.
 
-The owned scope is fixed when a task starts and cannot widen — that part exists today,
-as an exact pathset. Checks run against that scope. The receipt reports one of three verdicts — `REVIEWABLE`, `INCOMPLETE`, or
-`NOT_REVIEWABLE` — and never invents a fourth, softer one.
+The owned scope is fixed when a task starts and cannot widen, as an exact pathset.
+Checks run against that scope. The receipt reports one of three verdicts —
+`REVIEWABLE`, `INCOMPLETE`, or `NOT_REVIEWABLE` — and never invents a fourth, softer
+one. `REVIEWABLE` is unreachable until a bounded commit exists.
 
 Full command surface and exit semantics: [`docs/architecture.md`](docs/architecture.md).
+Per-command references: [`doctor`](docs/doctor.md), [`init` and
+`aiqe.toml`](docs/config.md), [`task`](docs/task.md), [`check`](docs/check.md),
+[`receipt`](docs/receipt.md).
 
 ## Change integrity
 
@@ -195,9 +327,13 @@ The user-facing guarantee is stated narrowly and deliberately:
 
 A check that succeeded earlier does not describe a commit made later. AIQE binds them.
 
-At `check`, a bounded cryptographic state binding is recorded for every owned path,
-covering file content, new-file and deletion states, relevant mode and type, and the
-digests of the configuration and evidence definitions in force.
+At `check` — implemented — a bounded cryptographic state binding is recorded for every
+owned path, covering file content, new-file and deletion states, relevant mode and
+type, and the digests of the configuration and evidence definitions in force. The same
+bounded authority is measured immediately before and after the validators run, so a
+validator that modifies what it checks cannot leave evidence that calls itself current.
+`aiqe receipt` recomputes it to decide freshness, and never re-runs a validator to do
+so.
 
 At `commit`, that binding is recomputed before any mutation. If it differs, the evidence
 is stale and the commit is refused. After the commit, AIQE verifies that the changed
@@ -220,9 +356,16 @@ ACCOUNTING             TRAIN_TEST_SEPARATION  DETERMINISM
 
 Every required validator bound to an applicable contract must pass. **A contract that
 applies but has zero required validators is a `COVERAGE_GAP`, not a pass.** This is the
-single most important behaviour in the product: silence is not evidence.
+single most important behaviour in the product: silence is not evidence. Each of the
+six families has its own deterministic fixtures proving all three outcomes — covered,
+failed, and coverage gap — because one family standing in for six would leave five with
+no evidence at all.
 
-Details: [`bench/protocol/families.md`](bench/protocol/families.md).
+Surface patterns are AIQE's own small documented grammar over raw path bytes, and are
+never handed to Git.
+
+Details: [`docs/config.md`](docs/config.md) and
+[`bench/protocol/families.md`](bench/protocol/families.md).
 
 ## What AIQE does not do — and cannot prove
 
@@ -262,7 +405,7 @@ install hooks or run in the background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | `doctor` and `task` implemented, tested, and benchmarked. Nothing released or tagged. |
+| *(current)* | `doctor`, `init`, `task`, `check` and `receipt` implemented, tested, and benchmarked. Nothing released or tagged. |
 | `v0.1.0` | First installable alpha: `doctor`, `init`, `task`, `check`, `receipt` on macOS. Real tests in real CI. |
 | `v0.2.0` | `commit` with checked-content binding, all six contracts, benchmark fixtures and retained results. |
 | `v0.3.0` | Linux baseline actually run. Agent adapters. Demo and visual package materialised. |

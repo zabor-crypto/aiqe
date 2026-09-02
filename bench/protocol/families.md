@@ -51,9 +51,16 @@ Each family also has a **missing-validator variant**: the contract applies, no r
 validator is bound, and the correct answer is `COVERAGE_GAP`. A pass here is a false
 green and a release blocker.
 
+The pre-commit half of this family is materialised in
+[`../fixtures/check/`](../fixtures/check/): three fixtures per contract — required
+validator passes, required validator fails, and zero required validators bound —
+eighteen in all, plus the classification and configuration cases. No family is
+represented by another.
+
 Also covers surface classification: overlapping quant and non-quant declarations must
 produce `CONFIG_CONFLICT` and fail closed, and obligations from multiple matching
-surfaces must union rather than override.
+surfaces must union rather than override. Declaration order has no semantic effect, and
+that is asserted over every permutation rather than over an example.
 
 ## D — Doctor first contact
 

@@ -10,7 +10,80 @@ makes the change, not at release time.
 
 ## [Unreleased]
 
+### Added
+
+- **`aiqe init`, `aiqe check` and `aiqe receipt`.** The first complete pre-commit
+  assurance workflow now exists: `init` → `task start --own` → change the owned files
+  → `check` → `receipt`. `aiqe commit` remains out of scope and unregistered.
+- **Configuration schema v1** in `./aiqe.toml`, with exactly two declaration types,
+  `[[surface]]` and `[[validator]]`. Parsing is fail-closed: an unknown field, a
+  missing `quant`, a missing `required`, a missing or out-of-range `timeout`, an empty
+  argument vector, a duplicate validator id or an invalid pattern is a refusal (exit 3)
+  rather than a default. `quant = false` is never inferred from an absence of evidence.
+- **An AIQE surface pattern grammar** — `*`, `?`, `**`, `[abc]` — matched on raw path
+  bytes, with no case folding and no Unicode normalisation. It is AIQE's own and is
+  never handed to Git as a pathspec. `**` must be a whole component; `a**b` is refused
+  rather than quietly demoted to `a*b`.
+- **All-matching surface classification.** Every matching declaration is evaluated, not
+  the first, and quant contract obligations union across them, so adding a surface can
+  never reduce an obligation. A path matched by both a quant and a non-quant surface is
+  `CONFIG_CONFLICT`: exit 3, no evidence, no receipt.
+- **The six launch contract families** — `CAUSALITY`, `DATA_ALIGNMENT`,
+  `EXECUTION_REALISM`, `ACCOUNTING`, `TRAIN_TEST_SEPARATION`, `DETERMINISM` — each with
+  its own deterministic fixtures proving covered, failed, and coverage gap. Custom
+  contract identifiers remain legal.
+- **`COVERAGE_GAP`.** An applicable contract with zero *required* validators bound to it
+  is a gap, not a pass. An optional validator never satisfies coverage, and a generic
+  suite never covers a quant contract.
+- **Validator consent, per definition digest, machine-local.** Tracked configuration is
+  executable trust material, not authorization. A validator's identity is its id,
+  argument vector, timeout, required flag and contracts, bound by a digest over a
+  length-delimited binary serialisation; changing any of them revokes consent by
+  identity mismatch, with no migration. `--allow <id>` authorises one run and persists
+  nothing. A non-interactive or `--format json` check never prompts and reports
+  `UNKNOWN` / `CONSENT_REQUIRED`.
+- **Mandatory validator timeouts**, and a timeout is a `FAIL`. The timeout ends the
+  validator's whole process group: a script's children inherit its pipes, and killing
+  only the process AIQE started let a one-second timeout run for thirty seconds.
+- **Checked-content binding**, bounded to the owned pathset — content digests, modes,
+  deletion and pending markers, the baseline and current HEAD, the raw `aiqe.toml`
+  digest and every validator definition digest. No whole-tree fingerprint.
+- **Validator-induced change detection.** The bounded authority is measured immediately
+  before and after validator execution. A validator that edits the file it is checking
+  and exits 0 does not produce current evidence; the previous record is removed rather
+  than left looking current.
+- **Staleness without re-running anything.** `aiqe receipt` recomputes the owned
+  binding, HEAD, the configuration digest and the validator definition digests, and
+  reports `STALE_OWNED_CONTENT`, `STALE_HEAD`, `STALE_CONFIG` or
+  `STALE_VALIDATOR_DEFINITION`.
+- **A correlation-minimised default receipt**, carrying counts, states, reason ids and a
+  verdict — and no path, filename, repository name, remote, branch, commit id,
+  validator command line, output, username, hostname or task label. The exclusion list
+  is property-tested against the fixture's real values, and the serialiser is bound to
+  a redaction policy id. `aiqe receipt --local` is the richer local surface.
+- **`REVIEWABLE` is unreachable before a bounded commit.** A completely green check
+  produces the internal state `REVIEWABLE_CANDIDATE`; the receipt still reports
+  `INCOMPLETE` with reason `BOUNDED_COMMIT_NOT_CREATED`. Asserted as a property over
+  every valid pre-commit state combination, not as examples.
+- **Evidence schema version 1**, one active record per task, replaced whole by each
+  check and removed by `task end`. No history. Recorded consent survives task end.
+- A new benchmark family, `CHECK_RECEIPT_EVIDENCE`: 33 cases and four negative
+  controls — `NC_CHECK_STALENESS`, `NC_MISSING_QUANT_VALIDATOR`, `NC_CONSENT`,
+  `NC_VALIDATOR_MUTATES_OWNED` — all reproducing their failures.
+- References: [`docs/config.md`](docs/config.md), [`docs/check.md`](docs/check.md),
+  [`docs/receipt.md`](docs/receipt.md).
+
 ### Changed
+
+- `git ls-tree` and `git cat-file` joined the Git subcommand allowlist. `check` needs an
+  owned path's baseline content, and asking Git whether a file changed would make it
+  read worktree content through any configured check-in filter. Both new subcommands
+  read the object database only.
+- The measured invariant for `check` is `UNCONSENTED_VALIDATOR_EXECUTIONS = 0`, not the
+  absence of repository-defined execution: here that execution is expected, after
+  consent. AIQE core's own repository writes remain zero-tolerance, and the benchmark
+  attributes every observed repository change to an authorised `init` write, a
+  validator, the fixture, or AIQE core.
 
 - **Task state moved out of Git metadata** to `$XDG_STATE_HOME/aiqe/` (falling back to
   `~/.local/state`), in a directory named by

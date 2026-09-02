@@ -1,0 +1,1971 @@
+{
+  "aiqe_version": "0.0.0.dev0",
+  "cases": [
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "causality_covered",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "CAUSALITY applies to the changed owned path and a required validator declaring it passes. The contract is COVERED, every pre-commit obligation is discharged, and the receipt is still INCOMPLETE because no bounded commit exists. (future information reaches a decision made before it existed)",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "causality_failed",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              CONTRACT_FAILED causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "The required validator bound to CAUSALITY fails. The generic unit suite still passes, and it changes nothing: the contract is CONTRACT_FAILED and the receipt verdict is NOT_REVIEWABLE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "FAIL",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "causality_coverage_gap",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n      causality              optional  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "COVERAGE_GAP"
+      },
+      "default_receipt_leaks": [],
+      "description": "CAUSALITY applies and no *required* validator declares it. Every validator the repository declares passes, including an optional one bound to CAUSALITY. The answer is COVERAGE_GAP, not a pass: an optional validator never satisfies coverage and a generic suite never covers a quant contract.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "data_alignment_covered",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DATA_ALIGNMENT         COVERED        data_alignment\n\n  Validators\n      unit                   required  PASS\n      data_alignment         required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "data_alignment",
+        "unit"
+      ],
+      "coverage_states": {
+        "DATA_ALIGNMENT": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "DATA_ALIGNMENT applies to the changed owned path and a required validator declaring it passes. The contract is COVERED, every pre-commit obligation is discharged, and the receipt is still INCOMPLETE because no bounded commit exists. (series joined on mismatched indices or timestamps)",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "data_alignment": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "data_alignment",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "data_alignment_failed",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DATA_ALIGNMENT         CONTRACT_FAILED data_alignment\n\n  Validators\n      unit                   required  PASS\n      data_alignment         required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "data_alignment",
+        "unit"
+      ],
+      "coverage_states": {
+        "DATA_ALIGNMENT": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "The required validator bound to DATA_ALIGNMENT fails. The generic unit suite still passes, and it changes nothing: the contract is CONTRACT_FAILED and the receipt verdict is NOT_REVIEWABLE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "data_alignment": "FAIL",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "data_alignment",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "data_alignment_coverage_gap",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DATA_ALIGNMENT         COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n      data_alignment         optional  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "data_alignment",
+        "unit"
+      ],
+      "coverage_states": {
+        "DATA_ALIGNMENT": "COVERAGE_GAP"
+      },
+      "default_receipt_leaks": [],
+      "description": "DATA_ALIGNMENT applies and no *required* validator declares it. Every validator the repository declares passes, including an optional one bound to DATA_ALIGNMENT. The answer is COVERAGE_GAP, not a pass: an optional validator never satisfies coverage and a generic suite never covers a quant contract.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "data_alignment": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "data_alignment",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "execution_realism_covered",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      EXECUTION_REALISM      COVERED        execution_realism\n\n  Validators\n      unit                   required  PASS\n      execution_realism      required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "execution_realism",
+        "unit"
+      ],
+      "coverage_states": {
+        "EXECUTION_REALISM": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "EXECUTION_REALISM applies to the changed owned path and a required validator declaring it passes. The contract is COVERED, every pre-commit obligation is discharged, and the receipt is still INCOMPLETE because no bounded commit exists. (fills assume prices or liquidity that were not available)",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "execution_realism": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "execution_realism",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "execution_realism_failed",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      EXECUTION_REALISM      CONTRACT_FAILED execution_realism\n\n  Validators\n      unit                   required  PASS\n      execution_realism      required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "execution_realism",
+        "unit"
+      ],
+      "coverage_states": {
+        "EXECUTION_REALISM": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "The required validator bound to EXECUTION_REALISM fails. The generic unit suite still passes, and it changes nothing: the contract is CONTRACT_FAILED and the receipt verdict is NOT_REVIEWABLE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "execution_realism": "FAIL",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "execution_realism",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "execution_realism_coverage_gap",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      EXECUTION_REALISM      COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n      execution_realism      optional  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "execution_realism",
+        "unit"
+      ],
+      "coverage_states": {
+        "EXECUTION_REALISM": "COVERAGE_GAP"
+      },
+      "default_receipt_leaks": [],
+      "description": "EXECUTION_REALISM applies and no *required* validator declares it. Every validator the repository declares passes, including an optional one bound to EXECUTION_REALISM. The answer is COVERAGE_GAP, not a pass: an optional validator never satisfies coverage and a generic suite never covers a quant contract.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "execution_realism": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "execution_realism",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "accounting_covered",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      ACCOUNTING             COVERED        accounting\n\n  Validators\n      unit                   required  PASS\n      accounting             required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "accounting",
+        "unit"
+      ],
+      "coverage_states": {
+        "ACCOUNTING": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "ACCOUNTING applies to the changed owned path and a required validator declaring it passes. The contract is COVERED, every pre-commit obligation is discharged, and the receipt is still INCOMPLETE because no bounded commit exists. (positions, cash and PnL fail to reconcile)",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "accounting": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "accounting",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "accounting_failed",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      ACCOUNTING             CONTRACT_FAILED accounting\n\n  Validators\n      unit                   required  PASS\n      accounting             required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "accounting",
+        "unit"
+      ],
+      "coverage_states": {
+        "ACCOUNTING": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "The required validator bound to ACCOUNTING fails. The generic unit suite still passes, and it changes nothing: the contract is CONTRACT_FAILED and the receipt verdict is NOT_REVIEWABLE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "accounting": "FAIL",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "accounting",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "accounting_coverage_gap",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      ACCOUNTING             COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n      accounting             optional  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "accounting",
+        "unit"
+      ],
+      "coverage_states": {
+        "ACCOUNTING": "COVERAGE_GAP"
+      },
+      "default_receipt_leaks": [],
+      "description": "ACCOUNTING applies and no *required* validator declares it. Every validator the repository declares passes, including an optional one bound to ACCOUNTING. The answer is COVERAGE_GAP, not a pass: an optional validator never satisfies coverage and a generic suite never covers a quant contract.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "accounting": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "accounting",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "train_test_separation_covered",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      TRAIN_TEST_SEPARATION  COVERED        train_test_separation\n\n  Validators\n      unit                   required  PASS\n      train_test_separation  required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "train_test_separation",
+        "unit"
+      ],
+      "coverage_states": {
+        "TRAIN_TEST_SEPARATION": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "TRAIN_TEST_SEPARATION applies to the changed owned path and a required validator declaring it passes. The contract is COVERED, every pre-commit obligation is discharged, and the receipt is still INCOMPLETE because no bounded commit exists. (evaluation data informed fitting)",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "train_test_separation": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "train_test_separation",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "train_test_separation_failed",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      TRAIN_TEST_SEPARATION  CONTRACT_FAILED train_test_separation\n\n  Validators\n      unit                   required  PASS\n      train_test_separation  required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "train_test_separation",
+        "unit"
+      ],
+      "coverage_states": {
+        "TRAIN_TEST_SEPARATION": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "The required validator bound to TRAIN_TEST_SEPARATION fails. The generic unit suite still passes, and it changes nothing: the contract is CONTRACT_FAILED and the receipt verdict is NOT_REVIEWABLE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "train_test_separation": "FAIL",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "train_test_separation",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "train_test_separation_coverage_gap",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      TRAIN_TEST_SEPARATION  COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n      train_test_separation  optional  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "train_test_separation",
+        "unit"
+      ],
+      "coverage_states": {
+        "TRAIN_TEST_SEPARATION": "COVERAGE_GAP"
+      },
+      "default_receipt_leaks": [],
+      "description": "TRAIN_TEST_SEPARATION applies and no *required* validator declares it. Every validator the repository declares passes, including an optional one bound to TRAIN_TEST_SEPARATION. The answer is COVERAGE_GAP, not a pass: an optional validator never satisfies coverage and a generic suite never covers a quant contract.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "train_test_separation": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "train_test_separation",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "determinism_covered",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DETERMINISM            COVERED        determinism\n\n  Validators\n      unit                   required  PASS\n      determinism            required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "determinism",
+        "unit"
+      ],
+      "coverage_states": {
+        "DETERMINISM": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "DETERMINISM applies to the changed owned path and a required validator declaring it passes. The contract is COVERED, every pre-commit obligation is discharged, and the receipt is still INCOMPLETE because no bounded commit exists. (identical inputs produce different results across runs)",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "determinism": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "determinism",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "determinism_failed",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DETERMINISM            CONTRACT_FAILED determinism\n\n  Validators\n      unit                   required  PASS\n      determinism            required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "determinism",
+        "unit"
+      ],
+      "coverage_states": {
+        "DETERMINISM": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "The required validator bound to DETERMINISM fails. The generic unit suite still passes, and it changes nothing: the contract is CONTRACT_FAILED and the receipt verdict is NOT_REVIEWABLE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "determinism": "FAIL",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "determinism",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "determinism_coverage_gap",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DETERMINISM            COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n      determinism            optional  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "determinism",
+        "unit"
+      ],
+      "coverage_states": {
+        "DETERMINISM": "COVERAGE_GAP"
+      },
+      "default_receipt_leaks": [],
+      "description": "DETERMINISM applies and no *required* validator declares it. Every validator the repository declares passes, including an optional one bound to DETERMINISM. The answer is COVERAGE_GAP, not a pass: an optional validator never satisfies coverage and a generic suite never covers a quant contract.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "COVERAGE_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "determinism": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "determinism",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "unclassified_changed_path",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  0 quant \u00b7 0 non-quant \u00b7 1 unclassified\n\n  Unclassified changed paths - no [[surface]] matches:\n      src/strategy/alpha.py\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         CLASSIFICATION_GAP\n\n",
+      "classification": [
+        0,
+        0,
+        1
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "unit"
+      ],
+      "coverage_states": {},
+      "default_receipt_leaks": [],
+      "description": "A changed owned path that no [[surface]] declaration matches. No contract applies, the required generic validator passes, and the result is still INCOMPLETE: an unclassified path is a classification gap, not an implicit non-quant surface.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CLASSIFICATION_GAP"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 1 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          CLASSIFICATION_GAP\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CLASSIFICATION_GAP"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "config_conflict_refused",
+      "changed_owned_count": null,
+      "check_exit": 3,
+      "check_json_exit": 3,
+      "check_output": "",
+      "classification": null,
+      "completion": null,
+      "consented": [
+        "unit"
+      ],
+      "coverage_states": {},
+      "default_receipt_leaks": [],
+      "description": "One changed owned path matched by a quant = true surface and a quant = false surface. Both commands exit 3, no check evidence is written and no receipt artifact is produced. AIQE does not pick a winner between two declarations that disagree.",
+      "end_exit": 0,
+      "evidence_after_check": false,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": null,
+      "receipt_evidence": null,
+      "receipt_exit": 3,
+      "receipt_json_exit": 3,
+      "receipt_local_exit": 3,
+      "receipt_output": "",
+      "receipt_owned_scope": null,
+      "receipt_reasons": [],
+      "receipt_verdict": null,
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {},
+      "validator_repository_mutations": 0,
+      "validators_fired": []
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "consent_withheld",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              CONTRACT_UNKNOWN causality\n\n  Validators\n      unit                   required  UNKNOWN      CONSENT_REQUIRED\n      causality              required  UNKNOWN      CONSENT_REQUIRED\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         REQUIRED_VALIDATOR_UNKNOWN \u00b7 CONTRACT_UNKNOWN\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [],
+      "coverage_states": {
+        "CAUSALITY": "CONTRACT_UNKNOWN"
+      },
+      "default_receipt_leaks": [],
+      "description": "Validators declared in tracked configuration, no --allow, no recorded consent, and no interactive terminal. Nothing is executed: the outcome is UNKNOWN with CONSENT_REQUIRED, which is neither a pass nor a failure.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_UNKNOWN",
+        "REQUIRED_VALIDATOR_UNKNOWN"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 1 unknown\n  Validators      2 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 2 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          REQUIRED_VALIDATOR_UNKNOWN \u00b7 CONTRACT_UNKNOWN\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_UNKNOWN",
+        "REQUIRED_VALIDATOR_UNKNOWN"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "UNKNOWN",
+        "unit": "UNKNOWN"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [],
+      "validators_that_ran": []
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "allow_is_not_persisted",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "description": "--allow authorises one run. The next check finds no recorded consent and reports UNKNOWN again.",
+      "first_exit": 0,
+      "first_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "second_exit": 2,
+      "second_outcomes": {
+        "causality": "UNKNOWN",
+        "unit": "UNKNOWN"
+      },
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 6,
+      "case": "definition_digest_drift",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "consented_exit": 0,
+      "consented_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "description": "Consent is recorded per validator definition digest. Editing one semantic field - here the timeout - changes the digest, so the recorded consent addresses a definition that no longer exists and the validator is UNKNOWN again. There is no migration.",
+      "distinct_digests": true,
+      "drifted_exit": 2,
+      "drifted_outcomes": {
+        "causality": "UNKNOWN",
+        "unit": "UNKNOWN"
+      },
+      "fixture_repository_mutations": 1,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "validator_unavailable",
+      "changed_owned_count": 1,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              CONTRACT_UNKNOWN causality\n\n  Validators\n      causality              required  UNAVAILABLE  EXECUTABLE_NOT_FOUND\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         REQUIRED_VALIDATOR_UNAVAILABLE \u00b7 CONTRACT_UNKNOWN\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "INCOMPLETE",
+      "consented": [
+        "causality"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "CONTRACT_UNKNOWN"
+      },
+      "default_receipt_leaks": [],
+      "description": "A required validator whose executable is not present. UNAVAILABLE is not FAIL and not PASS: nothing was established, so the contract is CONTRACT_UNKNOWN and the result INCOMPLETE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_UNKNOWN",
+        "REQUIRED_VALIDATOR_UNAVAILABLE"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 1 unknown\n  Validators      1 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 1 unavailable\n  Required        1 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          REQUIRED_VALIDATOR_UNAVAILABLE \u00b7 CONTRACT_UNKNOWN\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_UNKNOWN",
+        "REQUIRED_VALIDATOR_UNAVAILABLE"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "UNAVAILABLE"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": []
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "validator_timeout_is_failure",
+      "changed_owned_count": 1,
+      "check_exit": 1,
+      "check_json_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      DETERMINISM            CONTRACT_FAILED determinism\n\n  Validators\n      determinism            required  FAIL         timed out\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "NOT_REVIEWABLE",
+      "consented": [
+        "determinism"
+      ],
+      "coverage_states": {
+        "DETERMINISM": "CONTRACT_FAILED"
+      },
+      "default_receipt_leaks": [],
+      "description": "A required validator that exceeds its mandatory timeout. A timeout is a FAIL, never an unknown: a check that did not finish did not establish what it was asked to establish.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 1,
+      "receipt_json_exit": 1,
+      "receipt_local_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 0 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 0 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "CONTRACT_FAILED",
+        "REQUIRED_VALIDATOR_FAILED"
+      ],
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "determinism": "FAIL"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "determinism"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "validator_mutates_owned_path",
+      "changed_owned_count": null,
+      "check_exit": 2,
+      "check_json_exit": 2,
+      "check_output": "AIQE CHECK\n\n  The state this check rests on changed while the validators ran, so\n  the result does not describe the repository as it is now.\n\n  Changed         STALE_OWNED_CONTENT\n\n  Evidence        NOT CURRENT\n  Completion      INCOMPLETE\n  Reason          AUTHORITY_CHANGED_DURING_CHECK\n\n  A validator that modifies what it checks cannot also be evidence\n  about it. Run `aiqe check` again once the worktree is settled.\n",
+      "classification": null,
+      "completion": "INCOMPLETE",
+      "consented": [
+        "causality"
+      ],
+      "coverage_states": {},
+      "default_receipt_leaks": [],
+      "description": "A validator that edits the owned file it is checking and exits 0. The naive answer is PASS and current. AIQE measures the owned binding on both sides of execution, refuses to produce current evidence, and removes the previous record rather than leaving it looking current. The repository change is attributed to the validator, not to AIQE core.",
+      "end_exit": 0,
+      "evidence_after_check": false,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [
+        "AUTHORITY_CHANGED_DURING_CHECK",
+        "STALE_OWNED_CONTENT"
+      ],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "NONE",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     DECLARED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        NONE\n  Commit          NONE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          EVIDENCE_NONE\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "DECLARED",
+      "receipt_reasons": [
+        "EVIDENCE_NONE"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {},
+      "validator_repository_mutations": 1,
+      "validators_fired": [
+        "causality"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "owned_content_changes_after_check",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "A completely green check, then an edit to the owned file. The receipt recomputes the bounded owned binding and reports STALE without running a single validator.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 1,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "STALE",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        STALE\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "STALE_OWNED_CONTENT"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "head_moves_after_check",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "A green check, then an unrelated commit. The evidence was taken against a different HEAD, so it is STALE - even though not one owned byte changed.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 14,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "STALE",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        STALE\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_HEAD\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "STALE_HEAD"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "config_changes_after_check",
+      "changed_owned_count": 1,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        1,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "causality",
+        "unit"
+      ],
+      "coverage_states": {
+        "CAUSALITY": "COVERED"
+      },
+      "default_receipt_leaks": [],
+      "description": "A green check, then a comment appended to aiqe.toml. The configuration digest is over the file's raw bytes, so the evidence no longer describes the configuration the reader is looking at, and the receipt says STALE.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 1,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "STALE",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        STALE\n  Commit          NONE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_CONFIG\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "STALE_CONFIG"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "causality": "PASS",
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "causality",
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "unchanged_owned_path",
+      "changed_owned_count": 0,
+      "check_exit": 0,
+      "check_json_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 0 changed\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "classification": [
+        0,
+        0,
+        0
+      ],
+      "completion": "REVIEWABLE_CANDIDATE",
+      "consented": [
+        "unit"
+      ],
+      "coverage_states": {},
+      "default_receipt_leaks": [],
+      "description": "A task whose owned path was declared and never touched. There is no changed owned path to classify, so no contract applies; the required generic validator still runs, because it is an obligation of the task rather than of a surface.",
+      "end_exit": 0,
+      "evidence_after_check": true,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "CURRENT",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 0 changed\n  Foreign staged  OBSERVED\n  Evidence        CURRENT\n  Commit          NONE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {
+        "unit": "PASS"
+      },
+      "validator_repository_mutations": 0,
+      "validators_fired": [
+        "unit"
+      ]
+    },
+    {
+      "active_after_end": false,
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 5,
+      "case": "configuration_absent",
+      "changed_owned_count": null,
+      "check_exit": 3,
+      "check_json_exit": 3,
+      "check_output": "",
+      "classification": null,
+      "completion": null,
+      "consented": [],
+      "coverage_states": {},
+      "default_receipt_leaks": [],
+      "description": "A repository with no aiqe.toml. `check` exits 3 rather than inventing a default configuration; `receipt` reports INCOMPLETE with no evidence rather than refusing, because a task without a check is an ordinary state.",
+      "end_exit": 0,
+      "evidence_after_check": false,
+      "evidence_after_end": false,
+      "fixture_repository_mutations": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "reasons": [],
+      "receipt_commit": "NONE",
+      "receipt_evidence": "NONE",
+      "receipt_exit": 2,
+      "receipt_json_exit": 2,
+      "receipt_local_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     DECLARED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Evidence        NONE\n  Commit          NONE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          EVIDENCE_NONE \u00b7 CONFIG_ABSENT\n\n  Receipt schema  1 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_owned_scope": "DECLARED",
+      "receipt_reasons": [
+        "CONFIG_ABSENT",
+        "EVIDENCE_NONE"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "start_exit": 0,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_outcomes": {},
+      "validator_repository_mutations": 0,
+      "validators_fired": []
+    },
+    {
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [],
+      "aiqe_state_changes": 0,
+      "case": "init_print_writes_nothing",
+      "config_written": false,
+      "description": "`aiqe init --print` renders the complete proposed file and writes nothing at all: no aiqe.toml, no machine-local state, no salt.",
+      "fixture_repository_mutations": 0,
+      "init_exit": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "renders_schema": true,
+      "renders_surface_example": true,
+      "renders_validator_example": true,
+      "salt_created": false,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_repository_mutations": 0,
+      "validators_fired": []
+    },
+    {
+      "aiqe_core_repository_mutation_detail": [],
+      "aiqe_core_repository_mutations": 0,
+      "aiqe_init_writes": [
+        "added: repo/aiqe.toml"
+      ],
+      "aiqe_state_changes": 0,
+      "case": "init_writes_only_the_config",
+      "config_written": true,
+      "declares_no_surface": [
+        "schema = 1"
+      ],
+      "description": "`aiqe init --yes` writes exactly one repository path, and the scaffold declares no surface and no validator: AIQE does not guess what is quant-critical. A second init refuses rather than overwriting.",
+      "fixture_repository_mutations": 0,
+      "init_exit": 0,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "problems": [],
+      "second_init_exit": 3,
+      "terminal_safe": true,
+      "unconsented_validator_executions": 0,
+      "unconsented_validators": [],
+      "validator_repository_mutations": 0,
+      "validators_fired": []
+    }
+  ],
+  "cases_failed": 0,
+  "cases_passed": 33,
+  "cases_skipped_platform": 0,
+  "cases_skipped_platform_ids": [],
+  "cases_total": 33,
+  "family": "CHECK_RECEIPT_EVIDENCE",
+  "negative_controls": [
+    {
+      "aiqe_check_completion": "REVIEWABLE_CANDIDATE",
+      "aiqe_check_exit": 0,
+      "aiqe_receipt_evidence": "STALE",
+      "aiqe_receipt_exit": 2,
+      "aiqe_receipt_reasons": [
+        "STALE_OWNED_CONTENT"
+      ],
+      "aiqe_receipt_verdict": "INCOMPLETE",
+      "control": "NC_CHECK_STALENESS",
+      "control_reproduces_failure": true,
+      "description": "Check, then edit. The naive tool records that the validators passed and has nothing to compare against afterwards, so its green result survives an edit to the very file it was about. AIQE binds the owned content at check time and recomputes it at receipt time, so the same sequence reports STALE.",
+      "invariant": "EVIDENCE_DESCRIBES_CURRENT_OWNED_CONTENT",
+      "naive_still_reports_green": true
+    },
+    {
+      "aiqe_check_exit": 2,
+      "aiqe_coverage": {
+        "CAUSALITY": "COVERAGE_GAP"
+      },
+      "aiqe_receipt_exit": 2,
+      "aiqe_receipt_verdict": "INCOMPLETE",
+      "control": "NC_MISSING_QUANT_VALIDATOR",
+      "control_reproduces_failure": true,
+      "description": "Generic tests over a declared quant surface with no required validator bound to its contract. Every validator the repository declares passes, so the naive workflow is green - about a contract nothing in the repository was written to check. AIQE reports COVERAGE_GAP.",
+      "invariant": "APPLICABLE_CONTRACT_WITHOUT_REQUIRED_VALIDATOR_IS_A_GAP",
+      "naive_all_validators_passed": true,
+      "naive_reports_green": true
+    },
+    {
+      "aiqe_check_exit": 2,
+      "aiqe_executed_declared_command": false,
+      "aiqe_outcomes": {
+        "causality": "UNKNOWN"
+      },
+      "aiqe_reasons": {
+        "causality": "CONSENT_REQUIRED"
+      },
+      "control": "NC_CONSENT",
+      "control_reproduces_failure": true,
+      "description": "Tracked configuration treated as authorization. The naive tool reads aiqe.toml and runs what it declares, so anyone who can land a commit can run a command on the reviewer's machine. AIQE executes nothing without machine-local consent recorded for that exact validator definition.",
+      "invariant": "UNCONSENTED_VALIDATOR_EXECUTIONS = 0",
+      "naive_executed_declared_command": true
+    },
+    {
+      "aiqe_check_exit": 2,
+      "aiqe_check_reason": "INCOMPLETE",
+      "aiqe_receipt_evidence": "NONE",
+      "aiqe_receipt_exit": 2,
+      "aiqe_receipt_verdict": "INCOMPLETE",
+      "control": "NC_VALIDATOR_MUTATES_OWNED",
+      "control_reproduces_failure": true,
+      "description": "A validator that edits the file it checks and exits 0. The naive tool records the exit status and calls the result current, so it is green about source that no longer exists. AIQE measures the owned binding on both sides of execution and refuses to produce current evidence.",
+      "invariant": "VALIDATOR_INDUCED_CHANGE_INVALIDATES_CURRENT_EVIDENCE",
+      "naive_reports_green_and_current": true,
+      "validator_changed_the_file_it_checked": true
+    }
+  ],
+  "negative_controls_reproducing": 4,
+  "negative_controls_total": 4,
+  "other_families": {
+    "BOUNDED_COMMIT": "NOT_RUN"
+  },
+  "platform": "darwin",
+  "schema_version": 1,
+  "totals": {
+    "aiqe_core_repository_mutations": 0,
+    "local_state_writes": 0,
+    "model_calls": 0,
+    "network_requests": 0,
+    "precommit_reviewable_verdicts": 0,
+    "unconsented_validator_executions": 0
+  }
+}

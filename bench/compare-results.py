@@ -32,6 +32,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RETAINED_BY_FAMILY = {
     "DOCTOR_FIRST_CONTACT": os.path.join(HERE, "results", "doctor", "results.json"),
     "TASK_SCOPE_CORE": os.path.join(HERE, "results", "task", "results.json"),
+    "CHECK_RECEIPT_EVIDENCE": os.path.join(HERE, "results", "check", "results.json"),
 }
 
 #: Numbers that must agree between any two correct runs, on any platform.

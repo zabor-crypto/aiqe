@@ -391,8 +391,63 @@ def clear_active(state_directory):
     return True
 
 
-def _atomic_replace(directory, path, payload):
-    temporary = os.path.join(directory, ".%s.tmp.%d" % (ACTIVE_TASK_NAME, os.getpid()))
+def write_local_file(state_directory, name, payload):
+    """Replace one machine-local state file atomically.
+
+    The same temporary-file, fsync and rename path the active task record
+    uses. It is here rather than in each caller because every file AIQE keeps
+    beside the task - recorded consent, current check evidence - has the same
+    requirement: a reader sees the old bytes or the new ones, never half of
+    either, and a crash mid-write loses at most the newest write.
+
+    This is the whole of the Task Core integration the later lifecycle
+    surfaces needed. It adds no task semantics and does not touch the task
+    record's schema.
+    """
+    _ensure_directory(state_directory)
+    path = os.path.join(state_directory, name)
+    _require_regular_file(path)
+    _atomic_replace(state_directory, path, payload, name)
+    return path
+
+
+def read_local_file(state_directory, name):
+    """One machine-local state file's bytes, or None. Never mutates anything."""
+    if state_directory is None:
+        return None
+    path = os.path.join(state_directory, name)
+    if not _require_regular_file(path):
+        return None
+    try:
+        with open(path, "rb") as handle:
+            return handle.read()
+    except OSError as exc:
+        raise StateError(
+            STATE_UNREADABLE,
+            "AIQE local state file could not be read: %s" % (exc.strerror,),
+        )
+
+
+def remove_local_file(state_directory, name):
+    """Remove one machine-local state file. Returns whether it was there."""
+    if state_directory is None:
+        return False
+    path = os.path.join(state_directory, name)
+    try:
+        os.unlink(path)
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        raise StateError(
+            STATE_UNREADABLE,
+            "AIQE local state file could not be removed: %s" % (exc.strerror,),
+        )
+    _sync_directory(state_directory)
+    return True
+
+
+def _atomic_replace(directory, path, payload, name=ACTIVE_TASK_NAME):
+    temporary = os.path.join(directory, ".%s.tmp.%d" % (name, os.getpid()))
     descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     try:
         os.write(descriptor, payload)

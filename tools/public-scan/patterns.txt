@@ -16,15 +16,23 @@
 # positive, and never widened into an ignore. Every class here has a positive
 # control in self-test.sh that must still trip it after any such change.
 #
-# INTERNAL_HOSTNAME is tightened so that a trailing file extension disqualifies
-# a match: "settings.local.json" is a Claude Code filename, not a host. A real
-# host still matches at a word boundary, at end of line, and before a
+# INTERNAL_HOSTNAME is tightened twice, each time against a demonstrated false
+# positive, and never widened into an ignore.
+#
+#   a trailing file extension disqualifies a match: "settings.local.json" is a
+#   Claude Code filename, not a host;
+#
+#   a trailing underscore disqualifies one too: "receipt.LOCAL_REDACTION_POLICY"
+#   is a dotted attribute reference, and an underscore cannot appear in a
+#   hostname label at all.
+#
+# A real host still matches at a word boundary, at end of line, and before a
 # sentence-ending period.
 
 ABSOLUTE_HOME_PATH:::(/Users/|/home/)[A-Za-z0-9._-]+/
 PERSONAL_EMAIL:::[A-Za-z0-9._%+-]+@(gmail|googlemail|yahoo|outlook|hotmail|proton|protonmail|icloud|me)\.[A-Za-z]{2,}
 SSH_GIT_REMOTE:::git@[A-Za-z0-9.-]+:[A-Za-z0-9._/-]+
-INTERNAL_HOSTNAME:::[A-Za-z0-9-]+\.(local|internal|corp|lan|intranet)([^A-Za-z0-9.]|\.([^A-Za-z0-9]|$)|$)
+INTERNAL_HOSTNAME:::[A-Za-z0-9-]+\.(local|internal|corp|lan|intranet)([^A-Za-z0-9._]|\.([^A-Za-z0-9]|$)|$)
 CLOUD_BUCKET_URI:::(s3://|gs://|az://|abfss://)[a-z0-9][a-z0-9._-]+
 PRIVATE_KEY_BLOCK:::-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----
 GITHUB_TOKEN:::gh[pousr]_[A-Za-z0-9]{20,}
