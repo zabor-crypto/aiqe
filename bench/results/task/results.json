@@ -1,5 +1,5 @@
 {
-  "aiqe_version": "0.0.0.dev0",
+  "aiqe_version": "0.1.0a0",
   "cases": [
     {
       "active_after_end": false,
@@ -491,7 +491,7 @@
       "other_changes": [],
       "outcome": "PASS",
       "owned_while_active": [
-        "tests/test_strategy.py"
+        "src/strategy.py"
       ],
       "problems": [],
       "refusals": 1,

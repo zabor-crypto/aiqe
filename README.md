@@ -76,6 +76,16 @@ newer, and is not published to any index yet, so install it from a clone:
 python3 -m venv .venv && .venv/bin/pip install .
 ```
 
+Or from a built artifact, with pip or with uv — both paths are exercised by the
+release proof against a local wheel:
+
+```bash
+uvx --from ./dist/aiqe-0.1.0a0-py3-none-any.whl aiqe doctor
+```
+
+Where AIQE has actually been shown to run, and where it has not:
+[`docs/support.md`](docs/support.md).
+
 ```bash
 .venv/bin/aiqe doctor
 ```
@@ -175,7 +185,7 @@ AIQE RECEIPT
   Reason          BOUNDED_COMMIT_NOT_CREATED
 
   Receipt schema  2 · policy aiqe.receipt.default.v1
-  AIQE            0.0.0.dev0
+  AIQE            0.1.0a0
 ```
 
 `INCOMPLETE`, on a completely green check. That is the product working. `REVIEWABLE` is
@@ -256,7 +266,7 @@ AIQE RECEIPT
   Verdict         REVIEWABLE
 
   Receipt schema  2 · policy aiqe.receipt.default.v1
-  AIQE            0.0.0.dev0
+  AIQE            0.1.0a0
 ```
 
 `REVIEWABLE`, at last, and only here. If the foreign staged state had moved by so much

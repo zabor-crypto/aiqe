@@ -1,0 +1,226 @@
+"""Turning observations into support claims, and refusing to turn anything else into one.
+
+A support matrix is the easiest document in a project to write dishonestly,
+because the dishonest version is also the tidy one. Two runs at the ends of a
+range look like a range. One green hosted runner looks like an operating
+system. A pure-Python wheel looks like every architecture at once.
+
+None of those are inferences this module will make. It takes a list of
+surfaces that were actually executed, and a list of surfaces somebody wants to
+claim, and it marks each claim `PROVEN` or `NOT_PROVEN` with the observations
+that decided it. There is no third state and no override.
+
+`naive_python_range` is the unsafe reference the negative control needs. It is
+the extrapolation an ordinary matrix makes without noticing, written out
+explicitly so it can be shown to be wrong.
+"""
+
+PROVEN = "PROVEN"
+NOT_PROVEN = "NOT_PROVEN"
+
+from .environment import FULL_SUITE, INSTALLED_ARTIFACT_E2E
+
+
+#: What a Python minor version must have behind it before AIQE claims support
+#: for it.
+#:
+#: Both levels, on every claimed OS family. The full suite alone would prove
+#: the source tree runs there and say nothing about the artifact a user
+#: installs; the installed-artifact end-to-end alone would prove the artifact
+#: starts and say nothing about the several hundred behavioural cases. The
+#: pair is the claim, and one without the other is NOT_PROVEN.
+REQUIRED_PYTHON_LEVELS = (FULL_SUITE, INSTALLED_ARTIFACT_E2E)
+
+
+def _matching(observations, **criteria):
+    matched = []
+    for observation in observations:
+        if all(observation.get(key) == value for key, value in criteria.items()):
+            matched.append(observation)
+    return matched
+
+
+def _identify(observation):
+    """A short, stable description of one observation, for a claim's evidence."""
+    return "%s %s / %s / python %s / %s / %s" % (
+        observation.get("os_family"),
+        observation.get("os_release"),
+        observation.get("arch"),
+        observation.get("python_version"),
+        observation.get("level"),
+        observation.get("runner_provenance"),
+    )
+
+
+def python_support(observations, minors, os_families):
+    """Which claimed Python minors are proven, on every claimed OS family.
+
+    `observations` are records that carry an environment identity, a `level`,
+    and an `outcome`. Only observations whose outcome is `PASS` count: a job
+    that ran and failed is evidence of a failure, and a job that was skipped is
+    evidence of nothing at all.
+    """
+    passing = [o for o in observations if o.get("outcome") == "PASS"]
+    claims = {}
+    for minor in minors:
+        missing = []
+        evidence = []
+        for family in os_families:
+            for level in REQUIRED_PYTHON_LEVELS:
+                found = _matching(
+                    passing, python_minor=minor, os_family=family, level=level
+                )
+                if found:
+                    evidence.extend(_identify(o) for o in found)
+                else:
+                    missing.append("%s on %s" % (level, family))
+        claims[minor] = {
+            "verdict": PROVEN if not missing else NOT_PROVEN,
+            "missing": missing,
+            "evidence": sorted(set(evidence)),
+        }
+    return claims
+
+
+def naive_python_range(observations, minors):
+    """The extrapolation this project refuses to make, written out.
+
+    An ordinary CI matrix tests the endpoints of a supported range because
+    testing every minor costs money, and then the README states the range. The
+    interior versions were never executed. This function reproduces that
+    reasoning exactly - if the lowest and highest claimed minors have any
+    passing observation, everything between them is called supported - so that
+    a control can demonstrate the difference between it and `python_support`.
+
+    It is the unsafe reference. Nothing in the release proof consumes its
+    output as a claim.
+    """
+    passing = {
+        o.get("python_minor") for o in observations if o.get("outcome") == "PASS"
+    }
+    ordered = sorted(minors, key=lambda minor: tuple(int(p) for p in minor.split(".")))
+    if not ordered:
+        return {}
+    lowest, highest = ordered[0], ordered[-1]
+    endpoints_pass = lowest in passing and highest in passing
+    return {
+        minor: {"verdict": PROVEN if endpoints_pass else NOT_PROVEN}
+        for minor in ordered
+    }
+
+
+def os_arch_support(observations):
+    """Every OS/architecture surface that was actually executed, and at what level.
+
+    Nothing is aggregated up to an OS family here. `macos / arm64` proven says
+    nothing about `macos / x86_64`, and this function will not merge them: the
+    matrix is a list of surfaces that ran, in the words of the machines that
+    ran them.
+    """
+    surfaces = {}
+    for observation in observations:
+        if observation.get("outcome") != "PASS":
+            continue
+        key = (
+            observation.get("os_family"),
+            observation.get("os_release"),
+            observation.get("arch"),
+        )
+        entry = surfaces.setdefault(
+            key,
+            {
+                "os_family": key[0],
+                "os_release": key[1],
+                "arch": key[2],
+                "levels": set(),
+                "python_versions": set(),
+                "git_versions": set(),
+                "runner_provenance": set(),
+            },
+        )
+        entry["levels"].add(observation.get("level"))
+        entry["python_versions"].add(observation.get("python_version"))
+        if observation.get("git_version"):
+            entry["git_versions"].add(observation["git_version"])
+        entry["runner_provenance"].add(observation.get("runner_provenance"))
+    ordered = []
+    for key in sorted(surfaces, key=lambda k: tuple(str(part) for part in k)):
+        entry = surfaces[key]
+        ordered.append(
+            {
+                "os_family": entry["os_family"],
+                "os_release": entry["os_release"],
+                "arch": entry["arch"],
+                "levels": sorted(entry["levels"]),
+                "python_versions": sorted(entry["python_versions"]),
+                "git_versions": sorted(entry["git_versions"]),
+                "runner_provenance": sorted(entry["runner_provenance"]),
+            }
+        )
+    return ordered
+
+
+def git_boundary(observations):
+    """What is known about the Git compatibility boundary, and what is not.
+
+    This deliberately does not return a minimum supported version. It returns
+    the versions that were exercised and the lowest of them, because the only
+    honest statement available is "AIQE has been run against these". Anything
+    below the lowest exercised version is `NOT_PROVEN`, and stays that way
+    until a surface running it exists.
+    """
+    from .environment import git_version_number
+
+    versions = {}
+    for observation in observations:
+        if observation.get("outcome") != "PASS":
+            continue
+        reported = observation.get("git_version")
+        if not reported:
+            continue
+        versions.setdefault(reported, set()).add(
+            "%s %s / %s / %s"
+            % (
+                observation.get("os_family"),
+                observation.get("os_release"),
+                observation.get("arch"),
+                observation.get("level"),
+            )
+        )
+
+    def numeric(reported):
+        for token in reported.split():
+            parts = token.split(".")
+            if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                collected = []
+                for part in parts:
+                    if not part.isdigit():
+                        break
+                    collected.append(int(part))
+                return tuple(collected)
+        return ()
+
+    exercised = sorted(versions, key=numeric)
+    return {
+        "minimum_claimed": None,
+        "minimum_status": NOT_PROVEN,
+        "lowest_exercised": exercised[0] if exercised else None,
+        "highest_exercised": exercised[-1] if exercised else None,
+        "exercised": [
+            {"git_version": version, "surfaces": sorted(versions[version])}
+            for version in exercised
+        ],
+        "statement": (
+            "AIQE publishes the Git versions it was run against. It does not "
+            "publish a minimum supported version: no surface below the lowest "
+            "exercised version was executed, so no minimum has been "
+            "demonstrated."
+        ),
+    }
+
+
+def unproven(claims):
+    """Every claim that is not proven, as a flat list. Empty means all proven."""
+    return sorted(
+        name for name, claim in claims.items() if claim["verdict"] != PROVEN
+    )

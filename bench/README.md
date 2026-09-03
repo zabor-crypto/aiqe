@@ -10,10 +10,13 @@ fixtures/doctor/    deterministic builders, controls, expected outcomes  PRESENT
 fixtures/task/      deterministic builders, controls, expected outcomes  PRESENT
 fixtures/check/     deterministic builders, controls, expected outcomes  PRESENT
 fixtures/commit/    deterministic builders, controls, expected outcomes  PRESENT
+release/            release-proof machinery: environment, artifacts,
+                    support gate, controls                               PRESENT
 results/doctor/     retained result artifact                             PRESENT
 results/task/       retained result artifact                             PRESENT
 results/check/      retained result artifact                             PRESENT
 results/commit/     retained result artifact                             PRESENT
+results/release/    retained release-proof manifest                      PRESENT
 ```
 
 Nothing is present here for a surface that does not exist. The whole v1 command
@@ -141,7 +144,45 @@ Linux and is reported as `SKIPPED_PLATFORM` elsewhere — named in the results, 
 dropped from the listing. The comparison treats a case that one machine could run and
 the other could not as a platform difference rather than a disagreement.
 
+## The release proof
+
+The four families measure what AIQE does to a repository. The release proof
+measures something they cannot see: whether the artifact a user would install
+is the thing that was tested, and on which machines that has been shown.
+
+```
+python3 bench/run-suite.py --output /tmp/surface-suite.json
+python3 bench/run-release-proof.py --output /tmp/surface-artifact.json
+python3 bench/aggregate-release-proof.py --surfaces /tmp/surfaces --output /tmp/release-proof.json
+```
+
+Each run writes a **surface record**: the machine, the interpreter, the Git
+version, the runner provenance, the evidence level, and every test it skipped.
+The aggregator collects the records and applies the support gate in
+[`release/support.py`](release/support.py), which marks a claim `PROVEN` only
+when observations back it and `NOT_PROVEN` otherwise. A skipped case is not a
+pass, and `--parts` selections are recorded so a reduced run cannot be read as
+a full one.
+
+The release proof builds an sdist and a wheel from an exported
+tracked-content-only source tree, installs each into a fresh environment, and
+runs the whole workflow from the installed console script in a directory that
+is not the source tree, ending in `REVIEWABLE`. It also measures the uv and
+uvx paths, the offline runtime under a proven-armed socket canary, build
+reproducibility across two clean builds, the artifact allowlist and the
+extracted-artifact scans. Method and current verdicts:
+[`../docs/support.md`](../docs/support.md).
+
 ## Negative controls
+
+The release proof has three of its own, in
+[`release/controls.py`](release/controls.py), for the failure modes packaging
+introduces and no amount of source-tree testing can see:
+`NC-PACKAGE-SOURCE-IMPORT` (a module missing from the artifact, which the
+naive source-tree import does not notice), `NC-PACKAGE-PRIVATE-FILE` (a
+synthetic private file the pattern scan passes and the artifact allowlist
+rejects), and `NC-SUPPORT-CLAIM` (a contiguous version range extrapolated from
+its endpoints, which the support gate refuses).
 
 Each control in [`fixtures/doctor/controls.py`](fixtures/doctor/controls.py) is a
 reference naive diagnostic workflow — the obvious way to obtain the same information —
@@ -159,7 +200,8 @@ Check / receipt /
   evidence family     RUN       (results retained here)
 Numerical routing     RUN       (six contract families, in the check family)
 Bounded commit        RUN       (results retained here)
-Product friction      NOT_RUN   (no installable release exists)
+Release proof         RUN       (manifest retained in results/release/)
+Product friction      NOT_RUN   (no public release exists)
 Context efficiency    NOT_RUN   (deferred; methodology not yet defensible)
 
 macOS baseline        observed

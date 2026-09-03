@@ -9,23 +9,33 @@ on:
 permissions:
   contents: read
 
+# Every job that is support evidence writes a *surface record* - a JSON
+# document naming the machine it ran on, what it executed, and what it
+# skipped - and uploads it. The `manifest` job at the end collects them and
+# applies the support gate in `bench/release/support.py`.
+#
+# That indirection is the point. A green checkmark is not a support claim: a
+# claim needs a named surface, a named evidence level and a recorded skip
+# list, and `--require-all-claims` makes a missing one fail the build rather
+# than quietly narrow the manifest.
+
 jobs:
+  # --- Full suite, on every claimed Python minor and OS family ------------
+  #
+  # The literal minimum the release matrix asks for: all of 3.11 to 3.14, on
+  # both claimed families. The interior minors are not inferred from the
+  # endpoints, which is what the NC-SUPPORT-CLAIM control exists to
+  # demonstrate.
   tests:
-    name: tests (${{ matrix.os }}, python ${{ matrix.python }})
+    name: suite (${{ matrix.os }}, python ${{ matrix.python }})
     strategy:
       fail-fast: false
       matrix:
-        # macOS is the supported target for v1. Linux is exercised here so the
-        # suite is genuinely run on it - and it is the only place the
-        # arbitrary-byte path case can exist at all - but running green in CI
-        # is not a supported release artifact, and this file makes no such
-        # claim.
-        #
-        # 3.11 is the support floor. 3.14 is the current stable interpreter.
-        # The endpoints are tested; the versions between them are not claimed.
         os: [macos-latest, ubuntu-latest]
-        python: ["3.11", "3.14"]
+        python: ["3.11", "3.12", "3.13", "3.14"]
     runs-on: ${{ matrix.os }}
+    env:
+      AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,9 +45,89 @@ jobs:
         run: |
           python --version
           git --version
-      - name: Run the test suite
-        run: python -m unittest discover -s tests -t . --verbose
+      - name: Run the test suite and record the surface
+        run: |
+          python bench/run-suite.py \
+            --output "${RUNNER_TEMP}/surface.json" --verbose
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-suite-${{ matrix.os }}-py${{ matrix.python }}
+          path: ${{ runner.temp }}/surface.json
 
+  # --- Lower-bound and additional surfaces --------------------------------
+  #
+  # Each entry answers "which real compatibility risk does this cover", and
+  # nothing is here to make the matrix look bigger:
+  #
+  #   ubuntu-22.04       Ubuntu 22.04 LTS is still in standard support, so it
+  #                      is a live user population running an older Python and
+  #                      an older toolchain than the newest hosted image.
+  #   ubuntu-24.04-arm   Linux on arm64. A pure-Python wheel is not an
+  #                      argument about a processor, and without this job
+  #                      Linux/arm64 is NOT_PROVEN.
+  #   python:3.11-bullseye  Debian 11's Git. This is the Git lower-bound
+  #                      surface: the frozen core leans on a dozen Git
+  #                      behaviours, and the only honest way to publish a
+  #                      boundary is to run the whole suite against an old
+  #                      Git rather than to reason about release notes.
+  #   macos-15           One macOS release below the newest hosted image, so
+  #                      the product does not come to depend on the newest
+  #                      environment by accident.
+  #   macos-15-intel     x86_64 macOS. Without it, Intel Macs are NOT_PROVEN;
+  #                      a pure-Python wheel does not prove an architecture.
+  surfaces:
+    name: surface ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: ubuntu-22.04-py311
+            os: ubuntu-22.04
+            python: "3.11"
+          - label: ubuntu-24.04-arm-py314
+            os: ubuntu-24.04-arm
+            python: "3.14"
+          - label: debian-11-old-git
+            os: ubuntu-latest
+            container: python:3.11-bullseye
+          - label: macos-15-py311
+            os: macos-15
+            python: "3.11"
+          - label: macos-15-intel-py314
+            os: macos-15-intel
+            python: "3.14"
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    env:
+      AIQE_RUNNER_LABEL: ${{ matrix.os }}
+      AIQE_CONTAINER_IMAGE: ${{ matrix.container }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: matrix.container == ''
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Report toolchain
+        run: |
+          python3 --version
+          git --version
+      - name: Run the test suite and record the surface
+        run: |
+          python3 bench/run-suite.py --output "${RUNNER_TEMP:-/tmp}/surface-suite.json"
+      - name: Prove the installed artifact on this surface
+        run: |
+          python3 bench/run-release-proof.py \
+            --parts artifacts,install,e2e,scan \
+            --output "${RUNNER_TEMP:-/tmp}/surface-artifact.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-extra-${{ matrix.label }}
+          path: |
+            ${{ runner.temp }}/surface-suite.json
+            ${{ runner.temp }}/surface-artifact.json
+          if-no-files-found: error
+
+  # --- Arbitrary-byte paths, which must never be skipped ------------------
   non-utf8-e2e:
     name: linux arbitrary-byte paths (must not skip)
     runs-on: ubuntu-latest
@@ -71,6 +161,7 @@ jobs:
           python -m unittest tests.test_task_non_utf8 --verbose
           python -m unittest tests.test_commit_non_utf8 --verbose
 
+  # --- Benchmark families against the retained artifacts ------------------
   benchmark:
     name: benchmark families and controls (${{ matrix.os }})
     strategy:
@@ -100,73 +191,53 @@ jobs:
       - name: Compare the commit run against the retained artifact
         run: python bench/compare-results.py "${RUNNER_TEMP}/commit.json"
 
-  install:
-    name: install from a clean environment (${{ matrix.os }}, python ${{ matrix.python }})
+  # --- The installable artifact, on every claimed surface -----------------
+  #
+  # `parts` is explicit rather than defaulted, and the record states which
+  # parts did not run, so a reduced job can never be read as a full one. The
+  # 3.14 rows run everything: the uv path, the offline runtime proof, the
+  # reproducibility measurement and the negative controls need to run once per
+  # OS family, not once per interpreter.
+  release-proof:
+    name: release proof (${{ matrix.os }}, python ${{ matrix.python }})
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python: ["3.11", "3.14"]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python: "3.14"
+            parts: artifacts,install,e2e,offline,uv,reproducibility,scan,controls
+          - os: ubuntu-latest
+            python: "3.14"
+            parts: artifacts,install,e2e,offline,uv,reproducibility,scan,controls
     runs-on: ${{ matrix.os }}
+    env:
+      AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Install into an isolated virtual environment
+      - name: Report toolchain
         run: |
-          python -m venv "${RUNNER_TEMP}/aiqe-venv"
-          "${RUNNER_TEMP}/aiqe-venv/bin/python" -m pip install --quiet --upgrade pip
-          "${RUNNER_TEMP}/aiqe-venv/bin/python" -m pip install --quiet .
-      - name: Run the installed entry point
+          python --version
+          git --version
+      - name: Build, install and exercise the artifact
         run: |
-          "${RUNNER_TEMP}/aiqe-venv/bin/python" --version
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" --version
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" doctor
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" doctor --format json > /dev/null
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task start --own README.md --label "install proof"
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task
-          # The pre-commit workflow, through the installed entry point. The
-          # exit codes are the assertion: `init --print` writes nothing and
-          # succeeds; `check` refuses with 3 because this repository has no
-          # aiqe.toml; `receipt` reports INCOMPLETE with 2 because a task
-          # without a check is an ordinary state, not a refusal.
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" init --print > /dev/null
-          test ! -e aiqe.toml
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" check && rc=0 || rc=$?
-          test "$rc" -eq 3
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" receipt && rc=0 || rc=$?
-          test "$rc" -eq 2
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" receipt --local --format json > /dev/null \
-            && rc=0 || rc=$?
-          test "$rc" -eq 2
-          # `commit` refuses with 3 for the same reason `check` does: this
-          # repository has no aiqe.toml, and an absent configuration is a
-          # refusal rather than a default. It runs no validator and never
-          # pushes; the exit code is the assertion.
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" commit -m "install proof" && rc=0 || rc=$?
-          test "$rc" -eq 3
-          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task end
-          echo "Installed console script works."
-      - name: Confirm no third-party dependency was installed
-        run: |
-          "${RUNNER_TEMP}/aiqe-venv/bin/python" - <<'PY'
-          import subprocess, sys
-          frozen = subprocess.run(
-              [sys.executable, "-m", "pip", "list", "--format=freeze"],
-              stdout=subprocess.PIPE, check=True,
-          ).stdout.decode()
-          names = {
-              line.split("==")[0].lower()
-              for line in frozen.splitlines() if line.strip()
-          }
-          unexpected = names - {"aiqe", "pip", "setuptools", "wheel"}
-          if unexpected:
-              sys.exit("unexpected dependencies installed: %s" % sorted(unexpected))
-          print("no third-party dependency:", sorted(names))
-          PY
+          python bench/run-release-proof.py \
+            --parts "${{ matrix.parts || 'artifacts,install,e2e,scan' }}" \
+            --output "${RUNNER_TEMP}/surface.json"
+      - name: Show the surface record
+        if: always()
+        run: cat "${RUNNER_TEMP}/surface.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-artifact-${{ matrix.os }}-py${{ matrix.python }}
+          path: ${{ runner.temp }}/surface.json
 
+  # --- Sanitisation ------------------------------------------------------
   public-scan:
     name: public sanitisation scan
     runs-on: ubuntu-latest
@@ -205,3 +276,42 @@ jobs:
             exit 1
           fi
           echo "All relative markdown links resolve."
+
+  # --- The release-proof manifest ----------------------------------------
+  #
+  # Collects every surface record and applies the gate. `--require-all-claims`
+  # turns a NOT_PROVEN claimed minor into a failure here, which is what makes
+  # the README's support section something CI can keep honest.
+  #
+  # The manifest is uploaded as an ephemeral artifact of this private
+  # repository. Nothing is published.
+  manifest:
+    name: release-proof manifest
+    needs: [tests, surfaces, release-proof, benchmark, non-utf8-e2e, public-scan, links]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/surfaces
+          pattern: surface-*
+      - name: List the surface records collected
+        run: find "${RUNNER_TEMP}/surfaces" -name '*.json' | sort
+      - name: Aggregate and gate the support claims
+        run: |
+          python bench/aggregate-release-proof.py \
+            --surfaces "${RUNNER_TEMP}/surfaces" \
+            --output "${RUNNER_TEMP}/release-proof.json" \
+            --require-all-claims
+      - name: Scan the manifest itself
+        run: ./tools/public-scan/public-scan.sh "${RUNNER_TEMP}/release-proof.json"
+      - name: Show the manifest
+        if: always()
+        run: cat "${RUNNER_TEMP}/release-proof.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-proof-manifest
+          path: ${{ runner.temp }}/release-proof.json

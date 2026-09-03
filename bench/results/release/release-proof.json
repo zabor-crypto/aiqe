@@ -1,0 +1,397 @@
+{
+  "aiqe_version": "0.1.0a0",
+  "artifact_hash_agreement": {
+    "sdist": {
+      "by_hash": {
+        "add52f5b24216314df252d1a520fd920f8de7fa392fee0b6ccaf463bd41601ed": [
+          "macos/arm64/python 3.14.6"
+        ]
+      },
+      "distinct_hashes": 1
+    },
+    "wheel": {
+      "by_hash": {
+        "3a6b9c40f921840dfb703e1d9c01d0dc235dc4a4a0e53314c5fa81821bd732b3": [
+          "macos/arm64/python 3.14.6"
+        ]
+      },
+      "distinct_hashes": 1,
+      "note": "A pure-Python wheel built from one commit should have one hash on every surface only when the build procedure fixes timestamps. Where it does not, the hashes differ while the packaged content does not; see `reproducibility`."
+    }
+  },
+  "artifacts": {
+    "sdist": {
+      "disallowed_members": [],
+      "filename": "aiqe-0.1.0a0.tar.gz",
+      "member_count": 39,
+      "sha256": "add52f5b24216314df252d1a520fd920f8de7fa392fee0b6ccaf463bd41601ed",
+      "size_bytes": 126482
+    },
+    "wheel": {
+      "console_scripts": {
+        "aiqe": "aiqe.cli:main_entry"
+      },
+      "disallowed_members": [],
+      "filename": "aiqe-0.1.0a0-py3-none-any.whl",
+      "license": "Apache-2.0",
+      "member_count": 34,
+      "root_is_purelib": "true",
+      "sha256": "3a6b9c40f921840dfb703e1d9c01d0dc235dc4a4a0e53314c5fa81821bd732b3",
+      "size_bytes": 134581,
+      "tags": [
+        "py3-none-any"
+      ]
+    }
+  },
+  "build_backend": "setuptools.build_meta (requires setuptools>=61)",
+  "build_tool": [
+    "build==1.6.0",
+    "packaging==26.3",
+    "pip==26.1.2"
+  ],
+  "ci_runs": [],
+  "declared_python_requirement": ">=3.11",
+  "git_compatibility": {
+    "exercised": [
+      {
+        "git_version": "git version 2.50.1 (Apple Git-155)",
+        "surfaces": [
+          "macos macOS 26.6.2 / arm64 / FULL_SUITE",
+          "macos macOS 26.6.2 / arm64 / INSTALLED_ARTIFACT_E2E"
+        ]
+      }
+    ],
+    "highest_exercised": "git version 2.50.1 (Apple Git-155)",
+    "lowest_exercised": "git version 2.50.1 (Apple Git-155)",
+    "minimum_claimed": null,
+    "minimum_status": "NOT_PROVEN",
+    "statement": "AIQE publishes the Git versions it was run against. It does not publish a minimum supported version: no surface below the lowest exercised version was executed, so no minimum has been demonstrated."
+  },
+  "installed_artifact_e2e": {
+    "all_reviewable": true,
+    "runs": 1,
+    "verdicts": [
+      "REVIEWABLE"
+    ]
+  },
+  "negative_controls": {
+    "not_reproducing": [],
+    "reproducing": 3,
+    "results": [
+      {
+        "control": "NC-PACKAGE-SOURCE-IMPORT",
+        "reproduced": true,
+        "surface": "surface-artifact-local.json"
+      },
+      {
+        "control": "NC-PACKAGE-PRIVATE-FILE",
+        "reproduced": true,
+        "surface": "surface-artifact-local.json"
+      },
+      {
+        "control": "NC-SUPPORT-CLAIM",
+        "reproduced": true,
+        "surface": "surface-artifact-local.json"
+      }
+    ],
+    "total": 3
+  },
+  "offline_runtime": {
+    "all_pass": true,
+    "canary_armed_everywhere": true,
+    "network_attempts": 0,
+    "runs": 1,
+    "scope": "AIQE runtime only. Obtaining AIQE, uv or any other tool from an index uses the network by definition; that is installation, and it is not claimed to be offline."
+  },
+  "out_of_scope": [
+    "windows"
+  ],
+  "outcome": "PASS",
+  "problems": [],
+  "public_scan": {
+    "all_pass": true,
+    "note": "The scan is a pattern floor over text. The artifact allowlist is the check that catches a file no pattern describes; the NC-PACKAGE-PRIVATE-FILE control demonstrates the difference.",
+    "results": [
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-local.json",
+        "target": "oss7-portability-release"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-local.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-local.json",
+        "target": "extracted-wheel"
+      }
+    ],
+    "targets": [
+      "extracted-sdist",
+      "extracted-wheel",
+      "oss7-portability-release"
+    ]
+  },
+  "python_requirement": ">=3.11",
+  "python_support": {
+    "3.11": {
+      "evidence": [],
+      "missing": [
+        "FULL_SUITE on macos",
+        "INSTALLED_ARTIFACT_E2E on macos",
+        "FULL_SUITE on linux",
+        "INSTALLED_ARTIFACT_E2E on linux"
+      ],
+      "verdict": "NOT_PROVEN"
+    },
+    "3.12": {
+      "evidence": [],
+      "missing": [
+        "FULL_SUITE on macos",
+        "INSTALLED_ARTIFACT_E2E on macos",
+        "FULL_SUITE on linux",
+        "INSTALLED_ARTIFACT_E2E on linux"
+      ],
+      "verdict": "NOT_PROVEN"
+    },
+    "3.13": {
+      "evidence": [],
+      "missing": [
+        "FULL_SUITE on macos",
+        "INSTALLED_ARTIFACT_E2E on macos",
+        "FULL_SUITE on linux",
+        "INSTALLED_ARTIFACT_E2E on linux"
+      ],
+      "verdict": "NOT_PROVEN"
+    },
+    "3.14": {
+      "evidence": [
+        "macos macOS 26.6.2 / arm64 / python 3.14.6 / FULL_SUITE / local",
+        "macos macOS 26.6.2 / arm64 / python 3.14.6 / INSTALLED_ARTIFACT_E2E / local"
+      ],
+      "missing": [
+        "FULL_SUITE on linux",
+        "INSTALLED_ARTIFACT_E2E on linux"
+      ],
+      "verdict": "NOT_PROVEN"
+    }
+  },
+  "python_support_rule": "A Python minor is PROVEN only with both a full-suite run and an installed-artifact end-to-end run, on every claimed OS family. Nothing is inferred from the endpoints of a range.",
+  "record_type": "AIQE_RELEASE_PROOF_MANIFEST",
+  "reproducibility": {
+    "affects_artifact_integrity": false,
+    "bitwise_reproducible": false,
+    "bitwise_reproducible_with_source_date_epoch": true,
+    "documented_procedure": "python -m build with SOURCE_DATE_EPOCH=1700000000, from a source tree exported with tracked content only",
+    "pinned_sdist_bitwise_reproducible": false,
+    "pinned_wheel_hash_run_1": "98a6397422c7da3236fd3ecd872956ae8c976cd47c13eaa98751c09c3952b908",
+    "pinned_wheel_hash_run_2": "98a6397422c7da3236fd3ecd872956ae8c976cd47c13eaa98751c09c3952b908",
+    "sdist_bitwise_reproducible": false,
+    "sdist_cause": "every packaged file is byte-identical; the archives differ only in archive metadata (mtime) and, for a gzipped tar, the gzip header's own timestamp. setuptools stamps generated metadata files - PKG-INFO, setup.cfg and the egg-info directory - with the moment they were written, and SOURCE_DATE_EPOCH does not reach them in the sdist path.",
+    "sdist_comparison_default": {
+      "content_identical": true,
+      "differing_metadata_fields": {
+        "mtime": [
+          "aiqe-0.1.0a0",
+          "aiqe-0.1.0a0/PKG-INFO",
+          "aiqe-0.1.0a0/setup.cfg",
+          "aiqe-0.1.0a0/src",
+          "aiqe-0.1.0a0/src/aiqe",
+          "aiqe-0.1.0a0/src/aiqe.egg-info",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/PKG-INFO",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/SOURCES.txt",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/dependency_links.txt",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/entry_points.txt",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/top_level.txt"
+        ]
+      },
+      "identical_bytes": false,
+      "members_only_in_first": [],
+      "members_only_in_second": [],
+      "members_with_differing_content": [],
+      "same_member_set": true
+    },
+    "sdist_comparison_pinned": {
+      "content_identical": true,
+      "differing_metadata_fields": {
+        "mtime": [
+          "aiqe-0.1.0a0",
+          "aiqe-0.1.0a0/PKG-INFO",
+          "aiqe-0.1.0a0/setup.cfg",
+          "aiqe-0.1.0a0/src",
+          "aiqe-0.1.0a0/src/aiqe",
+          "aiqe-0.1.0a0/src/aiqe.egg-info",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/PKG-INFO",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/SOURCES.txt",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/dependency_links.txt",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/entry_points.txt",
+          "aiqe-0.1.0a0/src/aiqe.egg-info/top_level.txt"
+        ]
+      },
+      "identical_bytes": false,
+      "members_only_in_first": [],
+      "members_only_in_second": [],
+      "members_with_differing_content": [],
+      "same_member_set": true
+    },
+    "sdist_content_identical": true,
+    "sdist_hash_run_1": "66edb62248eb05a89043cc86a6fca434b88320df24f70cdc8280e7b1c32ee558",
+    "sdist_hash_run_2": "279d94e6b19fe3e7de3a870338d5b6b200e425d66e0c36680c0f977a12238549",
+    "source_date_epoch_used": 1700000000,
+    "wheel_cause": null,
+    "wheel_comparison_default": {
+      "content_identical": true,
+      "differing_metadata_fields": {
+        "date_time": [
+          "aiqe-0.1.0a0.dist-info/METADATA",
+          "aiqe-0.1.0a0.dist-info/RECORD",
+          "aiqe-0.1.0a0.dist-info/WHEEL",
+          "aiqe-0.1.0a0.dist-info/entry_points.txt",
+          "aiqe-0.1.0a0.dist-info/licenses/LICENSE",
+          "aiqe-0.1.0a0.dist-info/top_level.txt"
+        ]
+      },
+      "identical_bytes": false,
+      "members_only_in_first": [],
+      "members_only_in_second": [],
+      "members_with_differing_content": [],
+      "same_member_set": true
+    },
+    "wheel_comparison_pinned": {
+      "content_identical": true,
+      "differing_metadata_fields": {},
+      "identical_bytes": true,
+      "members_only_in_first": [],
+      "members_only_in_second": [],
+      "members_with_differing_content": [],
+      "same_member_set": true
+    },
+    "wheel_content_identical": true,
+    "wheel_hash_run_1": "747a4ee10123dcb806c5af7c329967c00f6337025a566cf7af406c3bfaf5420f",
+    "wheel_hash_run_2": "c4c56f2bfa1495fbd7fa2c6aff6b1aa71e3c4c675b5055d3a154c47b465903f4"
+  },
+  "runtime_dependency_count": 0,
+  "schema_version": 1,
+  "source_commit": "6ea3bd511c445e6a365971cf1b7df43ca5546072",
+  "source_trees_with_uncommitted_changes": [
+    "surface-artifact-local.json",
+    "surface-suite-local.json"
+  ],
+  "statement": "This manifest is private release-proof evidence. It records what was built and what was executed against it. It is not a release announcement, nothing described here is published, and a claim absent from it is a claim that was not demonstrated.",
+  "surfaces": [
+    {
+      "arch": "arm64",
+      "duration_seconds": 63.0,
+      "git_version": "git version 2.50.1 (Apple Git-155)",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "macos",
+      "os_release": "macOS 26.6.2",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "offline",
+        "uv",
+        "reproducibility",
+        "scan",
+        "controls"
+      ],
+      "python_version": "3.14.6",
+      "record": "surface-artifact-local.json",
+      "runner_provenance": "local",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "arm64",
+      "duration_seconds": 633.5,
+      "git_version": "git version 2.50.1 (Apple Git-155)",
+      "level": "FULL_SUITE",
+      "os_family": "macos",
+      "os_release": "macOS 26.6.2",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.14.6",
+      "record": "surface-suite-local.json",
+      "runner_provenance": "local",
+      "skips": [
+        "test_commit-non-utf8-name (tests.test_commit_fixtures.CommitFixtureTests.test_commit-non-utf8-name)",
+        "test_fixture_really_uses_a_non_utf8_name (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_fixture_really_uses_a_non_utf8_name)",
+        "test_no_worktree_path_was_written_by_aiqe (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_no_worktree_path_was_written_by_aiqe)",
+        "test_output_carries_no_raw_terminal_control_bytes (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_output_carries_no_raw_terminal_control_bytes)",
+        "test_the_changed_pathset_is_exactly_the_declared_bytes (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_the_changed_pathset_is_exactly_the_declared_bytes)",
+        "test_the_commit_is_created_and_reviewable (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_the_commit_is_created_and_reviewable)",
+        "test_the_parent_and_foreign_staged_proofs_hold (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_the_parent_and_foreign_staged_proofs_hold)",
+        "test_non_utf8_path (tests.test_doctor_fixtures.DoctorFixtureTests.test_non_utf8_path)",
+        "test_counts_are_correct (tests.test_non_utf8_paths.NonUtf8PathTests.test_counts_are_correct)",
+        "test_doctor_completes_on_byte_paths (tests.test_non_utf8_paths.NonUtf8PathTests.test_doctor_completes_on_byte_paths)",
+        "test_fixture_really_contains_non_utf8_names (tests.test_non_utf8_paths.NonUtf8PathTests.test_fixture_really_contains_non_utf8_names)",
+        "test_json_output_is_valid (tests.test_non_utf8_paths.NonUtf8PathTests.test_json_output_is_valid)",
+        "test_no_path_bytes_reach_the_output (tests.test_non_utf8_paths.NonUtf8PathTests.test_no_path_bytes_reach_the_output)",
+        "test_safety_invariants_hold_on_byte_paths (tests.test_non_utf8_paths.NonUtf8PathTests.test_safety_invariants_hold_on_byte_paths)",
+        "test_non_utf8_owned_path (tests.test_task_fixtures.TaskFixtureTests.test_non_utf8_owned_path)",
+        "test_digest_is_stable_over_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_digest_is_stable_over_byte_paths)",
+        "test_fixture_really_uses_a_non_utf8_name (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_fixture_really_uses_a_non_utf8_name)",
+        "test_lifecycle_succeeds_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_lifecycle_succeeds_on_byte_paths)",
+        "test_output_carries_no_invalid_terminal_bytes (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_output_carries_no_invalid_terminal_bytes)",
+        "test_safety_invariants_hold_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_safety_invariants_hold_on_byte_paths)",
+        "test_stored_bytes_equal_the_bytes_declared (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_stored_bytes_equal_the_bytes_declared)"
+      ],
+      "tests_run": 829,
+      "tests_skipped": 21
+    }
+  ],
+  "tested_install_paths": [
+    "pip install (sdist)",
+    "pip install (wheel)",
+    "uv tool install (local wheel)",
+    "uvx --from (local wheel)"
+  ],
+  "tested_os_arch_surfaces": [
+    {
+      "arch": "arm64",
+      "git_versions": [
+        "git version 2.50.1 (Apple Git-155)"
+      ],
+      "levels": [
+        "FULL_SUITE",
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "macos",
+      "os_release": "macOS 26.6.2",
+      "python_versions": [
+        "3.14.6"
+      ],
+      "runner_provenance": [
+        "local"
+      ]
+    }
+  ],
+  "unproven_python_minors": [
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14"
+  ],
+  "zero_tolerance_totals": {
+    "disallowed_sdist_members": 0,
+    "disallowed_wheel_members": 0,
+    "end_to_end_problems": 0,
+    "failed_artifact_scans": 0,
+    "install_failures": 0,
+    "negative_controls_not_reproducing": 0,
+    "network_attempts": 0,
+    "tests_errored": 0,
+    "tests_failed": 0,
+    "tests_unexpected_success": 0,
+    "third_party_runtime_dependencies": 0
+  }
+}

@@ -1,0 +1,17 @@
+# What the source distribution contains, stated explicitly.
+#
+# setuptools' default sdist manifest picks up `tests/test*.py` on its own and
+# nothing else from that directory - not `tests/__init__.py`, not
+# `tests/support.py`. The result is a test package that cannot be imported,
+# let alone run: a tree that looks like evidence and is not. A partial copy of
+# a test suite is worse than no copy, because a reader concludes the artifact
+# was verified.
+#
+# Shipping the suite *completely* is the other option, and it was rejected:
+# these tests import the benchmark fixture builders under `bench/`, read the
+# retained result artifacts, and assert against `README.md` and `docs/`. A
+# runnable suite therefore means shipping most of the repository inside every
+# sdist. The repository and its CI are the verification surface; the sdist is
+# the build input the wheel is produced from, and it says so by containing
+# exactly that.
+prune tests

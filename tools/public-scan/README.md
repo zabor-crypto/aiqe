@@ -75,6 +75,41 @@ positive recorded in `self-test.sh` and the class's positive control still firin
 legitimate file trips a pattern, the answer is a narrower pattern or a different file —
 not a broader exception.
 
+## Scanning an artifact, and the one recorded exception
+
+```
+./tools/public-scan/public-scan.sh                     the source tree
+./tools/public-scan/public-scan.sh <directory>         an extracted sdist or wheel
+./tools/public-scan/public-scan.sh <file>              the release-proof manifest
+```
+
+A source tree that scans clean says nothing about what a build backend swept into a
+distribution, so the extracted artifacts are scanned as trees in their own right rather
+than assumed to inherit the source result.
+
+One class is deliberately not applied to one kind of file, and it is the only exception
+in the scanner:
+
+```
+GIT_SHA_40   not applied to a file whose content identifies it as the
+             release-proof manifest
+```
+
+The manifest's job is to record which commit an artifact was built from, so it
+necessarily contains a bare 40-character object id. The exception is recognised by
+content rather than by path, because the manifest is scanned both inside the source tree
+and as a single named file straight out of a CI job, and a path-shaped rule would stop
+applying in the second case.
+
+Blanket-excluding the file would blind the scan to the thing the class exists to
+catch — an object id from *another* repository — so a stronger check replaces it there.
+`tests/test_release_proof.py` asserts that every 40-character object id in the manifest
+is an object that exists in this repository; a foreign id fails that test. Every skipped
+match is reported as `JUSTIFIED` and counted in the summary, never silently dropped.
+
+A second exception would need the same treatment: a named reason, and a check stronger
+than the one being skipped.
+
 ## What it does not prove
 
 This scan is a floor. It matches shapes it was told about. It cannot detect paraphrased

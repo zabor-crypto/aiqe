@@ -1,8 +1,8 @@
 {
-  "aiqe_version": "0.0.0.dev0",
+  "aiqe_version": "0.1.0a0",
   "cases": [
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes": 14,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -64,7 +64,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -133,7 +133,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -202,7 +202,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -269,7 +269,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 0 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 0 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -344,7 +344,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -413,7 +413,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -426,7 +426,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes": 14,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -488,7 +488,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -557,7 +557,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -628,7 +628,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -699,7 +699,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -770,7 +770,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -783,7 +783,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 19,
+      "aiqe_commit_git_writes": 17,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -845,7 +845,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -919,7 +919,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -997,7 +997,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1073,7 +1073,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1149,7 +1149,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1222,7 +1222,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1291,7 +1291,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -1360,7 +1360,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -1429,7 +1429,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -1498,7 +1498,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -1567,7 +1567,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -1640,7 +1640,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  0 quant \u00b7 1 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  0 quant \u00b7 1 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1653,7 +1653,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes": 14,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1713,7 +1713,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1726,7 +1726,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 12,
+      "aiqe_commit_git_writes": 13,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1824,7 +1824,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     7 declared \u00b7 7 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  7 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 7\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     7 declared \u00b7 7 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  7 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 7\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -1903,7 +1903,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -1982,7 +1982,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -2063,7 +2063,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     3 declared \u00b7 3 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  3 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 3\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     3 declared \u00b7 3 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  3 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 3\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -2078,7 +2078,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes": 14,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2139,7 +2139,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -2220,7 +2220,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -2233,7 +2233,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 14,
+      "aiqe_commit_git_writes": 15,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2293,7 +2293,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -2366,7 +2366,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "UNKNOWN",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  UNKNOWN\n  Checked content BOUND\n  Evidence        STALE\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         INCOMPLETE\n  Reason          COMPLETION_COMMIT_SUPERSEDED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  UNKNOWN\n  Checked content BOUND\n  Evidence        STALE\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         INCOMPLETE\n  Reason          COMPLETION_COMMIT_SUPERSEDED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [
@@ -2441,7 +2441,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 0,
       "receipt_foreign_staged": "EXCLUDED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "VERIFIED",
       "receipt_reasons": [],
@@ -2515,7 +2515,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -2584,7 +2584,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -2653,7 +2653,7 @@
       "receipt_discloses_commit_sha": false,
       "receipt_exit": 2,
       "receipt_foreign_staged": "OBSERVED",
-      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        STALE\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        STALE\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
       "receipt_output_control_bytes": 0,
       "receipt_owned_scope": "CHECKED",
       "receipt_reasons": [
@@ -2674,7 +2674,7 @@
   ],
   "cases_total": 37,
   "counts": {
-    "aiqe_commit_git_writes": 294,
+    "aiqe_commit_git_writes": 290,
     "reviewable_receipts": 18
   },
   "family": "BOUNDED_COMMIT",

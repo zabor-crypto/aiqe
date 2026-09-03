@@ -2,8 +2,17 @@
 #
 # AIQE public sanitisation scan.
 #
-# Scans every text file in the working tree against the pattern classes in
+#     public-scan.sh [<root>]
+#
+# Scans every text file under <root> against the pattern classes in
 # patterns.txt, plus any local-only private literal list if one is present.
+# <root> defaults to the repository this script lives in. It may also be a
+# single file.
+#
+# The argument exists because a source tree that scans clean says nothing
+# about what a build backend put inside a wheel or an sdist. Packaging is its
+# own way to publish a private file, so the extracted artifacts are scanned as
+# trees in their own right rather than assumed to inherit the source result.
 #
 # This is a floor, not a proof. It catches the shapes it was told about.
 # Paraphrased private material, an unredacted diagram label, or an asset derived
@@ -15,8 +24,21 @@
 set -uo pipefail
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-root=$(cd "$here/../.." && pwd)
 patterns="$here/patterns.txt"
+
+# The scan target. Without an argument it is the repository containing this
+# script, which is what the source-tree gate has always scanned.
+target="${1:-$here/../..}"
+if [ -d "$target" ]; then
+  root=$(cd "$target" && pwd)
+  scan_one_file=""
+elif [ -f "$target" ]; then
+  root=$(cd "$(dirname "$target")" && pwd)
+  scan_one_file="./$(basename "$target")"
+else
+  echo "public-scan: no such file or directory: $target" >&2
+  exit 2
+fi
 
 # Local-only private literals. Never committed; ignored by .gitignore.
 private_list="$here/private-literals.txt"
@@ -32,7 +54,14 @@ cd "$root" || exit 2
 # itself (which necessarily contains the patterns it defines and is covered by
 # human review instead).
 files=()
-while IFS= read -r -d '' f; do
+if [ -n "$scan_one_file" ]; then
+  # A single named file - the release-proof manifest is scanned this way,
+  # because it is generated outside any tree the source scan walks.
+  if LC_ALL=C grep -qI . "$scan_one_file" 2>/dev/null; then
+    files+=("$scan_one_file")
+  fi
+fi
+while [ -z "$scan_one_file" ] && IFS= read -r -d '' f; do
   case "$f" in
     # In an ordinary worktree .git is a directory; in a linked worktree it is a
     # pointer file. Neither is repository content.
@@ -46,23 +75,77 @@ while IFS= read -r -d '' f; do
   if LC_ALL=C grep -qI . "$f" 2>/dev/null; then
     files+=("$f")
   fi
-done < <(find . -type f -print0)
+done < <(if [ -z "$scan_one_file" ]; then find . -type f -print0; fi)
 
 if [ "${#files[@]}" -eq 0 ]; then
-  echo "public-scan: no text files found" >&2
+  echo "public-scan: no text files found under $root" >&2
   exit 2
 fi
 
 findings=0
+justified=0
+
+# The one place a pattern class is deliberately not applied, and why.
+#
+# The release-proof manifest's job is to say which commit an artifact was
+# built from, so it necessarily contains a bare 40-character object id. The
+# GIT_SHA_40 class exists to catch an object id from *another* repository
+# reaching public content, and blanket-excluding the file would blind the scan
+# to exactly that. So the exception is scoped to one class in one path, and a
+# stronger check replaces it there: `tests/test_release_proof.py` asserts that
+# every 40-character object id in the manifest is an object that exists in
+# this repository. A foreign id fails that test.
+#
+# Nothing else is excepted. A second entry here needs the same treatment: a
+# named reason and a check that is stronger than the one being skipped.
+#: Files that identify themselves as the release-proof manifest. Recognised by
+#: content rather than by path, because the manifest is scanned both in place
+#: inside the source tree and as a single named file straight out of a CI job,
+#: and a path-shaped rule would silently stop applying in the second case -
+#: which is the one where the scan matters most.
+manifest_files=""
+for f in "${files[@]}"; do
+  if LC_ALL=C grep -q '"record_type": *"AIQE_RELEASE_PROOF_MANIFEST"' "$f" 2>/dev/null; then
+    manifest_files="${manifest_files}${f}"$'\n'
+  fi
+done
+
+justified_match() {
+  local class="$1" line="$2" file="${2%%:*}"
+  [ "$class" = "GIT_SHA_40" ] || return 1
+  case $'\n'"$manifest_files" in
+    *$'\n'"$file"$'\n'*) return 0 ;;
+  esac
+  return 1
+}
 
 scan_one() {
-  local class="$1" regex="$2" hits
-  hits=$(LC_ALL=C grep -nEI -i -- "$regex" "${files[@]}" 2>/dev/null)
+  local class="$1" regex="$2" hits kept="" skipped=0
+  # /dev/null is passed so that grep always prefixes its output with a
+  # filename. With a single file it would otherwise omit the prefix, and the
+  # exception below - which is scoped to one file - would stop being able to
+  # tell which file a match came from. That is the single-file mode the
+  # release-proof manifest is scanned in.
+  hits=$(LC_ALL=C grep -nEI -i -- "$regex" "${files[@]}" /dev/null 2>/dev/null)
   if [ -n "$hits" ]; then
-    echo "FINDING [$class]"
-    printf '%s\n' "$hits" | sed 's/^/    /'
-    echo
-    findings=$((findings + 1))
+    while IFS= read -r hit; do
+      [ -z "$hit" ] && continue
+      if justified_match "$class" "$hit"; then
+        skipped=$((skipped + 1))
+        continue
+      fi
+      kept="${kept}${hit}"$'\n'
+    done <<< "$hits"
+    if [ "$skipped" -gt 0 ]; then
+      echo "JUSTIFIED [$class] $skipped match(es) in a path with a recorded exception"
+      justified=$((justified + skipped))
+    fi
+    if [ -n "${kept%$'\n'}" ]; then
+      echo "FINDING [$class]"
+      printf '%s\n' "${kept%$'\n'}" | sed 's/^/    /'
+      echo
+      findings=$((findings + 1))
+    fi
   fi
 }
 
@@ -88,6 +171,10 @@ else
   echo "public-scan: no local private literal list present (public patterns only)"
 fi
 
+echo "public-scan: root $root"
+if [ "$justified" -gt 0 ]; then
+  echo "public-scan: $justified match(es) skipped under a recorded, path-scoped exception"
+fi
 echo "public-scan: scanned ${#files[@]} text files against $(grep -cvE '^(#|$)' "$patterns") pattern classes"
 
 if [ "$findings" -gt 0 ]; then

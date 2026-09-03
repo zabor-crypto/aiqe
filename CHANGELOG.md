@@ -12,6 +12,69 @@ makes the change, not at release time.
 
 ### Added
 
+- **A release proof, and a support gate that can refuse.** Every CI job that is
+  support evidence now writes a *surface record* naming the machine, the interpreter,
+  the Git version, the runner provenance, the evidence level and every test it
+  skipped. [`bench/aggregate-release-proof.py`](bench/aggregate-release-proof.py)
+  collects them and applies the gate in
+  [`bench/release/support.py`](bench/release/support.py): a Python minor is `PROVEN`
+  only with both a full-suite run and an installed-artifact end-to-end run, on every
+  claimed OS family. Nothing is inferred from the endpoints of a range, nothing is
+  inferred about an architecture from a pure-Python wheel, and a skipped case is not
+  a pass. Reference: [`docs/support.md`](docs/support.md).
+- **`bench/run-release-proof.py`.** Builds an sdist and a wheel from an exported
+  tracked-content-only source tree, installs each into a fresh environment, and runs
+  the complete workflow — `doctor`, `init`, `task start`, `check`, `commit`,
+  `receipt` — from the installed console script in a directory that is not the source
+  tree, ending in `REVIEWABLE`. Also measures the uv and uvx paths, the offline
+  runtime, build reproducibility, the artifact allowlist and the extracted-artifact
+  scans. `--parts` selects a subset, and the record states which parts did *not* run,
+  so a reduced job can never be read as a full one.
+- **`bench/run-suite.py`.** The unit suite with its counts, its environment identity
+  and every skip recorded by name, because a support claim cannot be made from a
+  green checkmark.
+- **Three release-proof negative controls**, each with an unsafe reference that
+  genuinely fails. `NC-PACKAGE-SOURCE-IMPORT` builds a wheel with a module missing:
+  the naive check imports it from `./src` and passes, the installed-artifact check
+  fails. `NC-PACKAGE-PRIVATE-FILE` plants a synthetic private file collected by a wide
+  `package-data` glob: the pattern scan passes it and the artifact allowlist rejects
+  it. `NC-SUPPORT-CLAIM` extrapolates a contiguous Python range from its endpoints and
+  requires the gate to refuse it.
+- **An offline runtime proof for the installed artifact.** The whole core command set
+  runs with every standard-library socket entry point replaced by a recorder that
+  raises — and the canary is proved to fire on a deliberate connection attempt before
+  its silence is accepted as evidence. The claim is stated narrowly: AIQE's runtime
+  needs no network; obtaining AIQE or uv from an index does.
+- **`docs/support.md`.** How a support claim is decided, the Git behaviours the frozen
+  core relies on, the distribution decision, what may appear inside an artifact, and
+  the reproducibility procedure.
+
+### Changed
+
+- **The package version is now `0.1.0a0`** — PEP 440's spelling of the frozen
+  milestone `v0.1.0-alpha`, the first installable real product. It is a package
+  version and nothing else: no Git tag exists, no release exists, and nothing is
+  published to any index. The retained benchmark artifacts were regenerated at the new
+  version; every case outcome, every family count and every zero-tolerance total is
+  unchanged.
+- **`tools/public-scan/public-scan.sh` takes an optional root**, so the extracted
+  sdist, the extracted wheel and the release-proof manifest are scanned as trees in
+  their own right. A source tree that scans clean says nothing about what a build
+  backend put inside an artifact.
+- **The CI matrix proves what is claimed.** All four Python minors on both claimed OS
+  families, rather than the endpoints; plus five deliberately chosen surfaces — Ubuntu
+  22.04, Linux on arm64, a Debian 11 container for an older Git, macOS one release
+  back, and x86_64 macOS — each answering a distinct compatibility risk rather than
+  inflating the matrix.
+
+### Fixed
+
+- **The sdist no longer contains a broken partial copy of the test suite.**
+  setuptools' default manifest collected `tests/test*.py` and neither
+  `tests/__init__.py` nor `tests/support.py`, producing a test package that could not
+  be imported: a tree that looks like evidence and is not. `MANIFEST.in` prunes the
+  directory, and the artifact allowlist is what notices if that ever stops working.
+
 - **`aiqe commit -m <message>`.** The bounded completion commit, and the last command
   of the frozen v1 surface. It consumes existing green check evidence, never reruns a
   validator, and never pushes. One flag: there is no `--amend`, no `--no-verify`, no
