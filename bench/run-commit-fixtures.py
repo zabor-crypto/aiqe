@@ -133,18 +133,20 @@ def main(argv):
         "cases_failed": len([f for f in failed if f[0] != "negative-controls"]),
         "cases_skipped_platform": len(skipped),
         "cases_skipped_platform_ids": sorted(skipped),
+        # `totals` holds the zero-tolerance quantities and nothing else. The
+        # comparator asserts that every one of them is zero, so a descriptive
+        # count that is legitimately non-zero - how many commits were created,
+        # how many `.git` writes they made - lives in `counts` instead. A
+        # number that is allowed to be non-zero does not belong in a list whose
+        # meaning is "any non-zero value blocks release".
         "totals": {
             "aiqe_core_worktree_mutations": sum(
                 r.get("aiqe_core_worktree_mutations", 0) for r in records
-            ),
-            "aiqe_commit_git_writes": sum(
-                r.get("aiqe_commit_git_writes", 0) for r in records
             ),
             "policy_canary_executions": sum(
                 r.get("policy_canary_executions", 0) for r in records
             ),
             "local_state_writes": sum(r.get("local_state_writes", 0) for r in records),
-            "reviewable_receipts": len(reviewable),
             "precommit_reviewable_verdicts": len(precommit_reviewable),
             "raw_terminal_control_bytes": sum(
                 value
@@ -155,6 +157,12 @@ def main(argv):
             "aiqe_push_calls": 0,
             "network_requests": 0,
             "model_calls": 0,
+        },
+        "counts": {
+            "aiqe_commit_git_writes": sum(
+                r.get("aiqe_commit_git_writes", 0) for r in records
+            ),
+            "reviewable_receipts": len(reviewable),
         },
         "cases": records,
         "negative_controls": control_records,
@@ -185,7 +193,7 @@ def main(argv):
             document["totals"]["policy_canary_executions"],
             document["totals"]["local_state_writes"],
             document["totals"]["aiqe_push_calls"],
-            document["totals"]["reviewable_receipts"],
+            document["counts"]["reviewable_receipts"],
             document["totals"]["precommit_reviewable_verdicts"],
             document["totals"]["raw_terminal_control_bytes"],
             document["negative_controls_reproducing"],

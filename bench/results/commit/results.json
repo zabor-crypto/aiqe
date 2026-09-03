@@ -282,7 +282,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 13,
+      "aiqe_commit_git_writes": 12,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -783,7 +783,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 18,
+      "aiqe_commit_git_writes": 19,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -861,7 +861,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 18,
+      "aiqe_commit_git_writes": 19,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1013,7 +1013,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 18,
+      "aiqe_commit_git_writes": 19,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2233,7 +2233,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes": 14,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2673,6 +2673,10 @@
     "commit-non-utf8-name"
   ],
   "cases_total": 37,
+  "counts": {
+    "aiqe_commit_git_writes": 294,
+    "reviewable_receipts": 18
+  },
   "family": "BOUNDED_COMMIT",
   "negative_controls": [
     {
@@ -2800,7 +2804,6 @@
   "platform": "darwin",
   "schema_version": 1,
   "totals": {
-    "aiqe_commit_git_writes": 293,
     "aiqe_core_worktree_mutations": 0,
     "aiqe_push_calls": 0,
     "local_state_writes": 0,
@@ -2808,7 +2811,6 @@
     "network_requests": 0,
     "policy_canary_executions": 0,
     "precommit_reviewable_verdicts": 0,
-    "raw_terminal_control_bytes": 0,
-    "reviewable_receipts": 18
+    "raw_terminal_control_bytes": 0
   }
 }
