@@ -126,6 +126,66 @@ _CONFIG_ISOLATION = {
     "GIT_CONFIG_GLOBAL": os.devnull,
 }
 
+#: The oldest Git in which the isolation above actually isolates.
+#:
+#: `GIT_CONFIG_SYSTEM` and `GIT_CONFIG_GLOBAL` were introduced in Git 2.32.
+#: Before that release Git does not know the names, so it does not read them
+#: and does not complain about them: the isolation dictionary is applied, the
+#: process succeeds, and the user's `$HOME/.gitconfig` is in scope the whole
+#: time. `GIT_CONFIG_NOSYSTEM` is not a fallback for this, whatever its age -
+#: it declines the *system* file and says nothing about the per-user one.
+#:
+#: The consequence is not cosmetic. A filter driver defined in global
+#: configuration and bound by a tracked `.gitattributes` is exactly the case
+#: Doctor's isolation exists to prevent, and on an older Git that driver runs.
+#: Silence there is worse than a refusal, because the answer still looks
+#: confident.
+#:
+#: Measured, not inferred from a changelog: on Debian 11 (Git 2.30.2) the
+#: negative control `NC_DOCTOR_GLOBAL_FILTER_EXECUTION` stops reproducing,
+#: because the fixture's global driver was never in scope at all - and the
+#: bounded-commit policy preflight returns 0 where it must return 3.
+MINIMUM_GIT_VERSION = (2, 32)
+
+#: Why AIQE refuses, as a machine-readable reason rather than prose.
+GIT_TOO_OLD = "GIT_TOO_OLD_FOR_CONFIG_ISOLATION"
+GIT_VERSION_UNKNOWN = "GIT_VERSION_UNKNOWN"
+
+
+def version_tuple(dotted):
+    """Turn `2.30.2` into `(2, 30, 2)`, or return None.
+
+    Only the leading numeric components. A vendor suffix - macOS reports
+    `2.50.1 (Apple Git-155)` - is not part of the ordering and is not guessed
+    at.
+    """
+    if not dotted:
+        return None
+    numbers = []
+    for part in dotted.split("."):
+        if not part.isdigit():
+            break
+        numbers.append(int(part))
+    return tuple(numbers) if numbers else None
+
+
+def config_isolation_supported(dotted):
+    """Whether this Git honours the configuration isolation AIQE applies.
+
+    Returns (supported, reason). `supported` is False when the version is
+    below the floor *and* when it cannot be established at all: both mean the
+    same thing operationally, which is that AIQE cannot demonstrate the
+    repository-defined-execution invariant it is about to rely on. Failing
+    closed on an unreadable version is deliberate - the alternative is
+    assuming the best about an unknown toolchain.
+    """
+    numbers = version_tuple(dotted)
+    if numbers is None:
+        return False, GIT_VERSION_UNKNOWN
+    if numbers < MINIMUM_GIT_VERSION:
+        return False, GIT_TOO_OLD
+    return True, None
+
 #: Silencing the configuration *files* is not the whole job. Git also accepts
 #: configuration from the process environment, at command scope, which outranks
 #: every file:

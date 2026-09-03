@@ -143,11 +143,66 @@ class SupportGateTests(unittest.TestCase):
         self.assertEqual(result["3.12"]["verdict"], support.NOT_PROVEN)
 
     def test_one_family_does_not_prove_another(self):
+        """The artifact evidence is required on every claimed family."""
         result = support.python_support(
             self.both_levels(os_family="linux"), ["3.12"], ["linux", "macos"]
         )
         self.assertEqual(result["3.12"]["verdict"], support.NOT_PROVEN)
-        self.assertIn("%s on macos" % environment.FULL_SUITE, result["3.12"]["missing"])
+        self.assertIn(
+            "%s on macos" % environment.INSTALLED_ARTIFACT_E2E,
+            result["3.12"]["missing"],
+        )
+
+    def test_the_documented_tiering_is_what_the_gate_applies(self):
+        """The installed artifact everywhere; the full suite somewhere.
+
+        This is the tiering, stated as a test so that it is a decision rather
+        than an accident of how the matrix happens to be configured.
+        """
+        observations = [
+            self.observation(os_family="linux", level=environment.FULL_SUITE),
+            self.observation(
+                os_family="linux", level=environment.INSTALLED_ARTIFACT_E2E
+            ),
+            self.observation(
+                os_family="macos", level=environment.INSTALLED_ARTIFACT_E2E
+            ),
+        ]
+        result = support.python_support(observations, ["3.12"], ["linux", "macos"])
+        self.assertEqual(result["3.12"]["verdict"], support.PROVEN)
+        self.assertEqual(
+            result["3.12"]["families_by_level"][environment.FULL_SUITE], ["linux"]
+        )
+        self.assertEqual(
+            result["3.12"]["families_by_level"][environment.INSTALLED_ARTIFACT_E2E],
+            ["linux", "macos"],
+        )
+
+    def test_the_artifact_evidence_is_not_tiered_away(self):
+        """Dropping the end-to-end on one family must not still say PROVEN."""
+        observations = [
+            self.observation(os_family="linux", level=environment.FULL_SUITE),
+            self.observation(
+                os_family="linux", level=environment.INSTALLED_ARTIFACT_E2E
+            ),
+        ]
+        result = support.python_support(observations, ["3.12"], ["linux", "macos"])
+        self.assertEqual(result["3.12"]["verdict"], support.NOT_PROVEN)
+
+    def test_the_full_suite_is_required_somewhere(self):
+        """The end-to-end on both families is still not the whole claim."""
+        observations = [
+            self.observation(
+                os_family=family, level=environment.INSTALLED_ARTIFACT_E2E
+            )
+            for family in ("linux", "macos")
+        ]
+        result = support.python_support(observations, ["3.12"], ["linux", "macos"])
+        self.assertEqual(result["3.12"]["verdict"], support.NOT_PROVEN)
+        self.assertIn(
+            "%s on any of linux, macos" % environment.FULL_SUITE,
+            result["3.12"]["missing"],
+        )
 
     def test_a_failing_observation_is_not_evidence(self):
         failing = [dict(o, outcome="FAIL") for o in self.both_levels()]
@@ -334,20 +389,44 @@ class RetainedManifestTests(unittest.TestCase):
 
         identifiers = sorted(set(re.findall(r"\b[0-9a-f]{40}\b", self.raw)))
         self.assertTrue(identifiers, "the manifest records no source commit")
+
+        shallow = (
+            subprocess.run(
+                ["git", "-C", test_support.ROOT, "rev-parse", "--is-shallow-repository"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            .stdout.decode("ascii", "replace")
+            .strip()
+            == "true"
+        )
+
+        absent = []
         for identifier in identifiers:
-            with self.subTest(identifier=identifier):
-                completed = subprocess.run(
-                    ["git", "-C", test_support.ROOT, "cat-file", "-t", identifier],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    check=False,
-                )
-                self.assertEqual(
-                    completed.returncode,
-                    0,
-                    "object id %s in the manifest is not an object in this "
-                    "repository" % (identifier,),
-                )
+            completed = subprocess.run(
+                ["git", "-C", test_support.ROOT, "cat-file", "-t", identifier],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            if completed.returncode != 0:
+                absent.append(identifier)
+
+        if absent and shallow:
+            # In a shallow clone "not present" and "not ours" are the same
+            # observation, so the check cannot be made. It is skipped by name
+            # rather than passed quietly - CI clones with full history exactly
+            # so that this never skips there.
+            self.skipTest(
+                "shallow clone: %s not present, which a shallow checkout cannot "
+                "distinguish from a foreign object id" % (", ".join(absent),)
+            )
+        self.assertEqual(
+            absent,
+            [],
+            "object id(s) in the manifest are not objects in this repository",
+        )
 
     def test_the_manifest_carries_every_field_the_release_proof_owes(self):
         """The fields a release-proof manifest is required to contain."""

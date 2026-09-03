@@ -294,20 +294,56 @@ widen the core command surface.
 No telemetry. No daemon. No background watcher. No hook installation. No model calls.
 No auto-commit. No push. No numerical safety score.
 
+## The Git floor, and why it is a refusal
+
+Before any command that reaches Git, AIQE reads `git --version` and refuses if
+the toolchain cannot deliver the invariant every command rests on.
+
+```
+3   GIT_TOO_OLD_FOR_CONFIG_ISOLATION   Git is older than 2.32
+3   GIT_VERSION_UNKNOWN                the version could not be read
+```
+
+`aiqe --version` is exempt: it reaches no repository.
+
+AIQE's configuration isolation works by pointing `GIT_CONFIG_SYSTEM` and
+`GIT_CONFIG_GLOBAL` at the null device. Both were introduced in Git 2.32. An
+older Git does not know the names, so it does not read them **and does not
+complain**: the isolation is applied, the command succeeds, and the user's
+global configuration is in scope throughout. `GIT_CONFIG_NOSYSTEM` declines the
+*system* file only and is not a fallback for it.
+
+That is not a cosmetic gap. It was measured on Debian 11 (Git 2.30.2): the
+Doctor negative control for a globally defined filter driver stopped
+reproducing, and the bounded-commit policy preflight created a commit where it
+must have refused. A confident answer with the isolation silently absent is
+the failure this product exists to refuse, so AIQE declines to produce one.
+
+Refusing on an unreadable version is the same decision: the alternative is
+assuming the best about an unknown toolchain.
+
+Full account, including how the floor was found:
+[`support.md`](support.md#3-the-git-compatibility-boundary).
+
 ## Platform status
 
 ```
-macOS      supported target for v1
-Linux      a later proof obligation, tied to an actually advertised artifact
+macOS      exercised on every claimed interpreter minor
+Linux      exercised on every claimed interpreter minor
 Windows    out of scope for v1
+Git        2.32 or newer, enforced; older is refused, not degraded
 ```
+
+Which surfaces have actually been run, at what evidence level, and what is
+still `NOT_PROVEN`: [`support.md`](support.md) and the retained manifest it
+points at. Nothing in this document is the authority on that; the manifest is.
 
 ## Runtime
 
 The runtime is no longer late-bound. AIQE is implemented as a Python package with **no
 third-party runtime dependencies and no third-party test dependencies**; the test suite
-runs on the standard library `unittest` module. Python 3.11 is the support floor, with
-3.11 and 3.14 as the tested endpoints.
+runs on the standard library `unittest` module. Python 3.11 is the support floor, and
+3.11 through 3.14 are each exercised rather than inferred from the ends of the range.
 
 The choice follows from what the product has to be correct about. Doctor is a thin,
 careful layer over Git process invocation and filesystem inspection, and the hard parts

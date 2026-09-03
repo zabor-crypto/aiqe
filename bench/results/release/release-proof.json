@@ -3,7 +3,7 @@
   "artifact_hash_agreement": {
     "sdist": {
       "by_hash": {
-        "add52f5b24216314df252d1a520fd920f8de7fa392fee0b6ccaf463bd41601ed": [
+        "e86084d28caf02305eb2a3fcd33d5331aab09d50e9fa329b638ccd54c2df7d89": [
           "macos/arm64/python 3.14.6"
         ]
       },
@@ -11,7 +11,7 @@
     },
     "wheel": {
       "by_hash": {
-        "3a6b9c40f921840dfb703e1d9c01d0dc235dc4a4a0e53314c5fa81821bd732b3": [
+        "77ef3f006e05e7cae2636161c6dfd14cefa170c565b6f52474b306c226ca4a66": [
           "macos/arm64/python 3.14.6"
         ]
       },
@@ -24,8 +24,8 @@
       "disallowed_members": [],
       "filename": "aiqe-0.1.0a0.tar.gz",
       "member_count": 39,
-      "sha256": "add52f5b24216314df252d1a520fd920f8de7fa392fee0b6ccaf463bd41601ed",
-      "size_bytes": 126482
+      "sha256": "e86084d28caf02305eb2a3fcd33d5331aab09d50e9fa329b638ccd54c2df7d89",
+      "size_bytes": 128453
     },
     "wheel": {
       "console_scripts": {
@@ -36,8 +36,8 @@
       "license": "Apache-2.0",
       "member_count": 34,
       "root_is_purelib": "true",
-      "sha256": "3a6b9c40f921840dfb703e1d9c01d0dc235dc4a4a0e53314c5fa81821bd732b3",
-      "size_bytes": 134581,
+      "sha256": "77ef3f006e05e7cae2636161c6dfd14cefa170c565b6f52474b306c226ca4a66",
+      "size_bytes": 136654,
       "tags": [
         "py3-none-any"
       ]
@@ -138,31 +138,31 @@
   "python_support": {
     "3.11": {
       "evidence": [],
+      "families_by_level": {},
       "missing": [
-        "FULL_SUITE on macos",
         "INSTALLED_ARTIFACT_E2E on macos",
-        "FULL_SUITE on linux",
-        "INSTALLED_ARTIFACT_E2E on linux"
+        "INSTALLED_ARTIFACT_E2E on linux",
+        "FULL_SUITE on any of linux, macos"
       ],
       "verdict": "NOT_PROVEN"
     },
     "3.12": {
       "evidence": [],
+      "families_by_level": {},
       "missing": [
-        "FULL_SUITE on macos",
         "INSTALLED_ARTIFACT_E2E on macos",
-        "FULL_SUITE on linux",
-        "INSTALLED_ARTIFACT_E2E on linux"
+        "INSTALLED_ARTIFACT_E2E on linux",
+        "FULL_SUITE on any of linux, macos"
       ],
       "verdict": "NOT_PROVEN"
     },
     "3.13": {
       "evidence": [],
+      "families_by_level": {},
       "missing": [
-        "FULL_SUITE on macos",
         "INSTALLED_ARTIFACT_E2E on macos",
-        "FULL_SUITE on linux",
-        "INSTALLED_ARTIFACT_E2E on linux"
+        "INSTALLED_ARTIFACT_E2E on linux",
+        "FULL_SUITE on any of linux, macos"
       ],
       "verdict": "NOT_PROVEN"
     },
@@ -171,8 +171,15 @@
         "macos macOS 26.6.2 / arm64 / python 3.14.6 / FULL_SUITE / local",
         "macos macOS 26.6.2 / arm64 / python 3.14.6 / INSTALLED_ARTIFACT_E2E / local"
       ],
+      "families_by_level": {
+        "FULL_SUITE": [
+          "macos"
+        ],
+        "INSTALLED_ARTIFACT_E2E": [
+          "macos"
+        ]
+      },
       "missing": [
-        "FULL_SUITE on linux",
         "INSTALLED_ARTIFACT_E2E on linux"
       ],
       "verdict": "NOT_PROVEN"
@@ -186,8 +193,8 @@
     "bitwise_reproducible_with_source_date_epoch": true,
     "documented_procedure": "python -m build with SOURCE_DATE_EPOCH=1700000000, from a source tree exported with tracked content only",
     "pinned_sdist_bitwise_reproducible": false,
-    "pinned_wheel_hash_run_1": "98a6397422c7da3236fd3ecd872956ae8c976cd47c13eaa98751c09c3952b908",
-    "pinned_wheel_hash_run_2": "98a6397422c7da3236fd3ecd872956ae8c976cd47c13eaa98751c09c3952b908",
+    "pinned_wheel_hash_run_1": "0155cf0477d63ae8ef505f5ac9f9c062bd434ce99ed671c5b6335764a5d46c34",
+    "pinned_wheel_hash_run_2": "0155cf0477d63ae8ef505f5ac9f9c062bd434ce99ed671c5b6335764a5d46c34",
     "sdist_bitwise_reproducible": false,
     "sdist_cause": "every packaged file is byte-identical; the archives differ only in archive metadata (mtime) and, for a gzipped tar, the gzip header's own timestamp. setuptools stamps generated metadata files - PKG-INFO, setup.cfg and the egg-info directory - with the moment they were written, and SOURCE_DATE_EPOCH does not reach them in the sdist path.",
     "sdist_comparison_default": {
@@ -237,8 +244,8 @@
       "same_member_set": true
     },
     "sdist_content_identical": true,
-    "sdist_hash_run_1": "66edb62248eb05a89043cc86a6fca434b88320df24f70cdc8280e7b1c32ee558",
-    "sdist_hash_run_2": "279d94e6b19fe3e7de3a870338d5b6b200e425d66e0c36680c0f977a12238549",
+    "sdist_hash_run_1": "79bd025383e8d887f6807d996783e5174c3ee2657164d5d6f1ed13a2a1433d6e",
+    "sdist_hash_run_2": "8c770fcf4592fc8af732ac7f4706c8ca25fe67df003aff761969cda37f74ba7c",
     "source_date_epoch_used": 1700000000,
     "wheel_cause": null,
     "wheel_comparison_default": {
@@ -269,12 +276,12 @@
       "same_member_set": true
     },
     "wheel_content_identical": true,
-    "wheel_hash_run_1": "747a4ee10123dcb806c5af7c329967c00f6337025a566cf7af406c3bfaf5420f",
-    "wheel_hash_run_2": "c4c56f2bfa1495fbd7fa2c6aff6b1aa71e3c4c675b5055d3a154c47b465903f4"
+    "wheel_hash_run_1": "78abc674b7a11eb53c6b487c0b740c19326c75e01d1ed6245760e41298378d3c",
+    "wheel_hash_run_2": "31436e27c35d98010e9f77e909e4624a8e8d2ac7a7ea52c82c879edb91a9fcd7"
   },
   "runtime_dependency_count": 0,
   "schema_version": 1,
-  "source_commit": "6ea3bd511c445e6a365971cf1b7df43ca5546072",
+  "source_commit": "3203b362594eb3be8167a67a1da831089aee2128",
   "source_trees_with_uncommitted_changes": [
     "surface-artifact-local.json",
     "surface-suite-local.json"
@@ -283,7 +290,7 @@
   "surfaces": [
     {
       "arch": "arm64",
-      "duration_seconds": 63.0,
+      "duration_seconds": 99.7,
       "git_version": "git version 2.50.1 (Apple Git-155)",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
@@ -309,7 +316,7 @@
     },
     {
       "arch": "arm64",
-      "duration_seconds": 633.5,
+      "duration_seconds": 936.5,
       "git_version": "git version 2.50.1 (Apple Git-155)",
       "level": "FULL_SUITE",
       "os_family": "macos",
@@ -345,7 +352,7 @@
         "test_safety_invariants_hold_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_safety_invariants_hold_on_byte_paths)",
         "test_stored_bytes_equal_the_bytes_declared (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_stored_bytes_equal_the_bytes_declared)"
       ],
-      "tests_run": 829,
+      "tests_run": 852,
       "tests_skipped": 21
     }
   ],

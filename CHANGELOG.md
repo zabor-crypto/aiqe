@@ -51,6 +51,29 @@ makes the change, not at release time.
 
 ### Changed
 
+- **AIQE now refuses to run on Git older than 2.32, rather than running under-isolated.**
+  Every command rests on the invariant that nothing the repository defines is executed,
+  and that invariant is delivered by pointing `GIT_CONFIG_SYSTEM` and `GIT_CONFIG_GLOBAL`
+  at the null device. Both variables arrived in Git 2.32. An older Git does not know the
+  names, so it does not read them *and does not complain*: the isolation is applied, the
+  command succeeds, and `$HOME/.gitconfig` is in scope the whole time.
+  `GIT_CONFIG_NOSYSTEM` is not a fallback — it declines the system file and has no
+  opinion about the per-user one.
+
+  This was found, not reasoned about. On Debian 11 (Git 2.30.2) the Doctor negative
+  control `NC_DOCTOR_GLOBAL_FILTER_EXECUTION` stopped reproducing, because the fixture's
+  globally defined filter driver was never in scope at all; in the same run the
+  bounded-commit policy preflight returned `0` and created a commit where it must return
+  `3` and refuse. Fourteen cases failed from that one cause.
+
+  Before any command that reaches Git, AIQE now reads `git --version` and refuses with
+  exit `3` and reason `GIT_TOO_OLD_FOR_CONFIG_ISOLATION` below the floor, or
+  `GIT_VERSION_UNKNOWN` when the version cannot be read — failing closed on an unknown
+  toolchain rather than assuming the best about it. `aiqe --version` still answers,
+  because it reaches no repository. This is the one frozen surface this work
+  changed, and it is a refusal added at the entry point rather than a change to any
+  command's semantics.
+
 - **The package version is now `0.1.0a0`** — PEP 440's spelling of the frozen
   milestone `v0.1.0-alpha`, the first installable real product. It is a package
   version and nothing else: no Git tag exists, no release exists, and nothing is
@@ -61,11 +84,15 @@ makes the change, not at release time.
   sdist, the extracted wheel and the release-proof manifest are scanned as trees in
   their own right. A source tree that scans clean says nothing about what a build
   backend put inside an artifact.
-- **The CI matrix proves what is claimed.** All four Python minors on both claimed OS
-  families, rather than the endpoints; plus five deliberately chosen surfaces — Ubuntu
-  22.04, Linux on arm64, a Debian 11 container for an older Git, macOS one release
-  back, and x86_64 macOS — each answering a distinct compatibility risk rather than
-  inflating the matrix.
+- **The CI matrix proves what is claimed.** All four Python minors are exercised rather
+  than inferred from the endpoints, under a documented tiering: the installed-artifact
+  end-to-end runs on every claimed OS family and every minor, and the full behavioural
+  suite runs on Linux for every minor and on macOS at the ends of the range. The support
+  gate encodes exactly that split, and the manifest records per minor which families ran
+  the suite, so the basis of a `PROVEN` verdict is readable rather than implied. Plus
+  five deliberately chosen surfaces — Ubuntu 22.04, Linux on arm64, a Debian 11
+  container for the Git floor, macOS one release back, and x86_64 macOS — each
+  answering a distinct compatibility risk rather than inflating the matrix.
 
 ### Fixed
 

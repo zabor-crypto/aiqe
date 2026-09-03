@@ -37,13 +37,35 @@ INSTALLED_ARTIFACT_E2E   a wheel and an sdist were built, installed into fresh
                          installed console script, ending in REVIEWABLE
 ```
 
-A Python minor version is `PROVEN` only with **both** levels, on **every**
-claimed OS family. One without the other is `NOT_PROVEN`:
+A Python minor version is `PROVEN` only with:
+
+```
+INSTALLED_ARTIFACT_E2E   on every claimed OS family
+FULL_SUITE               on at least one claimed OS family
+```
+
+One without the other is `NOT_PROVEN`:
 
 - the full suite alone proves the source tree runs there, and says nothing
   about the artifact a user installs;
 - the installed end-to-end alone proves the artifact starts, and says nothing
   about the several hundred behavioural cases.
+
+The asymmetry between the two is a **documented tiering**, not a
+rounding-down. The artifact is what a user installs, and whether it installs
+and runs is exactly what differs between operating systems, so that evidence
+is required everywhere. The behavioural suite is several hundred cases about
+Git and filesystem semantics, and running all of them on every interpreter on
+every platform mostly re-answers the same question at ten times the price on
+macOS.
+
+What the tiering gives up, stated plainly: a defect that appears **only** on
+one OS family, **only** on one interpreter minor, and **only** in a case the
+end-to-end does not exercise would not be caught. In the current matrix that
+means macOS on Python 3.12 and 3.13. The manifest records, per minor, which
+families actually ran the full suite — `python_support.<minor>.families_by_level`
+— so the basis of each claim is readable rather than implied by the word
+`PROVEN`.
 
 A failing observation is not evidence, and a **skipped** observation is not
 evidence either. Skips are recorded by name in the surface record, so a
@@ -64,17 +86,58 @@ machines that ran them.
 
 ## 3. The Git compatibility boundary
 
-AIQE publishes the Git versions it was **run against**. It does not publish a
-minimum supported version, because no surface below the lowest exercised
-version has been executed:
-
 ```
-GIT_MINIMUM = NOT_PROVEN
+GIT_MINIMUM = 2.32
+AIQE refuses to run below it.
 ```
 
-That is a deliberate refusal rather than a gap to be filled by reading release
-notes. The frozen core leans on the behaviours below, and inferring a minimum
-from when each one was introduced would be publishing a version nobody ran.
+This floor was not read off a changelog. It was found by running the suite on
+a real old Git, and it is the one place where a frozen surface changed —
+because what that surface reproduced was a silent safety defect.
+
+**What happened.** Every AIQE command rests on one invariant: nothing the
+repository defines is executed. That invariant is delivered by pointing
+`GIT_CONFIG_SYSTEM` and `GIT_CONFIG_GLOBAL` at the null device before any
+invocation that reads the index or the worktree. Both variables were
+introduced in **Git 2.32**. An older Git does not know the names, so it does
+not read them *and does not complain*: the isolation is applied, the command
+succeeds, and `$HOME/.gitconfig` is in scope the whole time.
+`GIT_CONFIG_NOSYSTEM` is not a fallback for this — it declines the *system*
+file and has no opinion about the per-user one.
+
+**How it was caught.** On Debian 11 (Git 2.30.2), the Doctor negative control
+`NC_DOCTOR_GLOBAL_FILTER_EXECUTION` stopped reproducing: the fixture's
+globally defined filter driver was never in scope at all. In the same run the
+bounded-commit policy preflight returned `0` and created a commit where it must
+return `3` and refuse, for a repository whose signing and filter policy was
+defined through a global `include`. Fourteen cases failed, all from the one
+cause.
+
+A control that stops reproducing is this project's loudest signal, and here it
+was pointing at a real hazard: on such a Git, a user gets a confident answer
+that the isolation behind it never happened.
+
+**What AIQE does now.** It fails closed. Before any command that reaches Git,
+AIQE reads `git --version`; below 2.32, or when the version cannot be read at
+all, it refuses with exit `3` and reason `GIT_TOO_OLD_FOR_CONFIG_ISOLATION` or
+`GIT_VERSION_UNKNOWN`, naming the version it found and the floor it needs.
+`aiqe --version` still answers, because it reaches no repository.
+
+Refusing on an *unreadable* version is deliberate: the alternative is assuming
+the best about an unknown toolchain, which is the shape of the defect this
+floor exists to close.
+
+The `debian-11-old-git` job in
+[`.github/workflows/checks.yml`](../.github/workflows/checks.yml) keeps the
+finding alive. It does not run the suite — on that Git, AIQE refuses — it
+proves the refusal, and it proves that the artifact still builds and installs
+there, because declining to run is not the same as failing to install.
+
+Below 2.32 nothing is claimed and nothing is attempted. Above it, AIQE
+publishes the versions it was actually run against; the manifest's
+`git_compatibility.exercised` list is that record. The frozen core leans on
+the behaviours below, and inferring anything further from when each one was
+introduced would be publishing a version nobody ran.
 
 | Git behaviour AIQE relies on | Where | Why it matters |
 |---|---|---|
@@ -92,11 +155,10 @@ from when each one was introduced would be publishing a version nobody ran.
 | `diff-tree --raw -z --no-renames` | post-commit proof | reads the changed pathset back out of the object database |
 | effective configuration resolution with `include` / `includeIf` | commit policy preflight | the policy that matters is the one the real commit would use |
 
-The lower bound is established by **running the whole suite** against an older
-Git, not by reasoning about it. The `debian-11-old-git` job in
-[`.github/workflows/checks.yml`](../.github/workflows/checks.yml) exists for
-exactly that: a `python:3.11-bullseye` container, whose Git is materially older
-than any hosted runner's, records its own surface like every other job.
+Of these, only the configuration-isolation variables have been shown to have a
+version boundary that matters, and that boundary is the floor above. The rest
+are exercised on every surface the matrix runs, and no claim is made about how
+far back any of them goes.
 
 ## 4. Windows
 

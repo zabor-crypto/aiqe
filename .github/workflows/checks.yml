@@ -31,13 +31,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        # A documented tiering, not a rounding-down. Linux runs the whole
+        # behavioural suite on every claimed interpreter minor. macOS runs it
+        # on the ends of the range, and carries the installed-artifact
+        # end-to-end on all four through the `release-proof` job below.
+        #
+        # The support gate encodes exactly that split - the artifact evidence
+        # is required on every claimed family, the suite on at least one - and
+        # the manifest records, per minor, which families actually ran the
+        # suite. What the tiering gives up is a defect that appears only on
+        # macOS, only on 3.12 or 3.13, and only in a case the end-to-end does
+        # not reach.
+        os: [ubuntu-latest]
         python: ["3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: macos-latest
+            python: "3.11"
+          - os: macos-latest
+            python: "3.14"
     runs-on: ${{ matrix.os }}
     env:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -90,6 +112,7 @@ jobs:
           - label: debian-11-old-git
             os: ubuntu-latest
             container: python:3.11-bullseye
+            proves: git-floor-refusal
           - label: macos-15-py311
             os: macos-15
             python: "3.11"
@@ -103,6 +126,12 @@ jobs:
       AIQE_CONTAINER_IMAGE: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         if: matrix.container == ''
         with:
@@ -111,14 +140,66 @@ jobs:
         run: |
           python3 --version
           git --version
+      # Linux surfaces are cheap, so they carry the whole suite. The macOS
+      # ones carry the artifact evidence only, for the reason the `tests`
+      # matrix states: the suite answers the same questions on a second macOS
+      # release, at ten times the price.
       - name: Run the test suite and record the surface
+        if: matrix.proves != 'git-floor-refusal' && !startsWith(matrix.os, 'macos')
         run: |
           python3 bench/run-suite.py --output "${RUNNER_TEMP:-/tmp}/surface-suite.json"
       - name: Prove the installed artifact on this surface
+        if: matrix.proves != 'git-floor-refusal'
         run: |
           python3 bench/run-release-proof.py \
             --parts artifacts,install,e2e,scan \
             --output "${RUNNER_TEMP:-/tmp}/surface-artifact.json"
+
+      # The Git lower-bound surface does not run the suite, because on this
+      # Git AIQE refuses to run at all - and that refusal is the thing being
+      # proved. GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL arrived in Git 2.32;
+      # an older Git ignores them silently, so AIQE's configuration isolation
+      # would be absent while every answer still looked confident.
+      #
+      # This job is the reason the floor is a measurement rather than a
+      # reading of a changelog. The artifact still has to build and install
+      # here: refusing to run is not the same as failing to install.
+      - name: Prove the artifact still builds and installs on this surface
+        if: matrix.proves == 'git-floor-refusal'
+        run: |
+          python3 bench/run-release-proof.py \
+            --parts artifacts,install,scan \
+            --output "${RUNNER_TEMP:-/tmp}/surface-artifact.json"
+      - name: Prove AIQE refuses on a Git it cannot isolate
+        if: matrix.proves == 'git-floor-refusal'
+        run: |
+          set -u
+          git --version
+          echo "--- aiqe --version must still answer: it reaches no repository"
+          PYTHONPATH=src python3 -m aiqe --version
+          failures=0
+          for command in "doctor" "task" "check" "receipt" "init --print"; do
+            set +e
+            PYTHONPATH=src python3 -m aiqe $command > /tmp/out.txt 2> /tmp/err.txt
+            rc=$?
+            set -e
+            if [ "$rc" -ne 3 ]; then
+              echo "STOP: 'aiqe $command' exited $rc on git $(git --version), expected 3"
+              cat /tmp/err.txt
+              failures=$((failures + 1))
+            elif ! grep -q GIT_TOO_OLD_FOR_CONFIG_ISOLATION /tmp/err.txt; then
+              echo "STOP: 'aiqe $command' refused without naming the reason"
+              cat /tmp/err.txt
+              failures=$((failures + 1))
+            else
+              echo "ok: aiqe $command refused with exit 3"
+            fi
+          done
+          if [ "$failures" -ne 0 ]; then
+            echo "The Git floor refusal did not hold on this surface."
+            exit 1
+          fi
+          cat /tmp/err.txt
       - uses: actions/upload-artifact@v4
         with:
           name: surface-extra-${{ matrix.label }}
@@ -133,6 +214,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -171,6 +258,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -217,6 +310,12 @@ jobs:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -243,6 +342,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - name: Test the scanner before trusting it
         run: ./tools/public-scan/self-test.sh
       - name: Run public scan
@@ -253,6 +358,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - name: Check relative links resolve
         run: |
           set -uo pipefail
@@ -291,6 +402,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"

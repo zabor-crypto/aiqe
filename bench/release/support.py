@@ -24,11 +24,28 @@ from .environment import FULL_SUITE, INSTALLED_ARTIFACT_E2E
 #: What a Python minor version must have behind it before AIQE claims support
 #: for it.
 #:
-#: Both levels, on every claimed OS family. The full suite alone would prove
-#: the source tree runs there and say nothing about the artifact a user
-#: installs; the installed-artifact end-to-end alone would prove the artifact
-#: starts and say nothing about the several hundred behavioural cases. The
-#: pair is the claim, and one without the other is NOT_PROVEN.
+#: Two requirements, and they are deliberately not the same shape:
+#:
+#:     INSTALLED_ARTIFACT_E2E   on *every* claimed OS family
+#:     FULL_SUITE               on *at least one* claimed OS family
+#:
+#: The asymmetry is a documented tiering, not a rounding-down. The artifact is
+#: what a user installs, and whether it installs and runs is exactly the thing
+#: that differs between operating systems, so that evidence is required
+#: everywhere. The behavioural suite is several hundred cases about Git and
+#: filesystem semantics; running all of them on every interpreter on every
+#: platform costs a great deal and mostly re-answers the same question.
+#:
+#: What the tiering gives up is stated rather than glossed: a defect that
+#: appears only on one OS family *and* only on one interpreter minor, and only
+#: in a case the end-to-end does not exercise, would not be caught. The
+#: manifest records, per minor, which families actually ran the full suite, so
+#: a reader can see the basis of each claim instead of taking the word
+#: `PROVEN` at face value.
+REQUIRED_EVERYWHERE = (INSTALLED_ARTIFACT_E2E,)
+REQUIRED_SOMEWHERE = (FULL_SUITE,)
+
+#: Retained for readers of older records: the levels that participate at all.
 REQUIRED_PYTHON_LEVELS = (FULL_SUITE, INSTALLED_ARTIFACT_E2E)
 
 
@@ -65,19 +82,45 @@ def python_support(observations, minors, os_families):
     for minor in minors:
         missing = []
         evidence = []
-        for family in os_families:
-            for level in REQUIRED_PYTHON_LEVELS:
+        families_by_level = {}
+
+        for level in REQUIRED_EVERYWHERE:
+            for family in os_families:
                 found = _matching(
                     passing, python_minor=minor, os_family=family, level=level
                 )
                 if found:
                     evidence.extend(_identify(o) for o in found)
+                    families_by_level.setdefault(level, set()).add(family)
                 else:
                     missing.append("%s on %s" % (level, family))
+
+        for level in REQUIRED_SOMEWHERE:
+            found = [
+                o
+                for o in passing
+                if o.get("python_minor") == minor
+                and o.get("level") == level
+                and o.get("os_family") in os_families
+            ]
+            if found:
+                evidence.extend(_identify(o) for o in found)
+                families_by_level.setdefault(level, set()).update(
+                    o.get("os_family") for o in found
+                )
+            else:
+                missing.append(
+                    "%s on any of %s" % (level, ", ".join(sorted(os_families)))
+                )
+
         claims[minor] = {
             "verdict": PROVEN if not missing else NOT_PROVEN,
             "missing": missing,
             "evidence": sorted(set(evidence)),
+            "families_by_level": {
+                level: sorted(families)
+                for level, families in sorted(families_by_level.items())
+            },
         }
     return claims
 

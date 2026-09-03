@@ -44,8 +44,10 @@ import os
 import sys
 
 from . import exits
+from . import gitq
 from . import report as report_module
 from .doctor import inspect
+from .gitq import GitRunner, parse_version
 
 USAGE = """usage: aiqe --version
        aiqe doctor  [--format json]
@@ -75,6 +77,16 @@ def main(argv, stdout, stderr, cwd, env=None, prompt=None):
         stdout.write("aiqe %s\n" % __version__)
         return exits.OK
 
+    # Every command below this line reaches Git, and every one of them relies
+    # on AIQE's configuration isolation actually isolating. On a Git that does
+    # not know `GIT_CONFIG_SYSTEM` and `GIT_CONFIG_GLOBAL`, applying them
+    # succeeds and changes nothing, so the isolation is silently absent while
+    # every answer still looks confident. AIQE refuses there rather than
+    # producing one.
+    refusal = _refuse_unsupported_git(stderr, cwd, env)
+    if refusal is not None:
+        return refusal
+
     if argv[0] == "doctor":
         return _doctor(argv[1:], stdout, stderr, cwd, env)
     if argv[0] == "init":
@@ -89,6 +101,63 @@ def main(argv, stdout, stderr, cwd, env=None, prompt=None):
         return _receipt(argv[1:], stdout, stderr, cwd, env)
 
     return _usage(stderr, "unknown command %r" % (argv[0],))
+
+
+def _refuse_unsupported_git(stderr, cwd, env):
+    """Refuse, before any command runs, on a Git AIQE cannot isolate.
+
+    Returns an exit status to return, or None to proceed.
+
+    This is a refusal, not a diagnosis: the invariant every AIQE command
+    stands on - that nothing the repository defines is executed - cannot be
+    demonstrated on a Git older than the floor, and a bounded commit's policy
+    preflight silently stops seeing a globally defined hook, filter or signing
+    configuration. Reporting a confident result there would be the exact
+    failure this product exists to refuse.
+    """
+    runner = GitRunner(cwd, env=env)
+    result = runner.run("--version")
+    if not result.ok:
+        # Git missing or unrunnable is Doctor's own diagnosis to make, and it
+        # already makes it. Nothing to add here.
+        return None
+
+    version = parse_version(result.stdout)
+    supported, reason = gitq.config_isolation_supported(version)
+    if supported:
+        return None
+
+    if reason == gitq.GIT_TOO_OLD:
+        stderr.write(
+            "aiqe: UNSUPPORTED %s\n"
+            "    Git %s cannot apply the configuration isolation AIQE relies\n"
+            "    on. GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL arrived in Git\n"
+            "    %s; an older Git ignores them silently, so a filter driver or\n"
+            "    hook defined in your global configuration stays in scope and\n"
+            "    can be executed while AIQE reports that nothing was.\n"
+            "    AIQE refuses rather than answering without the isolation.\n"
+            "    Upgrade Git to %s or newer.\n"
+            % (
+                reason,
+                version,
+                ".".join(str(part) for part in gitq.MINIMUM_GIT_VERSION),
+                ".".join(str(part) for part in gitq.MINIMUM_GIT_VERSION),
+            )
+        )
+    else:
+        stderr.write(
+            "aiqe: UNSUPPORTED %s\n"
+            "    Git ran, but did not report a version AIQE could read, so it\n"
+            "    cannot be established that the configuration isolation AIQE\n"
+            "    relies on is honoured. AIQE fails closed on an unknown\n"
+            "    toolchain rather than assuming the best about it.\n"
+            "    Git %s or newer is required.\n"
+            % (
+                reason,
+                ".".join(str(part) for part in gitq.MINIMUM_GIT_VERSION),
+            )
+        )
+    return exits.UNSUPPORTED
 
 
 def _doctor(argv, stdout, stderr, cwd, env):
