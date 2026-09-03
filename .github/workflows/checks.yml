@@ -208,12 +208,15 @@ jobs:
             exit 1
           fi
           cat /tmp/err.txt
+      # A glob rather than two named paths: not every surface in this matrix
+      # writes both records. The Git lower-bound surface deliberately produces
+      # no suite record, because on that Git AIQE refuses to run - and
+      # `if-no-files-found: error` treats a named path that matches nothing as
+      # a failure even when the other one matched.
       - uses: actions/upload-artifact@v4
         with:
           name: surface-extra-${{ matrix.label }}
-          path: |
-            ${{ runner.temp }}/surface-suite.json
-            ${{ runner.temp }}/surface-artifact.json
+          path: ${{ runner.temp }}/surface-*.json
           if-no-files-found: error
 
   # --- Arbitrary-byte paths, which must never be skipped ------------------
