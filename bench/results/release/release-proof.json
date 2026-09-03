@@ -3,83 +3,89 @@
   "artifact_hash_agreement": {
     "sdist": {
       "by_hash": {
-        "1a50b9614afc390986a9c0319d1f3fab76dbc7f1e609e2516249b02e216923f3": [
-          "linux/aarch64/python 3.14.7"
+        "16d62258ba36e16ad527f6279a55f1d91bd1a7e9df5900a42c908177dd2e9898": [
+          "linux/x86_64/python 3.11.13"
         ],
-        "343233d728fa7919f513003f81bceb98efbe534c29f0dd1f9436320b442c62ac": [
-          "macos/arm64/python 3.13.14"
-        ],
-        "53d39e670ad7425336a6551baa47579c97fbebed4d8504d49c872e73f996d90e": [
-          "macos/arm64/python 3.11.9"
-        ],
-        "5ff12186eff134e290232e0c01cff3c50d8e3e5adafea5abe374e3680703161d": [
-          "macos/arm64/python 3.12.10"
-        ],
-        "8f96753e0144545223a061c15facec8a4b69e2d4887c4b05acb069d9f8e33260": [
-          "linux/x86_64/python 3.12.14"
-        ],
-        "93e509edb5305fd0f461ab782b8fff0ec567638d83d7c8c776de4bc7a7b87cc7": [
-          "linux/x86_64/python 3.11.16"
-        ],
-        "9591d948bed66fae8bf5b621dc7148ea7116487665b148b6fb6a72b7639d866e": [
-          "macos/arm64/python 3.11.9"
-        ],
-        "9a69d3227423194faf9699323d680277f3e0d608a29ab562f36be665b7f75729": [
-          "macos/arm64/python 3.14.7"
-        ],
-        "a41d83eedb51b47394d6cd5ef5894e0b85fbca94ca62f7de8ecb4a04702bd4e1": [
+        "1f66cc851b20a6631b3122b3409e88488f09e1559f5c21aedf293fb2b979f4c0": [
           "macos/x86_64/python 3.14.7"
         ],
-        "c52e9475243e4f7b75dc85f2474b5b8c23f5360a72f718974c99896ab76d4d08": [
-          "linux/x86_64/python 3.14.7"
+        "1fa1bb3dfaadfbe21c3932e31b9260caf6e652b122d200430f078dbacee52261": [
+          "linux/aarch64/python 3.14.7"
         ],
-        "db12e53985f9b84fd67feae923d0b0d52b53dd8f378ff134a031f15190e9be07": [
+        "20f04a447fa1d7b7f0c6c5e3882a14d47d5a5049e3b02a1e2d17a3172f23f8b7": [
+          "macos/arm64/python 3.12.10"
+        ],
+        "2b32e9ed66b97ffdf72723b503d775caff6b669121b37e957316d80932b91af0": [
+          "macos/arm64/python 3.14.6"
+        ],
+        "4552efc288b307533be85e6b58613f16e1e3a47fe3dd38be16f04b3236e027d8": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "67cc9737333f5978406e45b9d4afc1ac1aedfd7361d26072b83142f003e0f292": [
+          "linux/x86_64/python 3.11.16"
+        ],
+        "69dbd8b1e935355b45c3cb32be0cbcf60897e4925d3725d4ed77d18c0cb1ba78": [
+          "macos/arm64/python 3.13.14"
+        ],
+        "8a9aa8020b108149e3f8b8b2f02ff6aa0f9c5985f4f538b19a534079bd98ae40": [
           "linux/x86_64/python 3.13.15"
         ],
-        "e4977dbcbff875f6b82c31c0a9260869a6c28192eb2bce2c193146bbba964c82": [
+        "8e386438deb5c66fb5e4fed8ca188cb5b98a2a923845fff73edbbf3ed06a6d4a": [
           "linux/x86_64/python 3.11.16"
+        ],
+        "a975144409068c6446a36151e60af17f4cdb33af24657a5cfe66c05847188957": [
+          "linux/x86_64/python 3.12.14"
+        ],
+        "cd5862b0cf071a96e13797d1f22e02551459fd8660dc098dd7423ada3e4461df": [
+          "linux/x86_64/python 3.14.7"
+        ],
+        "d88d15d7161ec8541bf3d9d56a9b245a810c202c347f71f44c37ef5e43366b04": [
+          "macos/arm64/python 3.11.9"
         ]
       },
-      "distinct_hashes": 12
+      "distinct_hashes": 13
     },
     "wheel": {
       "by_hash": {
-        "1af1e08e2ec13b07627c50eafe8ec3c8f492a2377a3dbd47018237b657dedb5c": [
-          "macos/arm64/python 3.13.14"
+        "00b77e74aaf8ffeade9bcb9e4e30743f796f039e892195fe2387ae95650a02be": [
+          "macos/arm64/python 3.14.6"
         ],
-        "278846c963142747df70312f659e32627780bb9922e6d813ca0c9a9ade4f3540": [
-          "macos/arm64/python 3.14.7"
-        ],
-        "4d21eb3b1e2bd668f4b1d14c74e813f02a08ff17fbb072f00ae4a97cf01da96a": [
-          "linux/x86_64/python 3.13.15"
-        ],
-        "55b9b502f4bc1cbaf0613bbc0addcec88114190037026e2b131302e750eabb08": [
-          "linux/x86_64/python 3.12.14"
-        ],
-        "69bea121d69db172b4e8d5d8c924bb0bacc9920364854d2b10f1e4cdcbb8810f": [
-          "macos/arm64/python 3.11.9"
-        ],
-        "752df371fb2ab68a43f28a84e9e5f83f4f7020468cb0432552222655127f7afc": [
-          "linux/x86_64/python 3.11.16"
-        ],
-        "78b3e0af1c12a2584a64a13a939e2854c4e0b189fb40f920e5115d3eeb5c66c7": [
-          "macos/arm64/python 3.11.9"
-        ],
-        "7b4d6dfde5c5a0839eefb3a68546fb6e28b73f7c0c7bcb8a46ffbdc74dd61021": [
-          "linux/aarch64/python 3.14.7"
-        ],
-        "95e22797f07fd5637c70c85161123745c5c72eced08b694b317aadb27ed10104": [
-          "macos/x86_64/python 3.14.7"
-        ],
-        "97b274d65833f2d08ac0801bf002749f6a354b7bfc617fd8afeaccbc15cf7d02": [
-          "linux/x86_64/python 3.11.16",
+        "23c13a4b6e2942b8abb0281641cf3f77eaa134b5363d9c106f2ab8a781e9be26": [
           "linux/x86_64/python 3.14.7"
         ],
-        "c27e9c44bc1be3cd41131d43821974abd0ad84093150c5a7681945bf290eb584": [
+        "25600552d22e1020a26bd5eee9e84b802c6dae7b973648d224ce1c9d4811b2c0": [
+          "linux/aarch64/python 3.14.7"
+        ],
+        "2e7f078db424f6e1e7032c4446ee94d08d8d2989b982a2409bb48f992d30d319": [
+          "linux/x86_64/python 3.11.16"
+        ],
+        "4b08ee7b0c0ed796cc4d2194882a4ce3d4077d169873e4759aaab2c567f3f6a1": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "591876ed7421b2c8e1400ba34fa1f57bd11c9550522ed04806c7b4ab7991cc0f": [
           "macos/arm64/python 3.12.10"
+        ],
+        "5f50fd55d217773e724e46b5b5ae652d037eb310032aad858fe363e441540c67": [
+          "linux/x86_64/python 3.11.13"
+        ],
+        "8085d19f6437228b5dc1c744b224ad883e9ed698c1435cd2b75027eb5a0ff80a": [
+          "macos/arm64/python 3.13.14"
+        ],
+        "b99ffb2d996f3102f69eb539be2772e35c2a6756641ad3247136fcca511016be": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "cbf2f65c8d99135a2d1210a063cdfb719b04b02889fcc559895e956338716597": [
+          "linux/x86_64/python 3.11.16",
+          "linux/x86_64/python 3.13.15"
+        ],
+        "dc0782b1319415ae3e1b5a328f20bbf0c148d2418a61eef45dbf1221ad595d42": [
+          "linux/x86_64/python 3.12.14"
+        ],
+        "f91afd83abbb50e2bbd583e756159b372e73f00ccfa3f61f555fee78135fe7ba": [
+          "macos/x86_64/python 3.14.7"
         ]
       },
-      "distinct_hashes": 11,
+      "distinct_hashes": 12,
       "note": "A pure-Python wheel built from one commit should have one hash on every surface only when the build procedure fixes timestamps. Where it does not, the hashes differ while the packaged content does not; see `reproducibility`."
     }
   },
@@ -88,8 +94,8 @@
       "disallowed_members": [],
       "filename": "aiqe-0.1.0a0.tar.gz",
       "member_count": 39,
-      "sha256": "53d39e670ad7425336a6551baa47579c97fbebed4d8504d49c872e73f996d90e",
-      "size_bytes": 128307
+      "sha256": "d88d15d7161ec8541bf3d9d56a9b245a810c202c347f71f44c37ef5e43366b04",
+      "size_bytes": 130176
     },
     "wheel": {
       "console_scripts": {
@@ -100,8 +106,8 @@
       "license": "Apache-2.0",
       "member_count": 34,
       "root_is_purelib": "true",
-      "sha256": "78b3e0af1c12a2584a64a13a939e2854c4e0b189fb40f920e5115d3eeb5c66c7",
-      "size_bytes": 136654,
+      "sha256": "b99ffb2d996f3102f69eb539be2772e35c2a6756641ad3247136fcca511016be",
+      "size_bytes": 137587,
       "tags": [
         "py3-none-any"
       ]
@@ -119,36 +125,42 @@
       "job": "release-proof",
       "repository": "zabor-crypto/aiqe",
       "run_attempt": "1",
-      "run_id": "33794516990",
-      "run_number": "16",
-      "sha": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+      "run_id": "33796372017",
+      "run_number": "18",
+      "sha": "5b477a941f2238f1b05aa49d000d3a5958660dc4",
       "workflow": "checks"
     },
     {
       "job": "surfaces",
       "repository": "zabor-crypto/aiqe",
       "run_attempt": "1",
-      "run_id": "33794516990",
-      "run_number": "16",
-      "sha": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+      "run_id": "33796372017",
+      "run_number": "18",
+      "sha": "5b477a941f2238f1b05aa49d000d3a5958660dc4",
       "workflow": "checks"
     },
     {
       "job": "tests",
       "repository": "zabor-crypto/aiqe",
       "run_attempt": "1",
-      "run_id": "33794516990",
-      "run_number": "16",
-      "sha": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+      "run_id": "33796372017",
+      "run_number": "18",
+      "sha": "5b477a941f2238f1b05aa49d000d3a5958660dc4",
       "workflow": "checks"
     }
   ],
   "declared_python_requirement": ">=3.11",
   "git_compatibility": {
-    "enforced_but_unexercised_range": "Git 2.32 is enforced but not exercised: the lowest version AIQE was actually run against is git version 2.55.0. Versions from 2.32 up to that one are permitted by the floor and covered by no run.",
+    "enforced_but_unexercised_range": null,
     "enforced_minimum": "2.32",
     "enforced_minimum_basis": "GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL, which AIQE's configuration isolation is built on, were introduced in Git 2.32. Below that they are ignored silently. The refusal is proven on a real Git 2.30.2 surface; the floor itself is a mechanism argument, not a run.",
     "exercised": [
+      {
+        "git_version": "git version 2.30.2",
+        "surfaces": [
+          "linux debian 11 / x86_64 / ARTIFACT_BUILD_ONLY"
+        ]
+      },
       {
         "git_version": "git version 2.55.0",
         "surfaces": [
@@ -167,7 +179,7 @@
       }
     ],
     "highest_exercised": "git version 2.55.0",
-    "lowest_exercised": "git version 2.55.0",
+    "lowest_exercised": "git version 2.30.2",
     "minimum_claimed": "2.32",
     "minimum_status": "PROVEN",
     "statement": "AIQE refuses to run below the enforced minimum rather than running under-isolated. Above it, AIQE publishes the versions it was actually run against and does not interpolate between them."
@@ -354,6 +366,21 @@
       },
       {
         "outcome": "PASS",
+        "surface": "surface-extra-debian-11-old-git/surface-artifact.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-debian-11-old-git/surface-artifact.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-debian-11-old-git/surface-artifact.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
         "surface": "surface-extra-macos-15-intel-py314/surface-artifact.json",
         "target": "aiqe"
       },
@@ -448,7 +475,7 @@
       "evidence": [
         "linux ubuntu 24.04 / x86_64 / python 3.12.14 / FULL_SUITE / github-hosted runner ubuntu-latest (image ubuntu24)",
         "linux ubuntu 24.04 / x86_64 / python 3.12.14 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-latest (image ubuntu24)",
-        "macos macOS 26.5.2 / arm64 / python 3.12.10 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
+        "macos macOS 26.6.2 / arm64 / python 3.12.10 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
       ],
       "families_by_level": {
         "FULL_SUITE": [
@@ -488,7 +515,7 @@
         "linux ubuntu 24.04 / x86_64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-latest (image ubuntu24)",
         "macos macOS 15.7.9 / x86_64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-15-intel (image macos15)",
         "macos macOS 26.5.2 / arm64 / python 3.14.6 / FULL_SUITE / github-hosted runner macos-latest (image macos26)",
-        "macos macOS 26.6.2 / arm64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
+        "macos macOS 26.5.2 / arm64 / python 3.14.6 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
       ],
       "families_by_level": {
         "FULL_SUITE": [
@@ -512,8 +539,8 @@
     "bitwise_reproducible_with_source_date_epoch": true,
     "documented_procedure": "python -m build with SOURCE_DATE_EPOCH=1700000000, from a source tree exported with tracked content only",
     "pinned_sdist_bitwise_reproducible": false,
-    "pinned_wheel_hash_run_1": "0155cf0477d63ae8ef505f5ac9f9c062bd434ce99ed671c5b6335764a5d46c34",
-    "pinned_wheel_hash_run_2": "0155cf0477d63ae8ef505f5ac9f9c062bd434ce99ed671c5b6335764a5d46c34",
+    "pinned_wheel_hash_run_1": "cda78fcc2fbb40acc991fc7e714e9122405786a0a5b1490e0ccc1e53d6cfebf7",
+    "pinned_wheel_hash_run_2": "cda78fcc2fbb40acc991fc7e714e9122405786a0a5b1490e0ccc1e53d6cfebf7",
     "sdist_bitwise_reproducible": false,
     "sdist_cause": "every packaged file is byte-identical; the archives differ only in archive metadata (mtime) and, for a gzipped tar, the gzip header's own timestamp. setuptools stamps generated metadata files - PKG-INFO, setup.cfg and the egg-info directory - with the moment they were written, and SOURCE_DATE_EPOCH does not reach them in the sdist path.",
     "sdist_comparison_default": {
@@ -563,8 +590,8 @@
       "same_member_set": true
     },
     "sdist_content_identical": true,
-    "sdist_hash_run_1": "9cca0eee0ae140f8fba337818e58232b80b6add52d628349980c633b2f656c62",
-    "sdist_hash_run_2": "5ab228553217af6c21a4d9196b687158f165bc870e79a90f66ed121ec815b00d",
+    "sdist_hash_run_1": "425e9a5ae858bf9daf6cc457f9207a548adabb637af7898de5a38882afab64e0",
+    "sdist_hash_run_2": "652e69be8b2658b3604a14f92d6818d4dcc5566ed14265b9712fbe855885ac78",
     "source_date_epoch_used": 1700000000,
     "wheel_cause": null,
     "wheel_comparison_default": {
@@ -595,18 +622,18 @@
       "same_member_set": true
     },
     "wheel_content_identical": true,
-    "wheel_hash_run_1": "e54ce6db5c5a974df25eec5524655fe064fe205a6fcfeb746ae25b4e6b063336",
-    "wheel_hash_run_2": "852945acf120ccb414f56c49d787574cb393a358563f39e07b2742691dbcfdca"
+    "wheel_hash_run_1": "43f3bc3e846e0a7576205f3221aac9ad080661625ae177a3a71d99edaa6d1d47",
+    "wheel_hash_run_2": "11d8f18400716201a03a17e8e7cbe7b5b30c287635dc3841ad925b2daf27694e"
   },
   "runtime_dependency_count": 0,
   "schema_version": 1,
-  "source_commit": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+  "source_commit": "5b477a941f2238f1b05aa49d000d3a5958660dc4",
   "source_trees_with_uncommitted_changes": [],
   "statement": "This manifest is private release-proof evidence. It records what was built and what was executed against it. It is not a release announcement, nothing described here is published, and a claim absent from it is a claim that was not demonstrated.",
   "surfaces": [
     {
       "arch": "arm64",
-      "duration_seconds": 24.6,
+      "duration_seconds": 19.2,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
@@ -633,11 +660,11 @@
     },
     {
       "arch": "arm64",
-      "duration_seconds": 24.1,
+      "duration_seconds": 22.3,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
-      "os_release": "macOS 26.5.2",
+      "os_release": "macOS 26.6.2",
       "outcome": "PASS",
       "parts_not_run": [
         "offline",
@@ -660,7 +687,7 @@
     },
     {
       "arch": "arm64",
-      "duration_seconds": 21.3,
+      "duration_seconds": 21.0,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
@@ -687,11 +714,11 @@
     },
     {
       "arch": "arm64",
-      "duration_seconds": 49.1,
+      "duration_seconds": 53.2,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
-      "os_release": "macOS 26.6.2",
+      "os_release": "macOS 26.5.2",
       "outcome": "PASS",
       "parts_not_run": [],
       "parts_run": [
@@ -704,7 +731,7 @@
         "scan",
         "controls"
       ],
-      "python_version": "3.14.7",
+      "python_version": "3.14.6",
       "record": "surface-artifact-macos-latest-py3.14/surface.json",
       "runner_provenance": "github-hosted runner macos-latest (image macos26)",
       "skips": [],
@@ -713,7 +740,7 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 21.7,
+      "duration_seconds": 22.2,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "linux",
@@ -740,7 +767,7 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 17.7,
+      "duration_seconds": 17.9,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "linux",
@@ -767,7 +794,7 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 16.8,
+      "duration_seconds": 18.0,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "linux",
@@ -794,7 +821,7 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 50.0,
+      "duration_seconds": 48.7,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "linux",
@@ -820,7 +847,34 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 52.0,
+      "duration_seconds": 19.1,
+      "git_version": "git version 2.30.2",
+      "level": "ARTIFACT_BUILD_ONLY",
+      "os_family": "linux",
+      "os_release": "debian 11",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "e2e",
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "scan"
+      ],
+      "python_version": "3.11.13",
+      "record": "surface-extra-debian-11-old-git/surface-artifact.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image Linux) in container python:3.11-bullseye",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 42.9,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
@@ -847,7 +901,7 @@
     },
     {
       "arch": "arm64",
-      "duration_seconds": 19.6,
+      "duration_seconds": 22.3,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
@@ -874,7 +928,7 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 30.3,
+      "duration_seconds": 23.1,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "linux",
@@ -901,7 +955,7 @@
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 84.7,
+      "duration_seconds": 80.5,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "linux",
@@ -915,12 +969,12 @@
       "record": "surface-extra-ubuntu-22.04-py311/surface-suite.json",
       "runner_provenance": "github-hosted runner ubuntu-22.04 (image ubuntu22)",
       "skips": [],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 0
     },
     {
       "arch": "aarch64",
-      "duration_seconds": 18.2,
+      "duration_seconds": 16.8,
       "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "linux",
@@ -947,7 +1001,7 @@
     },
     {
       "arch": "aarch64",
-      "duration_seconds": 64.5,
+      "duration_seconds": 63.4,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "linux",
@@ -961,12 +1015,12 @@
       "record": "surface-extra-ubuntu-24.04-arm-py314/surface-suite.json",
       "runner_provenance": "github-hosted runner ubuntu-24.04-arm (image ubuntu24-arm64)",
       "skips": [],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 0
     },
     {
       "arch": "arm64",
-      "duration_seconds": 232.7,
+      "duration_seconds": 232.8,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "macos",
@@ -1002,12 +1056,12 @@
         "test_safety_invariants_hold_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_safety_invariants_hold_on_byte_paths)",
         "test_stored_bytes_equal_the_bytes_declared (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_stored_bytes_equal_the_bytes_declared)"
       ],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 21
     },
     {
       "arch": "arm64",
-      "duration_seconds": 227.8,
+      "duration_seconds": 170.1,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "macos",
@@ -1043,12 +1097,12 @@
         "test_safety_invariants_hold_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_safety_invariants_hold_on_byte_paths)",
         "test_stored_bytes_equal_the_bytes_declared (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_stored_bytes_equal_the_bytes_declared)"
       ],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 21
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 71.0,
+      "duration_seconds": 80.7,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "linux",
@@ -1062,12 +1116,12 @@
       "record": "surface-suite-ubuntu-latest-py3.11/surface.json",
       "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
       "skips": [],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 0
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 76.7,
+      "duration_seconds": 80.0,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "linux",
@@ -1081,12 +1135,12 @@
       "record": "surface-suite-ubuntu-latest-py3.12/surface.json",
       "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
       "skips": [],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 0
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 82.7,
+      "duration_seconds": 77.1,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "linux",
@@ -1100,12 +1154,12 @@
       "record": "surface-suite-ubuntu-latest-py3.13/surface.json",
       "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
       "skips": [],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 0
     },
     {
       "arch": "x86_64",
-      "duration_seconds": 75.4,
+      "duration_seconds": 79.0,
       "git_version": "git version 2.55.0",
       "level": "FULL_SUITE",
       "os_family": "linux",
@@ -1119,7 +1173,7 @@
       "record": "surface-suite-ubuntu-latest-py3.14/surface.json",
       "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
       "skips": [],
-      "tests_run": 852,
+      "tests_run": 860,
       "tests_skipped": 0
     }
   ],
@@ -1130,6 +1184,23 @@
     "uvx --from (local wheel)"
   ],
   "tested_os_arch_surfaces": [
+    {
+      "arch": "x86_64",
+      "git_versions": [
+        "git version 2.30.2"
+      ],
+      "levels": [
+        "ARTIFACT_BUILD_ONLY"
+      ],
+      "os_family": "linux",
+      "os_release": "debian 11",
+      "python_versions": [
+        "3.11.13"
+      ],
+      "runner_provenance": [
+        "github-hosted runner ubuntu-latest (image Linux) in container python:3.11-bullseye"
+      ]
+    },
     {
       "arch": "x86_64",
       "git_versions": [
@@ -1234,7 +1305,6 @@
       "os_release": "macOS 26.5.2",
       "python_versions": [
         "3.11.9",
-        "3.12.10",
         "3.13.14",
         "3.14.6"
       ],
@@ -1253,7 +1323,7 @@
       "os_family": "macos",
       "os_release": "macOS 26.6.2",
       "python_versions": [
-        "3.14.7"
+        "3.12.10"
       ],
       "runner_provenance": [
         "github-hosted runner macos-latest (image macos26)"
