@@ -9,12 +9,16 @@ This build implements exactly the surface below:
     aiqe task
     aiqe task    end
     aiqe check   [--allow <validator-id>]... [--format json]
+    aiqe commit  -m <message>
     aiqe receipt [--local] [--format json]
 
-The frozen v1 surface has one more command. `commit` is not registered here,
-not stubbed, and not advertised: a command that parses but does nothing is
-worse than one that does not exist, because it implies a capability the
-product has not built. It arrives with its implementation.
+That is the whole frozen v1 surface, and `commit` arrived with its
+implementation rather than as a stub, because a command that parses and does
+nothing implies a capability the product has not built.
+
+`commit` takes exactly one flag. There is no `--amend`, no `--no-verify`, no
+`--allow-empty` and no `--push`, and their absence is the feature: every one
+of them is a way to make the command succeed by weakening the claim it makes.
 
 One parsing rule matters more than it looks. The value after `--own` is taken
 literally, whatever it is. `--own --help` declares a path named `--help`, and
@@ -50,9 +54,10 @@ USAGE = """usage: aiqe --version
        aiqe task
        aiqe task    end
        aiqe check   [--allow <validator-id>]... [--format json]
+       aiqe commit  -m <message>
        aiqe receipt [--local] [--format json]
 
-`aiqe commit` is not implemented in this build."""
+`aiqe commit` creates one bounded completion commit. It never pushes."""
 
 _FORMATS = ("human", "json")
 
@@ -78,6 +83,8 @@ def main(argv, stdout, stderr, cwd, env=None, prompt=None):
         return _task(argv[1:], stdout, stderr, cwd, env)
     if argv[0] == "check":
         return _check(argv[1:], stdout, stderr, cwd, env, prompt)
+    if argv[0] == "commit":
+        return _commit(argv[1:], stdout, stderr, cwd, env)
     if argv[0] == "receipt":
         return _receipt(argv[1:], stdout, stderr, cwd, env)
 
@@ -197,6 +204,42 @@ def _check(argv, stdout, stderr, cwd, env, prompt):
             stdout.write(json.dumps(outcome.document, indent=2, sort_keys=True) + "\n")
         return outcome.exit_code
 
+    stream = stdout if outcome.exit_code in (0, 1, 2) else stderr
+    stream.write(outcome.render())
+    return outcome.exit_code
+
+
+def _commit(argv, stdout, stderr, cwd, env):
+    """`aiqe commit -m <message>`. One flag, and no way to widen it.
+
+    The message is required and is taken literally, whatever it is. It is user
+    data: AIQE stores none of it and echoes none of it, so there is no path by
+    which a commit message reaches a shareable receipt.
+    """
+    from . import commit as commit_module
+
+    message = None
+    index = 0
+    while index < len(argv):
+        argument = argv[index]
+        if argument == "-m":
+            if index + 1 >= len(argv):
+                return _usage(stderr, "-m requires a commit message")
+            if message is not None:
+                return _usage(stderr, "-m given more than once")
+            message = argv[index + 1]
+            index += 2
+            continue
+        return _usage(stderr, "unknown argument %r" % (argument,))
+
+    if message is None:
+        return _usage(stderr, "commit requires -m <message>")
+    if not message.strip():
+        # Git refuses an empty message and so does this. A completion commit
+        # with nothing written on it is a worse artifact than no commit.
+        return _usage(stderr, "-m requires a non-empty commit message")
+
+    outcome = commit_module.run(cwd, message, env=env)
     stream = stdout if outcome.exit_code in (0, 1, 2) else stderr
     stream.write(outcome.render())
     return outcome.exit_code

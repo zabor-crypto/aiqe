@@ -12,9 +12,62 @@ makes the change, not at release time.
 
 ### Added
 
-- **`aiqe init`, `aiqe check` and `aiqe receipt`.** The first complete pre-commit
-  assurance workflow now exists: `init` → `task start --own` → change the owned files
-  → `check` → `receipt`. `aiqe commit` remains out of scope and unregistered.
+- **`aiqe commit -m <message>`.** The bounded completion commit, and the last command
+  of the frozen v1 surface. It consumes existing green check evidence, never reruns a
+  validator, and never pushes. One flag: there is no `--amend`, no `--no-verify`, no
+  `--allow-empty` and no `--push`, because each of them is a way to make the command
+  succeed by weakening the claim it makes. Reference:
+  [`docs/commit.md`](docs/commit.md).
+- **`REVIEWABLE` is now reachable — and only from a verified commit.** A completely
+  green check still yields `INCOMPLETE` with `BOUNDED_COMMIT_NOT_CREATED`. The receipt
+  says `Owned scope VERIFIED · Foreign staged EXCLUDED · Checked content BOUND ·
+  Commit CREATED · Push NOT_PERFORMED_BY_AIQE · Verdict REVIEWABLE` only when the
+  commit's parent, changed pathset, committed content and foreign staged preservation
+  have each been proved against the object database.
+- **Effective Git commit-policy preflight.** Unlike Doctor's bounded static inspection,
+  commit resolves the configuration the real commit would use — system, global, local,
+  worktree and command scope, with `include` and `includeIf` — by asking Git rather
+  than reimplementing it. Five refusals, all exit 3 and all fail-closed: an active
+  `pre-commit`, `prepare-commit-msg`, `commit-msg` or `post-commit` hook under the
+  effective `core.hooksPath`; automatic commit signing; an external `clean` or
+  `process` filter bound to an owned path; an unresolvable effective configuration; and
+  an unsupported topology or operation state. No `--no-verify` and no `--no-gpg-sign`:
+  AIQE refuses rather than disabling a policy its user set. A driver that is configured
+  but bound to no owned path is deliberately **not** a blocker.
+- **Expected check-in state, derived before any mutation.** Each owned path is bound to
+  a blob OID and Git mode, or to an absence, using `git hash-object --path`, which
+  applies exactly the transformations Git would apply and writes nothing. This closes
+  the documented raw-bytes conservatism for the commit proof: under `core.autocrlf` or
+  a `* text` attribute the committed blob is deliberately not the worktree bytes, and
+  `CHECKED_CONTENT_BOUND` still holds. `core.fileMode` semantics are honoured in both
+  directions, measured rather than assumed.
+- **Transactional intent-to-add.** A new owned file is marked with `git add -N` over
+  exact literal paths only. A failure before a commit exists scope-rolls back exactly
+  the entries AIQE created and verifies the rollback; a whole saved index is
+  deliberately never restored, because that would discard concurrent foreign staged
+  work. An unprovable rollback is `ITA_ROLLBACK_INCOMPLETE`, exit 2, and no completion
+  claim.
+- **The pre-mutation staleness recheck.** HEAD, the owned-content binding, the
+  `aiqe.toml` digest and the validator definition digests are recomputed immediately
+  before the first index mutation, after every expensive preflight step. Drift stops
+  the operation with `commit = NONE` and `index mutation = NONE`.
+- **Structured foreign staged preservation.** The staged delta over every non-owned
+  path is captured against the pre-commit HEAD immediately before the first index
+  mutation and again immediately after the commit — as addition, modification,
+  deletion and mode or type change, NUL-safe with rename detection disabled, hashing
+  no foreign content. `PRE == POST` is what `EXCLUDED` means; any difference, including
+  a newly appearing entry, is `UNKNOWN` and at best `INCOMPLETE`.
+- **`COMMIT_EVIDENCE_SCHEMA_VERSION = 1`**, one local record per task, holding the
+  proof and not the commit message. `aiqe task end` removes it alongside the check
+  evidence, so a new task can never inherit a previous task's completion commit. A
+  second `aiqe commit` for the same task refuses.
+- **The `BOUNDED_COMMIT` benchmark family** — 37 cases and 8 negative controls under
+  `bench/fixtures/commit/`, with retained results. Every control reproduces its
+  failure, including a concurrent process that stages a foreign path inside AIQE's own
+  mutation window.
+- **`aiqe init`, `aiqe check` and `aiqe receipt`.** The complete assurance workflow:
+  `init` → `task start --own` → change the owned files → `check` → `commit` →
+  `receipt`.
 - **Configuration schema v1** in `./aiqe.toml`, with exactly two declaration types,
   `[[surface]]` and `[[validator]]`. Parsing is fail-closed: an unknown field, a
   missing `quant`, a missing `required`, a missing or out-of-range `timeout`, an empty
@@ -77,6 +130,25 @@ makes the change, not at release time.
 
 ### Changed
 
+- **`RECEIPT_SCHEMA_VERSION` is now 2.** Version 1 promised that `commit` was always
+  `NONE` and had no `checked_content` or `push` field, so a version 1 reader would
+  misread a post-commit receipt as a pre-commit one. The default receipt gains two
+  states and one count and still carries no identifier: no commit SHA, no filename, no
+  branch, no repository identity. `aiqe receipt --local` gains the allowlisted commit
+  identifiers, because you are standing in the repository they name.
+- **A post-commit receipt stops claiming a current state once HEAD moves off the
+  completion commit**, reporting `COMPLETION_COMMIT_SUPERSEDED`. This is not a verifier
+  for arbitrary historical commits and does not become one.
+- **A second Git layer, for the one operation that writes.** `gitq` stays read-only and
+  configuration-isolated. `gitwrite` runs the commit under effective Git semantics,
+  because the commit AIQE creates must be the commit your Git would create. It carries
+  its own allowlist, which contains no network subcommand, and suppresses only
+  non-semantic execution behaviour — `core.fsmonitor`, `gc.auto`, `maintenance.auto`.
+  Process creation in AIQE core now has three doors, and the test suite names them.
+- **A broken global Git configuration is diagnosed, not mistaken for an absent
+  repository.** Discovery reads the user's real configuration, so a `~/.gitconfig` Git
+  cannot parse makes every invocation fail. `aiqe commit` establishes that cause before
+  reporting the symptom and returns `EFFECTIVE_CONFIG_UNRESOLVED`.
 - **Pre-existing AIQE local state is validated before it is used.** Creating state
   privately is half the job; state that is already there may have been placed. Every
   AIQE-managed component — the state root, the per-worktree directory, the salt, the

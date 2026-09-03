@@ -3,11 +3,9 @@
 This document is the public statement of AIQE's frozen v1 architecture. It describes
 what the product does and where its guarantees stop.
 
-Most of it is now implemented. `aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check`
-and `aiqe receipt` exist and are tested. `aiqe commit` is the one remaining design
-target: it is not registered by the command-line interface and is not stubbed. Where
-this document describes behaviour that exists, it is marked; where it does not, it is
-a statement of intent.
+All of it is now implemented. `aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check`,
+`aiqe commit` and `aiqe receipt` exist and are tested, and the v1 command surface has
+no remaining design target. Nothing here is released and no version is tagged.
 
 ## Product
 
@@ -43,19 +41,25 @@ aiqe commit  -m <message>
 aiqe receipt [--local] [--format json]
 ```
 
-Everything above is implemented except `aiqe commit`, which is a design target:
-invoking it exits 3 with `unknown command`, because a command that parses and does
-nothing advertises a capability the product has not built.
+Everything above is implemented. `aiqe commit` was the last command to arrive, and it
+arrived with its implementation rather than as a stub, because a command that parses
+and does nothing advertises a capability the product has not built.
 
-The first complete pre-commit workflow therefore exists today:
+The complete workflow therefore exists today:
 
 ```
+aiqe doctor
 aiqe init
 aiqe task start --own <path>...
     change the owned files
 aiqe check
+aiqe commit -m <message>
 aiqe receipt
 ```
+
+`aiqe commit` takes exactly one flag. There is no `--amend`, no `--no-verify`, no
+`--allow-empty` and no `--push`: each of them is a way to make the command succeed by
+weakening the claim it makes.
 
 References: [`config.md`](config.md) for `aiqe.toml` and `init`,
 [`check.md`](check.md), [`receipt.md`](receipt.md).
@@ -115,7 +119,8 @@ and it adjudicates nothing either.
 `aiqe receipt` exits 0 for `REVIEWABLE`, which **no pre-commit state can reach**. A
 completely green check yields `INCOMPLETE` with reason `BOUNDED_COMMIT_NOT_CREATED`,
 because `REVIEWABLE` is a claim about a commit whose content is provably the checked
-content, and no commit exists. See [`receipt.md`](receipt.md).
+content. Only a verified bounded commit produces it. See [`receipt.md`](receipt.md)
+and [`commit.md`](commit.md).
 
 Machine-readable reason codes carry the detail that the exit code deliberately does not:
 
@@ -221,7 +226,9 @@ inspection, and it must either resolve that configuration unambiguously or refus
 Absence is never assumed.
 
 `aiqe commit` may neutralise non-semantic execution or performance surfaces only where
-doing so bypasses no explicit repository policy, and the effect is documented.
+doing so bypasses no explicit repository policy, and the effect is documented:
+`core.fsmonitor`, `gc.auto` and `maintenance.auto`, none of which changes what a commit
+contains. Implemented; see [`commit.md`](commit.md).
 
 When commit is unsupported, `check` and `receipt` remain available and the user commits
 with ordinary Git.

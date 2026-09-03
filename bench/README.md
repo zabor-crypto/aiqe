@@ -9,14 +9,15 @@ fixtures/           shared measurement and fixture-construction helpers  PRESENT
 fixtures/doctor/    deterministic builders, controls, expected outcomes  PRESENT
 fixtures/task/      deterministic builders, controls, expected outcomes  PRESENT
 fixtures/check/     deterministic builders, controls, expected outcomes  PRESENT
+fixtures/commit/    deterministic builders, controls, expected outcomes  PRESENT
 results/doctor/     retained result artifact                             PRESENT
 results/task/       retained result artifact                             PRESENT
 results/check/      retained result artifact                             PRESENT
+results/commit/     retained result artifact                             PRESENT
 ```
 
-Nothing is present here for a surface that does not exist. `doctor`, `init`, `task`,
-`check` and `receipt` are implemented, so their families are materialised; bounded
-commit has no fixtures because there is nothing to point them at.
+Nothing is present here for a surface that does not exist. The whole v1 command
+surface is implemented, so all four families are materialised.
 
 ## Running a family
 
@@ -24,6 +25,7 @@ commit has no fixtures because there is nothing to point them at.
 python3 bench/run-doctor-fixtures.py
 python3 bench/run-task-fixtures.py
 python3 bench/run-check-fixtures.py
+python3 bench/run-commit-fixtures.py
 ```
 
 Every case is built from nothing in an isolated temporary directory, with an isolated
@@ -66,6 +68,25 @@ records *each* run, in a directory outside every snapshot root, so the second qu
 is counted rather than argued. A canary named with the `observed.` prefix records an
 observation rather than a validator execution and is never counted as an unconsented
 one — the detached-child case leaves one deliberately.
+
+The bounded-commit family narrows the claim once more, because the command under
+measurement creates a commit:
+
+```
+AIQE_CORE_WORKTREE_MUTATIONS        = 0
+POLICY_CANARY_EXECUTIONS            = 0
+AIQE_PUSH_CALLS                     = 0
+PRECOMMIT_REVIEWABLE_VERDICTS       = 0
+RAW_TERMINAL_CONTROL_BYTES          = 0
+```
+
+Changes under `.git` are attributed to the completion commit rather than denied.
+`POLICY_CANARY_EXECUTIONS` counts every commit hook, filter driver and signing program
+a policy fixture installs, each writing a marker outside the repository, so
+"the refusal happened before anything ran" is measured rather than argued. And every
+proof is read back with the harness's own Git invocations — parent, changed pathset,
+blob and mode per path, staged delta before and after — rather than from AIQE's
+rendering of them. A proof only the product can see is not a proof.
 
 Three cases in this family are proofs rather than behaviours:
 
@@ -137,8 +158,8 @@ Task scope family     RUN       (results retained here)
 Check / receipt /
   evidence family     RUN       (results retained here)
 Numerical routing     RUN       (six contract families, in the check family)
-Bounded commit        NOT_RUN   (no implementation exists)
-Product friction      NOT_RUN   (no implementation exists)
+Bounded commit        RUN       (results retained here)
+Product friction      NOT_RUN   (no installable release exists)
 Context efficiency    NOT_RUN   (deferred; methodology not yet defensible)
 
 macOS baseline        observed
@@ -146,12 +167,16 @@ Linux baseline        exercised in CI, not a release claim
 Windows               out of scope for v1
 ```
 
-Three families have moved off `NOT_RUN`, and only for the cases that exist. No
+Four families have moved off `NOT_RUN`, and only for the cases that exist. No
 aggregate benchmark completion is claimed.
 
-Numerical routing is `RUN` for the pre-commit half only: classification, contract
-applicability and coverage are measured for all six families, and the post-commit half
-of family B waits on a bounded commit.
+The bounded-commit family measures a command that writes, so its zero is stated
+differently from the others: `AIQE_CORE_WORKTREE_MUTATIONS = 0`. The index, the object
+database, HEAD and the reflog are attributed to the completion commit rather than
+denied, because `.git` byte immutability is not a claim a command that creates a commit
+can make honestly. Its other zeros are `POLICY_CANARY_EXECUTIONS = 0` — no hook, filter
+driver or signer ever ran — `AIQE_PUSH_CALLS = 0`, and no `REVIEWABLE` verdict without
+a commit behind it.
 
 The provisional macOS baseline was observed during protocol development. It is **not**
 published as an authority and no number from it appears in the README, because the

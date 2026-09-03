@@ -26,6 +26,9 @@ from fixtures.task import harness as task_harness  # noqa: E402,F401
 from fixtures.check import builders as check_builders  # noqa: E402,F401
 from fixtures.check import controls as check_controls  # noqa: E402,F401
 from fixtures.check import harness as check_harness  # noqa: E402,F401
+from fixtures.commit import builders as commit_builders  # noqa: E402,F401
+from fixtures.commit import controls as commit_controls  # noqa: E402,F401
+from fixtures.commit import harness as commit_harness  # noqa: E402,F401
 
 
 def cases():
@@ -50,3 +53,11 @@ def check_cases():
 
 def check_case_ids():
     return [case["id"] for case in check_cases()]
+
+
+def commit_cases():
+    return commit_harness.load_cases()["cases"]
+
+
+def commit_case_ids():
+    return [case["id"] for case in commit_cases()]

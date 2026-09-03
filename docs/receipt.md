@@ -68,6 +68,64 @@ can reach `REVIEWABLE`**, and the test suite asserts that as a property over eve
 combination of classification, coverage, consent, staleness and validator outcome
 this build can produce — not as a set of examples.
 
+## Post-commit truth
+
+`aiqe commit` creates a bounded completion commit and records its proof. That record,
+and only that record, turns this surface into:
+
+```
+Owned scope       VERIFIED
+Foreign staged    EXCLUDED
+Checked content   BOUND
+Commit            CREATED
+Push              NOT_PERFORMED_BY_AIQE
+Verdict           REVIEWABLE                                   exit 0
+```
+
+`EXCLUDED` requires both halves: the commit's changed pathset was proved equal to the
+expected owned changed pathset, *and* the staged state AIQE does not own was the same
+immediately before and immediately after. Either alone is not exclusion.
+
+Nothing is re-proved when the receipt renders. The parent, pathset and content were
+verified against a tree at the moment the commit was created, and re-deriving them now
+would answer a different question — "is this true of some commit today" — which is the
+generic historical verifier this product deliberately does not build.
+
+### The post-commit states that are not `REVIEWABLE`
+
+**Foreign staged state changed inside the mutation window.** The owned scope is
+verified and the content is bound, and AIQE still will not say `EXCLUDED`:
+
+```
+Owned scope   VERIFIED   Checked content  BOUND
+Foreign staged  UNKNOWN  Commit           CREATED
+Verdict       INCOMPLETE                                       exit 2
+```
+
+AIQE does not claim it caused the drift, and does not claim it did not.
+
+**A commit exists and violates its construction.** A parent that is not the pre-commit
+HEAD, a changed pathset that is not the expected one, or committed content that is not
+the checked content:
+
+```
+Verdict       NOT_REVIEWABLE                                   exit 1
+```
+
+The commit is not reset, reverted or amended away. Evidence truth outranks tidiness.
+
+**The repository has moved past the completion commit.**
+
+```
+Evidence      STALE      Commit  CREATED
+Verdict       INCOMPLETE  reason  COMPLETION_COMMIT_SUPERSEDED  exit 2
+```
+
+The proof is still true of that commit; it is no longer a statement about where this
+worktree is, so the receipt stops making one.
+
+Full reference: [`commit.md`](commit.md).
+
 ## Staleness
 
 Freshness is recomputed, never re-run. Four things, and only these four:
@@ -129,8 +187,15 @@ aiqe.receipt.local.v1
 ## `--local`
 
 Adds task identity, the label you typed, timestamps, the local commit identifiers,
-the owned pathset and its binding, and each validator's identity, definition digest,
-outcome and bounded output tail.
+the owned pathset and its binding, each validator's identity, definition digest,
+outcome and bounded output tail, and — once a completion commit exists — the parent
+and created commit ids, both changed pathsets, the foreign staged digests before and
+after, and the commit-policy preflight results.
+
+A commit id belongs here and nowhere else. You are standing in the repository it
+names, so withholding it would make the local receipt useless; putting it in the
+shareable one would make that receipt an index into your project. The raw commit
+message is absent from both, because nothing needs it and it is your text.
 
 Still excluded: the process environment, unbounded output, file contents, and
 anything scraped opportunistically from the repository. `--local` is a local terminal
@@ -154,8 +219,18 @@ ordinary state, reported as `INCOMPLETE` with `CONFIG_ABSENT`.
 ## Exit status
 
 ```
-0   REVIEWABLE          unreachable in this build
+0   REVIEWABLE          only after a verified bounded commit
 1   NOT_REVIEWABLE
 2   INCOMPLETE
 3   no receipt could be produced
 ```
+
+## Schema
+
+```
+RECEIPT_SCHEMA_VERSION = 2
+```
+
+Version 1 promised that `commit` was always `NONE` and had no `checked_content` or
+`push` field, so a reader of version 1 would misread a post-commit receipt as a
+pre-commit one. That is exactly the condition this number exists to signal.

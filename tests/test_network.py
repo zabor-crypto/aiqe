@@ -98,6 +98,8 @@ class DependencyProofTests(unittest.TestCase):
             "import aiqe.config, aiqe.patterns, aiqe.contracts, aiqe.classify\n"
             "import aiqe.pathstate, aiqe.validators, aiqe.evidence\n"
             "import aiqe.check, aiqe.receipt, aiqe.init\n"
+            "import aiqe.gitwrite, aiqe.commitpolicy, aiqe.checkin\n"
+            "import aiqe.commit, aiqe.commitevidence\n"
             "added = set(sys.modules) - baseline\n"
             "print(','.join(sorted(added)))\n"
         )
@@ -166,20 +168,32 @@ class ChildProcessProofTests(unittest.TestCase):
             self.assertTrue(invocation[0].endswith("git"), invocation)
 
     def test_no_remote_contacting_subcommand_is_reachable(self):
+        """Neither Git allowlist contains a subcommand that reaches a network.
+
+        This is what `AIQE_PUSH_CALLS = 0` rests on. `aiqe commit` needs a Git
+        layer that writes, and that layer is a second allowlist rather than a
+        relaxation of the first - so the property is checked on both, and
+        adding `push` to either is a test failure rather than a review
+        oversight.
+        """
         from aiqe.gitq import ALLOWED_SUBCOMMANDS
+        from aiqe.gitwrite import ALLOWED_SUBCOMMANDS as COMMIT_SUBCOMMANDS
 
         remote_subcommands = {
             "fetch", "pull", "push", "clone", "remote", "ls-remote",
             "submodule", "send-email", "request-pull", "credential",
         }
         self.assertEqual(ALLOWED_SUBCOMMANDS & remote_subcommands, set())
+        self.assertEqual(COMMIT_SUBCOMMANDS & remote_subcommands, set())
 
-    def test_only_two_modules_can_spawn_a_program(self):
-        """Process creation has exactly two doors, and they are named.
+    def test_only_the_named_modules_can_spawn_a_program(self):
+        """Process creation has exactly three doors, and they are named.
 
-        A third one appearing somewhere in the package is how a network call,
+        A fourth one appearing somewhere in the package is how a network call,
         or an unconsented execution, would arrive without anyone deciding to
-        add it.
+        add it. `gitwrite` is the door `aiqe commit` uses; it exists because a
+        commit must run under effective Git configuration, which the read-only
+        layer deliberately switches off.
         """
         spawners = []
         for name in sorted(os.listdir(SOURCE_DIRECTORY)):
@@ -199,7 +213,9 @@ class ChildProcessProofTests(unittest.TestCase):
                     for module in imported
                 ):
                     spawners.append(name)
-        self.assertEqual(sorted(set(spawners)), ["gitq.py", "validators.py"])
+        self.assertEqual(
+            sorted(set(spawners)), ["gitq.py", "gitwrite.py", "validators.py"]
+        )
 
     def test_a_validator_is_only_spawned_after_a_consent_decision(self):
         """The consent decision is taken before anything is created.
@@ -220,11 +236,13 @@ class ChildProcessProofTests(unittest.TestCase):
 
     def test_allowlist_is_enforced_not_merely_documented(self):
         from aiqe.gitq import GitRunner
+        from aiqe.gitwrite import CommitGitRunner
 
-        runner = GitRunner(os.getcwd())
-        with self.assertRaises(AssertionError):
-            runner.run("fetch", "origin")
-        self.assertEqual(runner.invocations, [])
+        for runner in (GitRunner(os.getcwd()), CommitGitRunner(os.getcwd())):
+            for subcommand in ("fetch", "push", "remote", "ls-remote"):
+                with self.assertRaises(AssertionError):
+                    runner.run(subcommand, "origin")
+            self.assertEqual(runner.invocations, [])
 
 
 class ModelCallTests(unittest.TestCase):

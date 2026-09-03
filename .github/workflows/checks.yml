@@ -69,6 +69,7 @@ jobs:
         run: |
           python -m unittest tests.test_non_utf8_paths --verbose
           python -m unittest tests.test_task_non_utf8 --verbose
+          python -m unittest tests.test_commit_non_utf8 --verbose
 
   benchmark:
     name: benchmark families and controls (${{ matrix.os }})
@@ -94,6 +95,10 @@ jobs:
         run: python bench/run-check-fixtures.py --output "${RUNNER_TEMP}/check.json"
       - name: Compare the check run against the retained artifact
         run: python bench/compare-results.py "${RUNNER_TEMP}/check.json"
+      - name: Run the bounded-commit benchmark family
+        run: python bench/run-commit-fixtures.py --output "${RUNNER_TEMP}/commit.json"
+      - name: Compare the commit run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/commit.json"
 
   install:
     name: install from a clean environment (${{ matrix.os }}, python ${{ matrix.python }})
@@ -136,6 +141,12 @@ jobs:
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" receipt --local --format json > /dev/null \
             && rc=0 || rc=$?
           test "$rc" -eq 2
+          # `commit` refuses with 3 for the same reason `check` does: this
+          # repository has no aiqe.toml, and an absent configuration is a
+          # refusal rather than a default. It runs no validator and never
+          # pushes; the exit code is the assertion.
+          "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" commit -m "install proof" && rc=0 || rc=$?
+          test "$rc" -eq 3
           "${RUNNER_TEMP}/aiqe-venv/bin/aiqe" task end
           echo "Installed console script works."
       - name: Confirm no third-party dependency was installed

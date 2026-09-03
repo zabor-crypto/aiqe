@@ -23,28 +23,45 @@ the validator definition digests - and comparing. Re-running validators to
 answer "is this still true" would make the answer depend on running them
 again, which is the question it was supposed to settle.
 
-**`REVIEWABLE` cannot be reached here, and that is deliberate.** A completely
-green pre-commit check produces:
+**`REVIEWABLE` is reachable from exactly one place.** A completely green
+pre-commit check still produces:
 
 ```
 Owned scope     CHECKED
 Foreign staged  OBSERVED
+Checked content CHECKED
 Evidence        CURRENT
 Commit          NONE
 Verdict         INCOMPLETE
 Reason          BOUNDED_COMMIT_NOT_CREATED
 ```
 
-Every obligation that exists today is discharged, and the verdict is still
+Every pre-commit obligation is discharged and the verdict is still
 `INCOMPLETE`, because `REVIEWABLE` is a claim about a commit whose content is
-provably the checked content - and no commit has been created. The words
-`VERIFIED`, `EXCLUDED` and `CREATED` are absent from this surface for the same
-reason. Emitting any of them now would mean the vocabulary had to be quietly
-redefined later, and a verdict vocabulary that shifts is not a verdict
-vocabulary.
+provably the checked content. Only `aiqe commit` can create one, and only its
+recorded proof turns this surface into:
+
+```
+Owned scope     VERIFIED
+Foreign staged  EXCLUDED
+Checked content BOUND
+Commit          CREATED
+Push            NOT_PERFORMED_BY_AIQE
+Verdict         REVIEWABLE
+```
+
+`VERIFIED`, `EXCLUDED`, `BOUND` and `CREATED` were held back from this surface
+until the proof behind each of them existed, rather than being emitted early
+and redefined later.
+
+**A post-commit receipt is about the commit AIQE created, and says so.** If the
+repository's HEAD is no longer that commit, the receipt stops claiming a
+current reviewable state. This is not a general verifier for arbitrary
+historical commits, and does not become one.
 """
 
 from . import classify as classify_module
+from . import commitevidence as commitevidence_module
 from . import config as config_module
 from . import evidence as evidence_module
 from . import exits
@@ -56,7 +73,12 @@ from .textsafe import display_bytes, display_text
 
 #: The shape of the default receipt. A consumer that reads this knows which
 #: fields to expect.
-RECEIPT_SCHEMA_VERSION = 1
+#:
+#: Version 2 is the bounded-commit shape. Version 1 promised that `commit` was
+#: always `NONE` and had no `checked_content` or `push` field, so a reader of
+#: version 1 would misread a post-commit receipt as a pre-commit one. That is
+#: exactly the condition this number exists to signal.
+RECEIPT_SCHEMA_VERSION = 2
 
 #: What was redacted, and by which rule. Bound to the serialiser so that a
 #: receipt cannot silently start carrying more than the policy it names.
@@ -74,7 +96,19 @@ NONE = "NONE"
 CURRENT = "CURRENT"
 STALE = "STALE"
 
+#: The post-commit half of the vocabulary. Each one is a claim `aiqe commit`
+#: proved and recorded; none of them can be produced by a check.
+VERIFIED = "VERIFIED"
+UNVERIFIED = "UNVERIFIED"
+EXCLUDED = "EXCLUDED"
+UNKNOWN = "UNKNOWN"
+BOUND = "BOUND"
+NOT_BOUND = "NOT_BOUND"
+CREATED = "CREATED"
+NOT_PERFORMED_BY_AIQE = "NOT_PERFORMED_BY_AIQE"
+
 BOUNDED_COMMIT_NOT_CREATED = "BOUNDED_COMMIT_NOT_CREATED"
+COMPLETION_COMMIT_SUPERSEDED = "COMPLETION_COMMIT_SUPERSEDED"
 EVIDENCE_NONE = "EVIDENCE_NONE"
 CONFIG_ABSENT = "CONFIG_ABSENT"
 NO_ACTIVE_TASK = "NO_ACTIVE_TASK"
@@ -193,6 +227,9 @@ def run(cwd, local=False, env=None):
 
     try:
         stored = evidence_module.read(state_directory, record["task_id"])
+        committed = commitevidence_module.read(
+            state_directory, record["task_id"]
+        )
     except taskstate.StateError as error:
         # The same refusal as everywhere else: AIQE will not read local state
         # it cannot trust, and a receipt built on it would be worse than none.
@@ -221,8 +258,10 @@ def run(cwd, local=False, env=None):
         definitions,
     )
 
-    state = _assess(record, stored, current, config)
-    document = _document(__version__, record, stored, owned_states, state, local)
+    state = _assess(record, stored, current, config, committed, repository)
+    document = _document(
+        __version__, record, stored, committed, owned_states, state, local
+    )
     lines = _render_local(document) if local else _render_default(document)
     return ReceiptOutcome(RECEIPT_PRODUCED, state["exit_code"], lines, document)
 
@@ -234,8 +273,19 @@ def _refusal(code, exit_code, lines):
 # --- Adjudication ----------------------------------------------------------
 
 
-def _assess(record, stored, current, config):
-    """Decide the receipt's verdict from evidence and current authority."""
+def _assess(record, stored, current, config, committed, repository):
+    """Decide the receipt's verdict from evidence and current authority.
+
+    Once a completion commit exists the freshness question changes shape. The
+    check's recorded HEAD is the commit's *parent*, so the pre-commit
+    staleness comparison would report `STALE_HEAD` on every correct
+    completion - a false alarm on the one path this whole product exists to
+    reach. What is asked instead is the question that is actually load-bearing
+    after a commit: is the repository still on the commit AIQE created?
+    """
+    if committed is not None:
+        return _assess_post_commit(committed, repository)
+
     reasons = []
 
     if stored is None:
@@ -244,6 +294,10 @@ def _assess(record, stored, current, config):
             reasons.append(CONFIG_ABSENT)
         return {
             "owned_scope": DECLARED,
+            "foreign_staged": OBSERVED,
+            "checked_content": NONE,
+            "commit": NONE,
+            "push": NOT_PERFORMED_BY_AIQE,
             "evidence": NONE,
             "verdict": INCOMPLETE,
             "exit_code": exits.INCOMPLETE,
@@ -257,6 +311,10 @@ def _assess(record, stored, current, config):
     if staleness:
         return {
             "owned_scope": CHECKED,
+            "foreign_staged": OBSERVED,
+            "checked_content": CHECKED,
+            "commit": NONE,
+            "push": NOT_PERFORMED_BY_AIQE,
             "evidence": STALE,
             "verdict": INCOMPLETE,
             "exit_code": exits.INCOMPLETE,
@@ -271,6 +329,10 @@ def _assess(record, stored, current, config):
     if completion == "NOT_REVIEWABLE":
         return {
             "owned_scope": CHECKED,
+            "foreign_staged": OBSERVED,
+            "checked_content": CHECKED,
+            "commit": NONE,
+            "push": NOT_PERFORMED_BY_AIQE,
             "evidence": CURRENT,
             "verdict": NOT_REVIEWABLE,
             "exit_code": exits.FAIL,
@@ -284,6 +346,10 @@ def _assess(record, stored, current, config):
         # implied.
         return {
             "owned_scope": CHECKED,
+            "foreign_staged": OBSERVED,
+            "checked_content": CHECKED,
+            "commit": NONE,
+            "push": NOT_PERFORMED_BY_AIQE,
             "evidence": CURRENT,
             "verdict": INCOMPLETE,
             "exit_code": exits.INCOMPLETE,
@@ -293,6 +359,10 @@ def _assess(record, stored, current, config):
 
     return {
         "owned_scope": CHECKED,
+        "foreign_staged": OBSERVED,
+        "checked_content": CHECKED,
+        "commit": NONE,
+        "push": NOT_PERFORMED_BY_AIQE,
         "evidence": CURRENT,
         "verdict": INCOMPLETE,
         "exit_code": exits.INCOMPLETE,
@@ -301,10 +371,52 @@ def _assess(record, stored, current, config):
     }
 
 
+def _assess_post_commit(committed, repository):
+    """Render the proof `aiqe commit` recorded, or say it no longer applies.
+
+    Nothing is re-proved here. The commit's parent, pathset and content were
+    verified against a tree at the moment the commit was created, and
+    re-deriving them now would answer a different question - "is this true of
+    some commit today" - which is the generic historical verifier this product
+    deliberately does not build.
+    """
+    result = committed.get("result") or {}
+
+    if repository.head_sha != committed.get("commit_sha"):
+        # The repository has moved past the completion commit. The commit's
+        # proof is still true of that commit, and it is no longer a statement
+        # about where this worktree is, so the receipt stops claiming one.
+        return {
+            "owned_scope": result.get("owned_scope") or CHECKED,
+            "foreign_staged": UNKNOWN,
+            "checked_content": result.get("checked_content") or CHECKED,
+            "commit": CREATED,
+            "push": NOT_PERFORMED_BY_AIQE,
+            "evidence": STALE,
+            "verdict": INCOMPLETE,
+            "exit_code": exits.INCOMPLETE,
+            "reasons": (COMPLETION_COMMIT_SUPERSEDED,),
+            "staleness": (evidence_module.STALE_HEAD,),
+        }
+
+    return {
+        "owned_scope": result.get("owned_scope") or CHECKED,
+        "foreign_staged": result.get("foreign_staged") or UNKNOWN,
+        "checked_content": result.get("checked_content") or CHECKED,
+        "commit": CREATED,
+        "push": NOT_PERFORMED_BY_AIQE,
+        "evidence": CURRENT,
+        "verdict": result.get("verdict") or INCOMPLETE,
+        "exit_code": result.get("exit_code", exits.INCOMPLETE),
+        "reasons": tuple(result.get("reasons") or ()),
+        "staleness": (),
+    }
+
+
 # --- The documents ---------------------------------------------------------
 
 
-def _document(aiqe_version, record, stored, owned_states, state, local):
+def _document(aiqe_version, record, stored, committed, owned_states, state, local):
     """Build the receipt document.
 
     The default half is assembled first and is a strict subset of the local
@@ -322,9 +434,11 @@ def _document(aiqe_version, record, stored, owned_states, state, local):
         "owned_scope": state["owned_scope"],
         "owned_declared_count": len(owned_states),
         "owned_changed_count": sum(1 for entry in owned_states if entry.changed),
-        "foreign_staged": OBSERVED,
+        "foreign_staged": state["foreign_staged"],
+        "checked_content": state["checked_content"],
         "evidence": state["evidence"],
-        "commit": NONE,
+        "commit": state["commit"],
+        "push": state["push"],
         "verdict": state["verdict"],
         "reasons": list(state["reasons"]),
         "exit_code": state["exit_code"],
@@ -332,11 +446,19 @@ def _document(aiqe_version, record, stored, owned_states, state, local):
         "coverage": counts["coverage"],
         "validators": counts["validators"],
     }
+    if state["commit"] == CREATED:
+        # Counts, never identifiers. How many paths the commit changed is a
+        # number; which paths they were is an inventory of somebody's work.
+        document["committed_path_count"] = len(
+            (committed or {}).get("actual_changed_paths_b64") or []
+        )
     if not local:
         return document
 
     document["redaction_policy"] = LOCAL_REDACTION_POLICY
-    document["local"] = _local_detail(record, stored, owned_states, state)
+    document["local"] = _local_detail(
+        record, stored, committed, owned_states, state
+    )
     return document
 
 
@@ -389,7 +511,7 @@ def _counts(stored, owned_states):
     }
 
 
-def _local_detail(record, stored, owned_states, state):
+def _local_detail(record, stored, committed, owned_states, state):
     """The richer local view. Still bounded, still allowlisted.
 
     What this adds over the default: task identity, the label the user typed,
@@ -427,6 +549,7 @@ def _local_detail(record, stored, owned_states, state):
         "applicable_contracts": [],
         "coverage": [],
         "validators": [],
+        "commit": _local_commit_detail(committed),
     }
     if stored is None:
         return detail
@@ -459,6 +582,44 @@ def _local_detail(record, stored, owned_states, state):
     return detail
 
 
+def _local_commit_detail(committed):
+    """The allowlisted commit identifiers, local surface only.
+
+    A commit id belongs here and nowhere else. The user is standing in the
+    repository this names, so withholding it from them would make the local
+    receipt useless; putting it in the shareable one would make that receipt
+    an index into their project. The raw commit message is absent from both,
+    because nothing needs it and it is user text that would travel.
+    """
+    if committed is None:
+        return None
+    import base64
+
+    def paths(key):
+        return sorted(
+            display_bytes(base64.b64decode(value))
+            for value in committed.get(key) or []
+        )
+
+    return {
+        "committed_at": committed.get("committed_at"),
+        "parent_sha": committed.get("parent_sha"),
+        "commit_sha": committed.get("commit_sha"),
+        "expected_changed_paths": paths("expected_changed_paths_b64"),
+        "actual_changed_paths": paths("actual_changed_paths_b64"),
+        "foreign_staged_pre_digest": committed.get("foreign_staged_pre_digest"),
+        "foreign_staged_post_digest": committed.get("foreign_staged_post_digest"),
+        "foreign_staged_pre_entries": len(
+            committed.get("foreign_staged_pre") or []
+        ),
+        "foreign_staged_post_entries": len(
+            committed.get("foreign_staged_post") or []
+        ),
+        "preflight": committed.get("preflight") or {},
+        "push_performed_by_aiqe": committed.get("push_performed_by_aiqe", False),
+    }
+
+
 # --- Rendering -------------------------------------------------------------
 
 
@@ -472,8 +633,10 @@ def _render_default(document):
         "  Owned paths     %d declared · %d changed"
         % (document["owned_declared_count"], document["owned_changed_count"]),
         "  Foreign staged  %s" % (document["foreign_staged"],),
+        "  Checked content %s" % (document["checked_content"],),
         "  Evidence        %s" % (document["evidence"],),
         "  Commit          %s" % (document["commit"],),
+        "  Push            %s" % (document["push"],),
         "",
         "  Classification  %d quant · %d non-quant · %d unclassified"
         % (
@@ -504,9 +667,17 @@ def _render_default(document):
             document["validators"]["required_total"],
             document["validators"]["required_passed"],
         ),
-        "",
-        "  Verdict         %s" % (document["verdict"],),
     ]
+    if "committed_path_count" in document:
+        lines.append(
+            "  Committed paths %d" % (document["committed_path_count"],)
+        )
+    lines.extend(
+        [
+            "",
+            "  Verdict         %s" % (document["verdict"],),
+        ]
+    )
     if document["reasons"]:
         lines.append("  Reason          %s" % (" · ".join(document["reasons"]),))
     lines.append("")
@@ -576,6 +747,35 @@ def _render_local(document):
                 if entry.get(stream):
                     for line in entry[stream].split("\n"):
                         lines.append("          " + line)
+
+    commit = detail.get("commit")
+    if commit is not None:
+        lines.append("")
+        lines.append("  Completion commit")
+        lines.append("      Created     %s" % (commit["committed_at"],))
+        lines.append("      Parent      %s" % (commit["parent_sha"],))
+        lines.append("      Commit      %s" % (commit["commit_sha"],))
+        lines.append(
+            "      Pathset     %d expected · %d actual"
+            % (
+                len(commit["expected_changed_paths"]),
+                len(commit["actual_changed_paths"]),
+            )
+        )
+        for path in commit["actual_changed_paths"]:
+            lines.append("          %s" % (path,))
+        lines.append(
+            "      Foreign     %d entries before · %d after"
+            % (
+                commit["foreign_staged_pre_entries"],
+                commit["foreign_staged_post_entries"],
+            )
+        )
+        lines.append(
+            "      Push        %s"
+            % ("performed by AIQE" if commit["push_performed_by_aiqe"]
+               else NOT_PERFORMED_BY_AIQE,)
+        )
 
     if detail["staleness"]:
         lines.append("")

@@ -263,8 +263,15 @@ every validator's semantic definition digest
 Bounded by the owned pathset. There is no whole-tree fingerprint, and there will not
 be one: the cost of a check must not scale with the size of somebody's repository.
 
-This binding is the authority a future `aiqe commit` will verify against. That
-command does not exist, and nothing here verifies a commit.
+This binding is the authority `aiqe commit` verifies against, and it is recomputed
+immediately before that command's first index mutation. Nothing in `check` verifies a
+commit; see [`commit.md`](commit.md).
+
+One conservatism is deliberate and is closed at commit time rather than here. The
+comparison above is over raw bytes, so under EOL normalisation a file Git would call
+unchanged reads as changed — which adds obligations rather than removing them.
+`aiqe commit` derives the *expected* checked-in blob instead, so a correct commit under
+`core.autocrlf` is not reported as a mismatch.
 
 ## Validator-induced change
 

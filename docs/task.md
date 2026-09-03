@@ -173,8 +173,9 @@ staged when the task began.
 
 It is informational and local. It is **not** the foreign-staged guarantee —
 the load-bearing before-and-after comparison that decides whether a bounded
-commit excluded work the task never mentioned belongs to `aiqe commit`, and
-recording a number here does not make that comparison.
+commit excluded work the task never mentioned is a structured delta taken
+inside `aiqe commit`'s mutation window, and recording a number here does not
+make that comparison. See [`commit.md`](commit.md).
 
 The count comes from `diff-index --cached`, which compares the index against
 HEAD and reads no worktree content, so it cannot refresh the index and cannot
@@ -445,7 +446,8 @@ by assertion. The frozen requirement — that a process crash never leaves a
 half-written record a reader accepts — is met and tested separately.
 
 **The staged count is informational.** `foreign_staged_count_at_start` is not
-the foreign-staged guarantee; that comparison belongs to `aiqe commit`.
+the foreign-staged guarantee; that comparison is the structured PRE/POST delta
+`aiqe commit` takes around its own mutation window.
 
 **No task history.** Ending a task removes the active record. Retaining an
 ended one would be the first row of a task history database, which is out of

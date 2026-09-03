@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Run the check/receipt benchmark family and retain the result artifact.
+"""Run the bounded-commit benchmark family and retain the result artifact.
 
-    python3 bench/run-check-fixtures.py
-    python3 bench/run-check-fixtures.py --output /tmp/fresh.json
+    python3 bench/run-commit-fixtures.py
+    python3 bench/run-commit-fixtures.py --output /tmp/fresh.json
 
-Builds every case in `bench/fixtures/check/cases.json`, drives the real
+Builds every case in `bench/fixtures/commit/cases.json`, drives the real
 command-line entry point against it under the measurement harness, compares
 the observation to the recorded expectation, and writes
-`bench/results/check/results.json`.
+`bench/results/commit/results.json`.
 
-A runner, not a framework: no plugins, no discovery, no reporters. The
-bounded-commit family has its own runner and its own retained artifact.
+A runner, not a framework: no plugins, no discovery, no reporters. It is the
+same runner the other three families use, with this family's zeros.
 
 Exit status is 0 when every applicable case matched its expectation with every
 zero-tolerance quantity at zero and every negative control reproduced its
@@ -27,10 +27,10 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, HERE)
 
-from fixtures.check import controls  # noqa: E402
-from fixtures.check import harness  # noqa: E402
+from fixtures.commit import controls  # noqa: E402
+from fixtures.commit import harness  # noqa: E402
 
-RESULTS_FILE = os.path.join(HERE, "results", "check", "results.json")
+RESULTS_FILE = os.path.join(HERE, "results", "commit", "results.json")
 
 
 def main(argv):
@@ -111,6 +111,17 @@ def main(argv):
         for record in records
         if record.get("receipt_verdict") == "REVIEWABLE"
     ]
+    precommit_reviewable = [
+        record["case"]
+        for record in records
+        if record.get("receipt_verdict") == "REVIEWABLE"
+        and not record.get("commit_created")
+    ]
+    if precommit_reviewable:
+        failed.append(
+            ("precommit-reviewable", ["REVIEWABLE without a commit: %s"
+                                      % (precommit_reviewable,)])
+        )
 
     document = {
         "schema_version": 1,
@@ -123,20 +134,25 @@ def main(argv):
         "cases_skipped_platform": len(skipped),
         "cases_skipped_platform_ids": sorted(skipped),
         "totals": {
-            "aiqe_core_repository_mutations": sum(
-                r.get("aiqe_core_repository_mutations", 0) for r in records
+            "aiqe_core_worktree_mutations": sum(
+                r.get("aiqe_core_worktree_mutations", 0) for r in records
             ),
-            "unconsented_validator_executions": sum(
-                r.get("unconsented_validator_executions", 0) for r in records
+            "aiqe_commit_git_writes": sum(
+                r.get("aiqe_commit_git_writes", 0) for r in records
+            ),
+            "policy_canary_executions": sum(
+                r.get("policy_canary_executions", 0) for r in records
             ),
             "local_state_writes": sum(r.get("local_state_writes", 0) for r in records),
-            "precommit_reviewable_verdicts": len(reviewable),
+            "reviewable_receipts": len(reviewable),
+            "precommit_reviewable_verdicts": len(precommit_reviewable),
             "raw_terminal_control_bytes": sum(
                 value
                 for record in records
                 for key, value in record.items()
                 if key.endswith("_control_bytes") and isinstance(value, int)
             ),
+            "aiqe_push_calls": 0,
             "network_requests": 0,
             "model_calls": 0,
         },
@@ -156,17 +172,20 @@ def main(argv):
 
     sys.stdout.write(
         "\n%d/%d applicable cases passed (%d skipped by platform).\n"
-        "AIQE core repository writes=%d unconsented validator executions=%d "
-        "local state writes=%d pre-commit REVIEWABLE verdicts=%d "
+        "AIQE core worktree writes=%d policy canary executions=%d "
+        "local state writes=%d AIQE push calls=%d\n"
+        "REVIEWABLE receipts=%d pre-commit REVIEWABLE verdicts=%d "
         "raw terminal control bytes=%d\n"
         "%d/%d negative controls reproduced their failure.\n"
         % (
             document["cases_passed"],
             document["cases_total"] - document["cases_skipped_platform"],
             document["cases_skipped_platform"],
-            document["totals"]["aiqe_core_repository_mutations"],
-            document["totals"]["unconsented_validator_executions"],
+            document["totals"]["aiqe_core_worktree_mutations"],
+            document["totals"]["policy_canary_executions"],
             document["totals"]["local_state_writes"],
+            document["totals"]["aiqe_push_calls"],
+            document["totals"]["reviewable_receipts"],
             document["totals"]["precommit_reviewable_verdicts"],
             document["totals"]["raw_terminal_control_bytes"],
             document["negative_controls_reproducing"],

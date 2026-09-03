@@ -407,6 +407,7 @@ class PrivacyTests(ReceiptTestCase):
             sorted(
                 [
                     "aiqe_version",
+                    "checked_content",
                     "classification",
                     "command",
                     "commit",
@@ -417,6 +418,7 @@ class PrivacyTests(ReceiptTestCase):
                     "owned_changed_count",
                     "owned_declared_count",
                     "owned_scope",
+                    "push",
                     "reasons",
                     "receipt_schema_version",
                     "redaction_policy",
@@ -448,6 +450,7 @@ class PrivacyTests(ReceiptTestCase):
                 receipt.INCOMPLETE,
                 receipt.NOT_REVIEWABLE,
                 receipt.BOUNDED_COMMIT_NOT_CREATED,
+                receipt.NOT_PERFORMED_BY_AIQE,
             ]
         )
         from aiqe import __version__

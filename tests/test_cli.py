@@ -48,19 +48,45 @@ class InvalidInvocationTests(unittest.TestCase):
         self.assertEqual(status, exits.UNSUPPORTED)
         self.assertIn("unknown command", err)
 
-    def test_reserved_commands_are_not_implemented(self):
-        """A frozen future command must not parse into a silent no-op.
+    def test_the_frozen_surface_has_no_reserved_command_left(self):
+        """Nothing parses into a silent no-op, because nothing is reserved.
 
         A command that accepts its arguments and does nothing advertises a
-        capability the product has not built. `task` left this list when it
-        acquired an implementation, and `init`, `check` and `receipt` left it
-        when they acquired theirs. `commit` is what remains.
+        capability the product has not built. `task` left the reserved list
+        when it acquired an implementation, `init`, `check` and `receipt` left
+        it when they acquired theirs, and `commit` was the last one out.
         """
-        for command in ("commit",):
-            status, out, err = run([command])
-            self.assertEqual(status, exits.UNSUPPORTED, command)
-            self.assertEqual(out, "", command)
-            self.assertIn("unknown command", err, command)
+        from aiqe.cli import USAGE
+
+        self.assertIn("aiqe commit  -m <message>", USAGE)
+        self.assertNotIn("not implemented", USAGE)
+
+        status, out, err = run(["frobnicate"])
+        self.assertEqual(status, exits.UNSUPPORTED)
+        self.assertEqual(out, "")
+        self.assertIn("unknown command", err)
+
+    def test_commit_takes_exactly_one_flag(self):
+        """No `--amend`, no `--no-verify`, no `--allow-empty`, no `--push`.
+
+        Each of those is a way to make the command succeed by weakening the
+        claim it makes, so none of them parses.
+        """
+        for argv in (
+            ["commit"],
+            ["commit", "-m"],
+            ["commit", "-m", "a", "-m", "b"],
+            ["commit", "-m", "a", "--amend"],
+            ["commit", "-m", "a", "--no-verify"],
+            ["commit", "-m", "a", "--allow-empty"],
+            ["commit", "--amend", "-m", "a"],
+            ["commit", "-m", "   "],
+            ["commit", "-m", ""],
+        ):
+            status, out, err = run(argv)
+            self.assertEqual(status, exits.UNSUPPORTED, argv)
+            self.assertEqual(out, "", argv)
+            self.assertIn("usage:", err, argv)
 
     def test_unknown_flag(self):
         for flag in ("--verbose", "--debug", "--fix", "--write", "--network"):

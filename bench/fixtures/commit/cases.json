@@ -1,0 +1,914 @@
+{
+  "cases": [
+    {
+      "description": "a CRLF worktree file commits as its normalised blob and stays bound",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-crlf-normalisation"
+    },
+    {
+      "description": "a detached HEAD is refused rather than silently claimed as supported",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "DETACHED_HEAD_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-detached-head"
+    },
+    {
+      "description": "an unresolvable effective configuration refuses rather than guessing",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "EFFECTIVE_CONFIG_UNRESOLVED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-effective-config-unresolved"
+    },
+    {
+      "description": "an owned path the task never touched produces no empty completion commit",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 2,
+        "commit_reasons": [
+          "NO_OWNED_CHANGES_TO_COMMIT"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-empty-expected-changeset"
+    },
+    {
+      "description": "an executable owned file keeps mode 100755 through the commit",
+      "expect": {
+        "changed_paths": [
+          "src/tool.sh"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "owned_tree_modes": {
+          "src/tool.sh": "100755"
+        },
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-executable-mode"
+    },
+    {
+      "description": "a binding from core.attributesFile is resolved and refuses",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "CHECKIN_FILTER_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-filter-attributes-file"
+    },
+    {
+      "description": "a configured driver bound to no owned path is not a blocker",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-filter-configured-but-unbound"
+    },
+    {
+      "description": "a binding from $GIT_DIR/info/attributes is resolved and refuses",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "CHECKIN_FILTER_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-filter-info-attributes"
+    },
+    {
+      "description": "a process filter refuses, and is never started",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "CHECKIN_FILTER_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-filter-process"
+    },
+    {
+      "description": "a driver defined through a global include still refuses",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "CHECKIN_FILTER_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-filter-through-include"
+    },
+    {
+      "description": "a tracked .gitattributes binding a clean filter refuses, filter unrun",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "CHECKIN_FILTER_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-filter-tracked-attributes"
+    },
+    {
+      "description": "a foreign staged addition survives the bounded commit untouched",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-foreign-staged-addition"
+    },
+    {
+      "description": "a foreign staged deletion survives the bounded commit untouched",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-foreign-staged-deletion"
+    },
+    {
+      "description": "a foreign staged mode change survives the bounded commit untouched",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-foreign-staged-mode-change"
+    },
+    {
+      "description": "a foreign staged modification survives the bounded commit untouched",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-foreign-staged-modification"
+    },
+    {
+      "description": "a foreign untracked file is neither committed nor staged",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-foreign-untracked-path"
+    },
+    {
+      "description": "a completion commit driven from a subdirectory of the worktree",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "owned_tree_modes": {
+          "src/strategy/alpha.py": "100644"
+        },
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-from-a-subdirectory"
+    },
+    {
+      "description": "an active commit-msg hook refuses, and does not run",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_HOOK_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-hook-commit-msg"
+    },
+    {
+      "description": "an active post-commit hook refuses, and does not run",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_HOOK_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-hook-post-commit"
+    },
+    {
+      "description": "an active pre-commit hook refuses, and does not run",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_HOOK_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-hook-pre-commit"
+    },
+    {
+      "description": "an active prepare-commit-msg hook refuses, and does not run",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_HOOK_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-hook-prepare-commit-msg"
+    },
+    {
+      "description": "a hook reached through core.hooksPath refuses, and does not run",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_HOOK_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-hooks-path"
+    },
+    {
+      "description": "an owned filename beginning with a dash is a name, not an option",
+      "expect": {
+        "changed_paths": [
+          "-dash.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-leading-dash-name"
+    },
+    {
+      "description": "a completion commit in a linked worktree",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-linked-worktree"
+    },
+    {
+      "description": "owned filenames that are pathspec syntax commit themselves and no decoy",
+      "expect": {
+        "changed_paths": [
+          "src/-dash.py",
+          "src/:(top)magic.py",
+          "src/br[ack].py",
+          "src/nl\nname.py",
+          "src/q?.py",
+          "src/sp ace\ttab.py",
+          "src/star*.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-literal-pathspec-names"
+    },
+    {
+      "description": "a merge in progress is a topology this build refuses to commit onto",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "MERGE_IN_PROGRESS"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-merge-in-progress"
+    },
+    {
+      "description": "a mode change with identical content is a change, and is committed",
+      "expect": {
+        "changed_paths": [
+          "src/plain.sh"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "owned_tree_modes": {
+          "src/plain.sh": "100755"
+        },
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-mode-change"
+    },
+    {
+      "description": "a modification, a creation and a deletion in one bounded commit",
+      "expect": {
+        "changed_paths": [
+          "src/beta.py",
+          "src/gamma.py",
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-multiple-owned-paths"
+    },
+    {
+      "description": "a new untracked owned file, committed through transactional intent-to-add",
+      "expect": {
+        "changed_paths": [
+          "src/created.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "owned_tree_modes": {
+          "src/created.py": "100644"
+        },
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-new-untracked-path"
+    },
+    {
+      "description": "an owned filename that is not valid UTF-8 commits as its exact bytes",
+      "expect": {
+        "changed_paths": [
+          "src/\udcff\udcfe-invalid.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-non-utf8-name",
+      "platform": "linux"
+    },
+    {
+      "description": "an owned path deleted from the worktree is committed as a deletion",
+      "expect": {
+        "changed_paths": [
+          "src/gone.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "owned_tree_modes": {
+          "src/gone.py": null
+        },
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-owned-deletion"
+    },
+    {
+      "description": "one tracked owned file, modified and committed",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "owned_tree_modes": {
+          "src/strategy/alpha.py": "100644"
+        },
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE"
+      },
+      "id": "commit-owned-modification"
+    },
+    {
+      "description": "a later commit stops the receipt claiming a current reviewable state",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 2,
+        "receipt_foreign_staged": "UNKNOWN",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_reasons": [
+          "COMPLETION_COMMIT_SUPERSEDED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-postcommit-head-move"
+    },
+    {
+      "description": "a second completion commit for the same task refuses deterministically",
+      "expect": {
+        "changed_paths": [
+          "src/strategy/alpha.py"
+        ],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": true,
+        "commit_evidence_schema": 1,
+        "commit_exit": 0,
+        "commit_reasons": [],
+        "commit_verdict": "REVIEWABLE",
+        "evidence_push_performed": false,
+        "foreign_staged_preserved": true,
+        "parent_is_pre_commit_head": true,
+        "receipt_checked_content": "BOUND",
+        "receipt_commit": "CREATED",
+        "receipt_exit": 0,
+        "receipt_foreign_staged": "EXCLUDED",
+        "receipt_owned_scope": "VERIFIED",
+        "receipt_verdict": "REVIEWABLE",
+        "second_commit_created": false,
+        "second_commit_exit": 3,
+        "second_commit_reasons": [
+          "COMPLETION_COMMIT_ALREADY_CREATED"
+        ]
+      },
+      "id": "commit-second-commit-refused"
+    },
+    {
+      "description": "commit.gpgSign in repository scope refuses, and no signer runs",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_SIGNING_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-signing-configured"
+    },
+    {
+      "description": "commit.gpgSign reached through a global include refuses just the same",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 3,
+        "commit_reasons": [
+          "COMMIT_SIGNING_POLICY_UNSUPPORTED"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "BOUNDED_COMMIT_NOT_CREATED"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-signing-through-include"
+    },
+    {
+      "description": "an owned file edited after the check refuses before any index mutation",
+      "expect": {
+        "changed_paths": [],
+        "check_completion": "REVIEWABLE_CANDIDATE",
+        "check_exit": 0,
+        "commit_created": false,
+        "commit_evidence_schema": null,
+        "commit_exit": 2,
+        "commit_reasons": [
+          "STALE_OWNED_CONTENT"
+        ],
+        "index_unchanged": true,
+        "receipt_commit": "NONE",
+        "receipt_exit": 2,
+        "receipt_reasons": [
+          "STALE_OWNED_CONTENT"
+        ],
+        "receipt_verdict": "INCOMPLETE"
+      },
+      "id": "commit-stale-owned-edit"
+    }
+  ],
+  "family": "BOUNDED_COMMIT"
+}

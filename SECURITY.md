@@ -140,25 +140,46 @@ AIQE core.
 
 ## `aiqe commit` boundary
 
-`aiqe commit` is not implemented. This section describes the boundary it will have; the
-paragraphs below are a statement of intent, not of current behaviour.
+`aiqe commit` is implemented. It is optional: when used it creates one bounded
+completion commit and nothing else, and it never pushes.
 
-`aiqe commit` is optional. When used, it creates a bounded completion commit and nothing
-else. It never pushes.
+`AIQE_PUSH_CALLS = 0` is a property of the code rather than a promise in prose. The Git
+allowlist `aiqe commit` runs through contains no network subcommand, the guard raises
+rather than degrading, and the test suite asserts both. The receipt wording is
+`Push = NOT_PERFORMED_BY_AIQE`: a statement about AIQE, and deliberately
+not a claim that nobody else pushed concurrently.
 
-AIQE will **refuse rather than bypass repository governance.** Specifically, these
-conditions make the operation unsupported rather than triggering a workaround:
+AIQE **refuses rather than bypassing repository governance.** These conditions make the
+operation unsupported rather than triggering a workaround:
 
 ```
-ACTIVE_COMMIT_HOOK                              -> UNSUPPORTED
-EFFECTIVE_COMMIT_SIGNING_REQUIRED               -> UNSUPPORTED
-EXTERNAL_CLEAN_OR_PROCESS_FILTER_ON_OWNED_PATH  -> UNSUPPORTED
+ACTIVE_COMMIT_HOOK                              -> UNSUPPORTED   exit 3
+EFFECTIVE_COMMIT_SIGNING_REQUIRED               -> UNSUPPORTED   exit 3
+EXTERNAL_CLEAN_OR_PROCESS_FILTER_ON_OWNED_PATH  -> UNSUPPORTED   exit 3
+EFFECTIVE_CONFIG_UNRESOLVED                     -> UNSUPPORTED   exit 3
+UNSUPPORTED_TOPOLOGY                            -> UNSUPPORTED   exit 3
 ```
+
+There is no `--no-verify` and no `--no-gpg-sign`. Every refusal is measured with the
+thing being refused installed as a canary that records the fact that it ran, in a
+directory outside the repository, and the retained fixtures assert the marker is
+absent: `hook, filter and signer executions = 0`.
+
+A driver that is configured and bound to no owned path is **not** a blocker. Refusing
+there would make AIQE unusable on any machine that has ever installed Git LFS, and
+would teach its users that its refusals are noise.
 
 Commit preflight reasons about the **effective** Git configuration the actual commit
 would use — hooks path, signing, and filter drivers — including applicable `include` and
 `includeIf` chains. If the relevant effective configuration cannot be resolved without
 ambiguity, the answer is `UNSUPPORTED`. Absence is never assumed.
+
+Write confinement during a commit is stated rather than overstated. The expected Git
+mutations are the index, the object database, HEAD, the ref and its reflog, and ordinary
+commit metadata, plus AIQE's own machine-local evidence record. `.git` byte immutability
+is **not** claimed. What is claimed, and measured from outside the process, is
+`AIQE_CORE_WORKTREE_MUTATIONS = 0`, the exact bounded commit pathset, and preservation
+of the foreign staged structured delta.
 
 When commit is unsupported, `aiqe check` and `aiqe receipt` remain fully available and
 you commit with ordinary Git. AIQE does not intercept or police ordinary Git.

@@ -18,6 +18,7 @@ TASK_REFERENCE = os.path.join(support.ROOT, "docs", "task.md")
 CONFIG_REFERENCE = os.path.join(support.ROOT, "docs", "config.md")
 CHECK_REFERENCE = os.path.join(support.ROOT, "docs", "check.md")
 RECEIPT_REFERENCE = os.path.join(support.ROOT, "docs", "receipt.md")
+COMMIT_REFERENCE = os.path.join(support.ROOT, "docs", "commit.md")
 README = os.path.join(support.ROOT, "README.md")
 ARCHITECTURE = os.path.join(support.ROOT, "docs", "architecture.md")
 
@@ -334,19 +335,87 @@ class SecurityPolicyTests(unittest.TestCase):
             "digest is taken over the argument vector AIQE will execute", policy
         )
 
-    def test_the_unimplemented_commit_boundary_is_marked_as_intent(self):
+    def test_the_commit_boundary_is_stated_as_implemented_behaviour(self):
         policy = read(self.SECURITY)
-        self.assertIn("`aiqe commit` is not implemented", policy)
+        self.assertIn("`aiqe commit` is implemented", policy)
+        self.assertNotIn("`aiqe commit` is not implemented", policy)
+
+    def test_the_push_claim_is_bounded(self):
+        policy = read(self.SECURITY)
+        self.assertIn("AIQE_PUSH_CALLS = 0", policy)
+        self.assertIn("not a claim that nobody else pushed", policy)
+
+    def test_the_commit_write_confinement_claim_is_not_overstated(self):
+        policy = read(self.SECURITY)
+        self.assertIn("byte immutability", policy)
+        self.assertIn("AIQE_CORE_WORKTREE_MUTATIONS = 0", policy)
+
+
+class CommitReferenceTests(unittest.TestCase):
+    def test_every_commit_policy_refusal_is_documented(self):
+        from aiqe import commitpolicy
+
+        reference = read(COMMIT_REFERENCE)
+        for code in (
+            commitpolicy.EFFECTIVE_CONFIG_UNRESOLVED,
+            commitpolicy.COMMIT_HOOK_POLICY_UNSUPPORTED,
+            commitpolicy.COMMIT_SIGNING_POLICY_UNSUPPORTED,
+            commitpolicy.CHECKIN_FILTER_UNSUPPORTED,
+            commitpolicy.MERGE_IN_PROGRESS,
+            commitpolicy.REBASE_IN_PROGRESS,
+            commitpolicy.CHERRY_PICK_IN_PROGRESS,
+            commitpolicy.REVERT_IN_PROGRESS,
+            commitpolicy.SEQUENCER_IN_PROGRESS,
+            commitpolicy.BISECT_IN_PROGRESS,
+            commitpolicy.UNMERGED_INDEX_ENTRIES,
+            commitpolicy.SPARSE_CHECKOUT_UNSUPPORTED,
+            commitpolicy.DETACHED_HEAD_UNSUPPORTED,
+        ):
+            self.assertIn(code, reference, code)
+
+    def test_every_commit_hook_name_is_documented(self):
+        from aiqe import commitpolicy
+
+        reference = read(COMMIT_REFERENCE)
+        for hook in commitpolicy.COMMIT_HOOKS:
+            self.assertIn(hook, reference, hook)
+
+    def test_the_commit_evidence_schema_version_is_stated(self):
+        from aiqe import commitevidence
+
+        reference = read(COMMIT_REFERENCE)
+        self.assertIn(
+            "COMMIT_EVIDENCE_SCHEMA_VERSION = %d"
+            % (commitevidence.COMMIT_EVIDENCE_SCHEMA_VERSION,),
+            reference,
+        )
+
+    def test_the_forbidden_flags_are_named_rather_than_implied(self):
+        reference = read(COMMIT_REFERENCE)
+        for flag in ("--amend", "--no-verify", "--allow-empty", "--no-gpg-sign"):
+            self.assertIn(flag, reference, flag)
+
+    def test_the_push_claim_is_bounded(self):
+        reference = read(COMMIT_REFERENCE)
+        self.assertIn("AIQE_PUSH_CALLS = 0", reference)
+        self.assertIn("not a claim that nobody else pushed", reference)
+
+    def test_write_confinement_is_not_overstated(self):
+        reference = read(COMMIT_REFERENCE)
+        self.assertIn("is **not** claimed", reference)
+        self.assertIn("AIQE_CORE_WORKTREE_MUTATIONS = 0", reference)
 
 
 class ArchitectureTests(unittest.TestCase):
-    def test_implemented_commands_are_not_described_as_intent(self):
+    def test_no_command_is_described_as_a_remaining_design_target(self):
         reference = read(ARCHITECTURE)
-        self.assertIn("except `aiqe commit`", reference)
+        self.assertIn("Everything above is implemented.", reference)
+        self.assertNotIn("except `aiqe commit`", reference)
+        self.assertNotIn("`aiqe commit` is the one remaining design", reference)
 
-    def test_the_one_remaining_design_target_is_named(self):
+    def test_the_commit_reference_is_linked(self):
         reference = read(ARCHITECTURE)
-        self.assertIn("`aiqe commit` is the one remaining design", reference)
+        self.assertIn("commit.md", reference)
 
 
 class ReadmeClaimTests(unittest.TestCase):
@@ -355,13 +424,9 @@ class ReadmeClaimTests(unittest.TestCase):
         self.assertNotIn("no installable artifact yet", readme.lower())
         self.assertNotIn("no implementation exists", readme.lower())
 
-    def test_readme_marks_unimplemented_commands_as_design_targets(self):
-        readme = read(README)
-        self.assertIn("design target", readme.lower())
-
     def test_readme_does_not_mark_implemented_commands_as_design_targets(self):
         """A command leaves the design-target list when it acquires an
-        implementation. `commit` is what remains."""
+        implementation. `commit` was the last one out, so the list is empty."""
         readme = read(README)
         for line in readme.splitlines():
             lowered = line.lower()
@@ -369,10 +434,19 @@ class ReadmeClaimTests(unittest.TestCase):
                 continue
             self.assertFalse(
                 lowered.strip().startswith(
-                    ("doctor ", "task ", "init ", "check ", "receipt ")
+                    ("doctor ", "task ", "init ", "check ", "receipt ", "commit ")
                 ),
                 "an implemented command is still marked a design target: %r" % (line,),
             )
+
+    def test_readme_does_not_still_call_commit_unimplemented(self):
+        readme = read(README).lower()
+        for claim in (
+            "`aiqe commit` is not implemented",
+            "commit` remains a\ndesign target",
+            "unknown command",
+        ):
+            self.assertNotIn(claim, readme, claim)
 
     def test_readme_example_output_matches_the_retained_artifact(self):
         """A README terminal block must be copied from a retained result.
@@ -434,6 +508,50 @@ class ReadmeClaimTests(unittest.TestCase):
         readme = read(README)
         self.assertIn("BOUNDED_COMMIT_NOT_CREATED", readme)
         self.assertIn("COVERAGE_GAP", readme)
+
+    def test_readme_commit_output_matches_the_retained_artifact(self):
+        """The first real `REVIEWABLE` receipt is copied, not composed.
+
+        This is the block a reader is most likely to take at face value, so it
+        is the block that must come from a retained measurement of a synthetic
+        fixture rather than from anybody's keyboard.
+        """
+        import json
+
+        artifact = os.path.join(
+            support.ROOT, "bench", "results", "commit", "results.json"
+        )
+        with open(artifact) as handle:
+            results = json.load(handle)
+        retained = {case["case"]: case for case in results["cases"]}
+
+        readme = read(README)
+        case = retained["commit-owned-modification"]
+        self.assertEqual(case["receipt_verdict"], "REVIEWABLE")
+        self.assertIn(
+            case["commit_output"].strip(),
+            readme,
+            "the README commit example is not the retained output for its case",
+        )
+        self.assertIn(
+            case["receipt_output"].strip(),
+            readme,
+            "the README post-commit receipt is not the retained output",
+        )
+
+    def test_the_readme_reviewable_receipt_carries_no_identifier(self):
+        """The one place a shareable artifact could leak, shown to everyone."""
+        import json
+
+        artifact = os.path.join(
+            support.ROOT, "bench", "results", "commit", "results.json"
+        )
+        with open(artifact) as handle:
+            results = json.load(handle)
+        retained = {case["case"]: case for case in results["cases"]}
+        case = retained["commit-owned-modification"]
+        self.assertFalse(case["receipt_discloses_commit_sha"])
+        self.assertNotIn("src/strategy/alpha.py", case["receipt_output"])
 
 
 if __name__ == "__main__":

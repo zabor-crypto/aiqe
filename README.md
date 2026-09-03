@@ -8,13 +8,13 @@ runs your project-native checks, and shows what remains unknown.
 
 ---
 
-**Status: the complete pre-commit workflow is implemented and tested. `commit` is still specification.**
+**Status: the whole v1 workflow is implemented and tested, end to end.**
 
-`aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check` and `aiqe receipt` are real: they
-run, they are covered by a deterministic test suite, and their safety contracts are
-measured from outside the process rather than self-reported. `aiqe commit` remains a
-design target, is not implemented, and is not stubbed. Nothing here is released and no
-version is tagged.
+`aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check`, `aiqe commit` and `aiqe receipt`
+are real: they run, they are covered by a deterministic test suite, and their safety
+contracts are measured from outside the process rather than self-reported. `commit` was
+the last command to arrive, and with it `REVIEWABLE` — a verdict that had deliberately
+been unreachable — became reachable. Nothing here is released and no version is tagged.
 
 The output below was produced by `aiqe doctor` against benchmark case
 `checkin_filter_configured`, a synthetic fixture built from nothing by
@@ -91,7 +91,7 @@ and makes no network request.
 Reference for the output, the finding codes and the exit status:
 [`docs/doctor.md`](docs/doctor.md).
 
-### The pre-commit workflow
+### The workflow
 
 ```bash
 .venv/bin/aiqe init
@@ -161,8 +161,10 @@ AIQE RECEIPT
   Owned scope     CHECKED
   Owned paths     1 declared · 1 changed
   Foreign staged  OBSERVED
+  Checked content CHECKED
   Evidence        CURRENT
   Commit          NONE
+  Push            NOT_PERFORMED_BY_AIQE
 
   Classification  1 quant · 0 non-quant · 0 unclassified
   Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
@@ -172,15 +174,15 @@ AIQE RECEIPT
   Verdict         INCOMPLETE
   Reason          BOUNDED_COMMIT_NOT_CREATED
 
-  Receipt schema  1 · policy aiqe.receipt.default.v1
+  Receipt schema  2 · policy aiqe.receipt.default.v1
   AIQE            0.0.0.dev0
 ```
 
 `INCOMPLETE`, on a completely green check. That is the product working. `REVIEWABLE` is
-a claim about a commit whose content is provably the checked content, and `aiqe commit`
-does not exist yet, so no pre-commit state can reach it — a property the test suite
-asserts over every combination of classification, coverage, consent, staleness and
-validator outcome this build can produce.
+a claim about a commit whose content is provably the checked content, and no commit
+exists yet, so **no pre-commit state can reach it** — a property the test suite asserts
+over every combination of classification, coverage, consent, staleness and validator
+outcome this build can produce.
 
 The default receipt is what you paste into a pull request, so it carries counts,
 states, reason ids and a verdict, and nothing else: no path, no filename, no repository
@@ -189,6 +191,83 @@ hostname. The exclusion list is property-tested against the fixture's real value
 `aiqe receipt --local` shows you the rest, locally.
 
 Reference: [`docs/receipt.md`](docs/receipt.md).
+
+### The commit, and the verdict it earns
+
+```
+aiqe commit -m "bounded completion"
+```
+
+That is the whole surface. There is no `--amend`, no `--no-verify`, no `--allow-empty`
+and no `--push`, and their absence is the feature: each of them is a way to make the
+command succeed by weakening the claim it makes.
+
+The commit is `git commit --only` over the exact expected changed pathset, with literal
+pathspec semantics, after a preflight that resolves the **effective** Git configuration
+the real commit would use — includes and all. An active commit hook, configured signing,
+or an external check-in filter bound to an owned path is a refusal, never a bypass.
+
+Output from benchmark case `commit-owned-modification`, copied from the retained result
+artifact:
+
+```
+AIQE COMMIT
+
+  Owned scope     VERIFIED
+  Committed paths 1
+  Foreign staged  EXCLUDED
+  Checked content BOUND
+  Commit          CREATED
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Verdict         REVIEWABLE
+
+  The commit contains exactly the owned changed pathset, its content is
+  the checked content, and the staged work AIQE did not own is unchanged.
+  See `aiqe receipt`.
+```
+
+Every word of that is a proof, not a summary. `VERIFIED` means the parent-to-commit
+changed pathset was read back from the object database and equals the expected owned
+pathset. `BOUND` means each committed blob and mode equals the check-in state derived
+before the commit — which under `core.autocrlf` is deliberately *not* the worktree
+bytes. `EXCLUDED` means the structured staged delta over every path the task does not
+own was identical immediately before and immediately after.
+
+And then the receipt, from the same retained case:
+
+```
+AIQE RECEIPT
+
+  Owned scope     VERIFIED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  EXCLUDED
+  Checked content BOUND
+  Evidence        CURRENT
+  Commit          CREATED
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
+  Validators      1 applicable · 1 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        1 of them · 1 passed
+  Committed paths 1
+
+  Verdict         REVIEWABLE
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.0.0.dev0
+```
+
+`REVIEWABLE`, at last, and only here. If the foreign staged state had moved by so much
+as one newly appearing entry, this would say `Foreign staged UNKNOWN` and
+`Verdict INCOMPLETE` — a negative control drives exactly that, with a concurrent process
+staging a file inside AIQE's own window.
+
+The shareable receipt still names nothing: no commit id, no filename, no branch. It
+gained a state and a count.
+
+Reference: [`docs/commit.md`](docs/commit.md).
 
 ### Validators run only after you say so
 
@@ -286,24 +365,23 @@ doctor    inspect the environment before anything is changed   IMPLEMENTED
 init      write ./aiqe.toml                                    IMPLEMENTED
 task      declare an immutable owned scope for a unit of work  IMPLEMENTED
 check     run the validators bound to the applicable contracts IMPLEMENTED
+commit    create a bounded completion commit, or refuse        IMPLEMENTED
 receipt   render what is proven, what is excluded, and what is unknown
                                                                IMPLEMENTED
-commit    create a bounded completion commit, or refuse        design target
 ```
 
-A design target is not registered as a command. Running `aiqe commit` today exits 3
-with `unknown command`, because a command that parses and does nothing advertises a
-capability that does not exist.
+The v1 surface is closed and has no remaining design target.
 
 The owned scope is fixed when a task starts and cannot widen, as an exact pathset.
 Checks run against that scope. The receipt reports one of three verdicts —
 `REVIEWABLE`, `INCOMPLETE`, or `NOT_REVIEWABLE` — and never invents a fourth, softer
-one. `REVIEWABLE` is unreachable until a bounded commit exists.
+one. `REVIEWABLE` requires a bounded commit whose parent, pathset and content have all
+been proved.
 
 Full command surface and exit semantics: [`docs/architecture.md`](docs/architecture.md).
 Per-command references: [`doctor`](docs/doctor.md), [`init` and
 `aiqe.toml`](docs/config.md), [`task`](docs/task.md), [`check`](docs/check.md),
-[`receipt`](docs/receipt.md).
+[`commit`](docs/commit.md), [`receipt`](docs/receipt.md).
 
 ## Change integrity
 
@@ -313,11 +391,15 @@ AIQE bounds what a completion commit is allowed to contain.
   a declared path owns itself and nothing else.
 - Git caller paths use literal-pathspec semantics, so a filename containing a glob
   character cannot silently expand the change.
-- Foreign staged state — anything staged outside the owned scope — is observed before
-  and after. If it drifts in any direction, including a *newly appearing* entry, the
-  answer is `UNKNOWN`, not a shrug.
-- Intent-to-add is transactional.
-- AIQE never pushes.
+- Foreign staged state — anything staged outside the owned scope — is captured as a
+  structured delta before and after, against the same baseline. If it drifts in any
+  direction, including a *newly appearing* entry, the answer is `UNKNOWN`, not a shrug.
+- Intent-to-add is transactional, and a failure scope-rolls back exactly what AIQE
+  created rather than restoring a whole saved index over somebody else's staged work.
+- Committed content is proved against the *expected check-in state*, so a correct commit
+  under `core.autocrlf` is not reported as a mismatch, and a wrong one still is.
+- AIQE never pushes. The Git allowlist it runs through contains no network subcommand,
+  and the guard raises rather than degrading.
 
 The user-facing guarantee is stated narrowly and deliberately:
 
@@ -327,7 +409,7 @@ The user-facing guarantee is stated narrowly and deliberately:
 
 A check that succeeded earlier does not describe a commit made later. AIQE binds them.
 
-At `check` — implemented — a bounded cryptographic state binding is recorded for every
+At `check`, a bounded cryptographic state binding is recorded for every
 owned path, covering file content, new-file and deletion states, relevant mode and
 type, and the digests of the configuration and evidence definitions in force. The same
 bounded authority is measured immediately before and after the validators run, so a
@@ -335,11 +417,14 @@ validator that modifies what it checks cannot leave evidence that calls itself c
 `aiqe receipt` recomputes it to decide freshness, and never re-runs a validator to do
 so.
 
-At `commit`, that binding is recomputed before any mutation. If it differs, the evidence
-is stale and the commit is refused. After the commit, AIQE verifies that the changed
-pathset is exactly the expected owned pathset and that the committed content corresponds
-to the exact checked state. If that correspondence cannot be demonstrated, the receipt
-does not say `REVIEWABLE`.
+At `commit`, that binding is recomputed immediately before the first index mutation —
+after every expensive preflight step, because the gap between "checked" and "committed"
+is the whole staleness surface. If it differs, the evidence is stale and the commit is
+refused with nothing written. After the commit, AIQE verifies the parent, verifies that
+the changed pathset is exactly the expected owned pathset, and verifies that each
+committed blob and mode equals the check-in state derived beforehand. If any of that
+cannot be demonstrated, the receipt does not say `REVIEWABLE` — and AIQE does not reset,
+revert or amend the commit away to make the report tidier.
 
 ## Numerical integrity
 
@@ -405,7 +490,7 @@ install hooks or run in the background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | `doctor`, `init`, `task`, `check` and `receipt` implemented, tested, and benchmarked. Nothing released or tagged. |
+| *(current)* | `doctor`, `init`, `task`, `check`, `commit` and `receipt` implemented, tested, and benchmarked. The v1 command surface is complete. Nothing released or tagged. |
 | `v0.1.0` | First installable alpha: `doctor`, `init`, `task`, `check`, `receipt` on macOS. Real tests in real CI. |
 | `v0.2.0` | `commit` with checked-content binding, all six contracts, benchmark fixtures and retained results. |
 | `v0.3.0` | Linux baseline actually run. Agent adapters. Demo and visual package materialised. |

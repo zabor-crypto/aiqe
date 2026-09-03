@@ -13,6 +13,14 @@ metacharacters; foreign staged state observed before and after, with any drift �
 including a newly appearing entry — reported as `UNKNOWN` rather than ignored;
 transactional intent-to-add; and the absence of any pushed ref.
 
+Materialised in [`../fixtures/commit/`](../fixtures/commit/): owned modification,
+multiple owned paths, deletion, a new untracked path through intent-to-add, executable
+mode and mode change, filenames that are pathspec syntax, a leading dash, whitespace
+and control characters, a non-UTF-8 filename on Linux, a linked worktree, foreign
+staged modification, addition, deletion and mode change, a foreign untracked path, an
+empty expected changed pathset, a commit driven from a subdirectory of the worktree,
+and the check-edit-commit stale refusal.
+
 Also covers path identity on case-insensitive filesystems and under Unicode
 normalisation, where two spellings of a path may or may not denote the same file.
 
@@ -29,7 +37,24 @@ check-in filters on owned paths — including effective configuration resolved t
 `include` and `includeIf` chains, and refusal when that configuration cannot be resolved
 unambiguously.
 
-The controlling question is negative: no unjustified `REVIEWABLE`, ever.
+The controlling question is negative: no unjustified `REVIEWABLE`, ever. Both halves
+are now materialised — the pre-commit half in [`../fixtures/check/`](../fixtures/check/),
+where `REVIEWABLE` is unreachable by construction, and the post-commit half in
+[`../fixtures/commit/`](../fixtures/commit/), where it is reachable only behind the
+parent, pathset, content and foreign-staged proofs.
+
+Eight negative controls gate this family, and each must reproduce its failure:
+
+```
+NC-COMMIT-SHARED-INDEX      a plain commit absorbs unrelated staged work
+NC-COMMIT-PATHSPEC          a declared path handed to Git as a pathspec broadens
+NC-COMMIT-STALE             check, edit, commit: the edit is never validated
+NC-COMMIT-ITA-ROLLBACK      a failed staging sequence leaves index residue
+NC-COMMIT-HOOK-POLICY       committing runs the repository's commit hook
+NC-COMMIT-SIGNING-POLICY    --no-gpg-sign makes the error go away, silently
+NC-COMMIT-FILTER            checking in a bound path executes its clean filter
+NC-COMMIT-FOREIGN-RACE      foreign staged state changes inside the window
+```
 
 ## C — Numerical-integrity routing
 

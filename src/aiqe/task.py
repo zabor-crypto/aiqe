@@ -340,26 +340,30 @@ def end(cwd, env=None):
 
 
 def _discard_check_evidence(state_directory):
-    """Remove the active task's check evidence.
+    """Remove the active task's check and completion-commit evidence.
 
     Completion evidence is *about* a task. When the task is gone the evidence
     describes nothing, and keeping it would be the first row of the evidence
-    history this product does not build. Recorded validator consent is
+    history this product does not build. A new task must not inherit either
+    record: reusing a previous task's commit evidence would let a fresh task
+    claim a completion commit it never made. Recorded validator consent is
     deliberately not touched: consenting to run a command is a statement about
     that command, not about one unit of work.
 
     This is the whole of the task lifecycle's knowledge of evidence. Task Core
     semantics, its record and its schema are unchanged.
     """
+    from . import commitevidence
     from . import evidence
 
-    try:
-        evidence.remove(state_directory)
-    except taskstate.StateError:
-        # Ending a task must not be blocked by the removal of a file that is
-        # already unreadable. The record itself is gone, which is what `end`
-        # promises.
-        pass
+    for module in (evidence, commitevidence):
+        try:
+            module.remove(state_directory)
+        except taskstate.StateError:
+            # Ending a task must not be blocked by the removal of a file that
+            # is already unreadable. The record itself is gone, which is what
+            # `end` promises.
+            pass
 
 
 def _existing_state_directory(repository, env):

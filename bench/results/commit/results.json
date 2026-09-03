@@ -1,0 +1,2814 @@
+{
+  "aiqe_version": "0.0.0.dev0",
+  "cases": [
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-crlf-normalisation",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a CRLF worktree file commits as its normalised blob and stays bound",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-detached-head",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "DETACHED_HEAD_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a detached HEAD is refused rather than silently claimed as supported",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-effective-config-unresolved",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "EFFECTIVE_CONFIG_UNRESOLVED"
+      ],
+      "commit_verdict": null,
+      "description": "an unresolvable effective configuration refuses rather than guessing",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 2,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [],
+      "case": "commit-empty-expected-changeset",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 0 changed\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Not applicable  unit\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 2,
+      "commit_output": "AIQE COMMIT\n\n  Under the supported Git check-in semantics, none of this task's owned\n  paths would change the tree. AIQE does not create an empty completion\n  commit.\n\n  Commit          NONE\n  Verdict         INCOMPLETE\n  Reason          NO_OWNED_CHANGES_TO_COMMIT\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "NO_OWNED_CHANGES_TO_COMMIT"
+      ],
+      "commit_verdict": "INCOMPLETE",
+      "description": "an owned path the task never touched produces no empty completion commit",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 0 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  0 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 13,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-executable-mode",
+      "changed_paths": [
+        "src/tool.sh"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "an executable owned file keeps mode 100755 through the commit",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/tool.sh"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "src/tool.sh",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "src/tool.sh",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/tool.sh": "100755"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100755 100755 M src/tool.sh"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-filter-attributes-file",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "CHECKIN_FILTER_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a binding from core.attributesFile is resolved and refuses",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-filter-configured-but-unbound",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a configured driver bound to no owned path is not a blocker",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-filter-info-attributes",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "CHECKIN_FILTER_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a binding from $GIT_DIR/info/attributes is resolved and refuses",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-filter-process",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "CHECKIN_FILTER_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a process filter refuses, and is never started",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-filter-through-include",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "CHECKIN_FILTER_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a driver defined through a global include still refuses",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-filter-tracked-attributes",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "CHECKIN_FILTER_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a tracked .gitattributes binding a clean filter refuses, filter unrun",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        ".gitattributes",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 18,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-foreign-staged-addition",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a foreign staged addition survives the bounded commit untouched",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/foreign_added.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/foreign_added.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":000000 100644 A src/foreign_added.py",
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [
+        ":000000 100644 A src/foreign_added.py"
+      ],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 18,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-foreign-staged-deletion",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a foreign staged deletion survives the bounded commit untouched",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 000000 D src/foreign.py",
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [
+        ":100644 000000 D src/foreign.py"
+      ],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 19,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-foreign-staged-mode-change",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a foreign staged mode change survives the bounded commit untouched",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/foreign_tool.sh",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/foreign_tool.sh",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py",
+        ":100644 100755 M src/foreign_tool.sh"
+      ],
+      "staged_delta_before": [
+        ":100644 100755 M src/foreign_tool.sh"
+      ],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 18,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-foreign-staged-modification",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a foreign staged modification survives the bounded commit untouched",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/foreign.py",
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [
+        ":100644 100644 M src/foreign.py"
+      ],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-foreign-untracked-path",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a foreign untracked file is neither committed nor staged",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-from-a-subdirectory",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a completion commit driven from a subdirectory of the worktree",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-hook-commit-msg",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_HOOK_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "an active commit-msg hook refuses, and does not run",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-hook-post-commit",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_HOOK_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "an active post-commit hook refuses, and does not run",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-hook-pre-commit",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_HOOK_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "an active pre-commit hook refuses, and does not run",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-hook-prepare-commit-msg",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_HOOK_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "an active prepare-commit-msg hook refuses, and does not run",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-hooks-path",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_HOOK_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "a hook reached through core.hooksPath refuses, and does not run",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 11,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [],
+      "case": "commit-leading-dash-name",
+      "changed_paths": [
+        "-dash.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  0 quant \u00b7 1 non-quant \u00b7 0 unclassified\n\n  Not applicable  unit\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "an owned filename beginning with a dash is a name, not an option",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "-dash.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "-dash.py",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "-dash.py",
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "-dash.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  0 quant \u00b7 1 non-quant \u00b7 0 unclassified\n  Contracts       0 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      0 applicable \u00b7 0 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        0 of them \u00b7 0 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M -dash.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-linked-worktree",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a completion commit in a linked worktree",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 12,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-literal-pathspec-names",
+      "changed_paths": [
+        "src/-dash.py",
+        "src/:(top)magic.py",
+        "src/br[ack].py",
+        "src/nl\nname.py",
+        "src/q?.py",
+        "src/sp ace\ttab.py",
+        "src/star*.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     7 declared \u00b7 7 changed\n  Classification  7 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 7\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "owned filenames that are pathspec syntax commit themselves and no decoy",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/-dash.py",
+        "src/:(top)magic.py",
+        "src/br[ack].py",
+        "src/nl\nname.py",
+        "src/q?.py",
+        "src/sp ace\ttab.py",
+        "src/star*.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/-dash.py",
+        "src/:(top)magic.py",
+        "src/br[ack].py",
+        "src/brack.py",
+        "src/foreign.py",
+        "src/nl\nname.py",
+        "src/q?.py",
+        "src/qX.py",
+        "src/sp ace\ttab.py",
+        "src/star*.py",
+        "src/starDECOY.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/-dash.py",
+        "src/:(top)magic.py",
+        "src/br[ack].py",
+        "src/brack.py",
+        "src/foreign.py",
+        "src/nl\nname.py",
+        "src/q?.py",
+        "src/qX.py",
+        "src/sp ace\ttab.py",
+        "src/star*.py",
+        "src/starDECOY.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/-dash.py": "100644",
+        "src/:(top)magic.py": "100644",
+        "src/br[ack].py": "100644",
+        "src/nl\nname.py": "100644",
+        "src/q?.py": "100644",
+        "src/sp ace\ttab.py": "100644",
+        "src/star*.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     7 declared \u00b7 7 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  7 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 7\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/-dash.py",
+        ":100644 100644 M src/:(top)magic.py",
+        ":100644 100644 M src/br[ack].py",
+        ":100644 100644 M src/nl\nname.py",
+        ":100644 100644 M src/q?.py",
+        ":100644 100644 M src/sp ace\ttab.py",
+        ":100644 100644 M src/star*.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-merge-in-progress",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "MERGE_IN_PROGRESS"
+      ],
+      "commit_verdict": null,
+      "description": "a merge in progress is a topology this build refuses to commit onto",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/main.py",
+        "tests/side.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/main.py",
+        "tests/side.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":000000 100644 A tests/side.py"
+      ],
+      "staged_delta_before": [
+        ":000000 100644 A tests/side.py"
+      ],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 12,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-mode-change",
+      "changed_paths": [
+        "src/plain.sh"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a mode change with identical content is a change, and is committed",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/plain.sh"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/plain.sh",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/plain.sh",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/plain.sh": "100755"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100755 M src/plain.sh"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 18,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-multiple-owned-paths",
+      "changed_paths": [
+        "src/beta.py",
+        "src/gamma.py",
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     3 declared \u00b7 3 changed\n  Classification  3 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 3\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a modification, a creation and a deletion in one bounded commit",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/beta.py",
+        "src/gamma.py",
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/beta.py",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/gamma.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": false,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/beta.py": "100644",
+        "src/gamma.py": null,
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     3 declared \u00b7 3 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  3 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 3\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":000000 100644 A src/beta.py",
+        ":100644 000000 D src/gamma.py",
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-new-untracked-path",
+      "changed_paths": [
+        "src/created.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a new untracked owned file, committed through transactional intent-to-add",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/created.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/created.py",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": false,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/created.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":000000 100644 A src/created.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "case": "commit-non-utf8-name",
+      "description": "an owned filename that is not valid UTF-8 commits as its exact bytes",
+      "outcome": "SKIPPED_PLATFORM",
+      "platform_required": "linux",
+      "problems": []
+    },
+    {
+      "aiqe_commit_git_writes": 11,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-owned-deletion",
+      "changed_paths": [
+        "src/gone.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "an owned path deleted from the worktree is committed as a deletion",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/gone.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/gone.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": false,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/gone.py": null
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 000000 D src/gone.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-owned-modification",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "one tracked owned file, modified and committed",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 23,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-postcommit-head-move",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a later commit stops the receipt claiming a current reviewable state",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 1,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "UNKNOWN",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  UNKNOWN\n  Checked content BOUND\n  Evidence        STALE\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         INCOMPLETE\n  Reason          COMPLETION_COMMIT_SUPERSEDED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [
+        "COMPLETION_COMMIT_SUPERSEDED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 15,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 8,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-second-commit-refused",
+      "changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": true,
+      "commit_evidence_schema": 1,
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": 1,
+      "commit_reasons": [],
+      "commit_verdict": "REVIEWABLE",
+      "description": "a second completion commit for the same task refuses deterministically",
+      "evidence_push_performed": false,
+      "expected_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {
+        "src/strategy/alpha.py": "100644"
+      },
+      "parent_is_pre_commit_head": true,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "BOUND",
+      "receipt_commit": "CREATED",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 0,
+      "receipt_foreign_staged": "EXCLUDED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "VERIFIED",
+      "receipt_reasons": [],
+      "receipt_verdict": "REVIEWABLE",
+      "remotes_configured": 0,
+      "second_commit_created": false,
+      "second_commit_exit": 3,
+      "second_commit_reasons": [
+        "COMPLETION_COMMIT_ALREADY_CREATED"
+      ],
+      "staged_delta_after": [
+        ":100644 100644 M src/strategy/alpha.py"
+      ],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-signing-configured",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_SIGNING_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "commit.gpgSign in repository scope refuses, and no signer runs",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-signing-through-include",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 3,
+      "commit_output": "",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "COMMIT_SIGNING_POLICY_UNSUPPORTED"
+      ],
+      "commit_verdict": null,
+      "description": "commit.gpgSign reached through a global include refuses just the same",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 0,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "BOUNDED_COMMIT_NOT_CREATED"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    },
+    {
+      "aiqe_commit_git_writes": 0,
+      "aiqe_core_worktree_mutation_detail": [],
+      "aiqe_core_worktree_mutations": 0,
+      "aiqe_state_changes": 7,
+      "canaries_fired": [
+        "unit"
+      ],
+      "case": "commit-stale-owned-edit",
+      "changed_paths": [],
+      "check_completion": "REVIEWABLE_CANDIDATE",
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        unit\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_created": false,
+      "commit_evidence_schema": null,
+      "commit_exit": 2,
+      "commit_output": "AIQE COMMIT\n\n  The state the check evidence was taken against has changed, so\n  committing now would bind a commit to content nothing checked.\n\n  Commit          NONE\n  Index           unchanged\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  AIQE does not rerun validators here. Run `aiqe check` again.\n\n",
+      "commit_output_control_bytes": 0,
+      "commit_parent_count": null,
+      "commit_reasons": [
+        "STALE_OWNED_CONTENT"
+      ],
+      "commit_verdict": "INCOMPLETE",
+      "description": "an owned file edited after the check refuses before any index mutation",
+      "evidence_push_performed": null,
+      "expected_changed_paths": [],
+      "fixture_repository_mutations": 1,
+      "foreign_staged_preserved": true,
+      "index_paths_after": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_paths_before": [
+        "aiqe.toml",
+        "checks/unit.sh",
+        "src/foreign.py",
+        "src/strategy/alpha.py",
+        "tests/test_alpha.py"
+      ],
+      "index_unchanged": true,
+      "local_state_write_detail": [],
+      "local_state_writes": 0,
+      "other_changes": [],
+      "outcome": "PASS",
+      "owned_tree_modes": {},
+      "parent_is_pre_commit_head": null,
+      "policy_canaries": [],
+      "policy_canary_executions": 0,
+      "problems": [],
+      "receipt_checked_content": "CHECKED",
+      "receipt_commit": "NONE",
+      "receipt_discloses_commit_sha": false,
+      "receipt_exit": 2,
+      "receipt_foreign_staged": "OBSERVED",
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        STALE\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.0.0.dev0\n\n",
+      "receipt_output_control_bytes": 0,
+      "receipt_owned_scope": "CHECKED",
+      "receipt_reasons": [
+        "STALE_OWNED_CONTENT"
+      ],
+      "receipt_verdict": "INCOMPLETE",
+      "remotes_configured": 0,
+      "staged_delta_after": [],
+      "staged_delta_before": [],
+      "task_start_exit": 0
+    }
+  ],
+  "cases_failed": 0,
+  "cases_passed": 36,
+  "cases_skipped_platform": 1,
+  "cases_skipped_platform_ids": [
+    "commit-non-utf8-name"
+  ],
+  "cases_total": 37,
+  "family": "BOUNDED_COMMIT",
+  "negative_controls": [
+    {
+      "aiqe_changed_paths": [
+        "src/strategy/alpha.py"
+      ],
+      "aiqe_foreign_staged_preserved": true,
+      "aiqe_verdict": "REVIEWABLE",
+      "control": "NC-COMMIT-SHARED-INDEX",
+      "control_reproduces_failure": true,
+      "description": "a plain commit absorbs unrelated staged work",
+      "invariant": "a completion commit contains only the owned changed pathset",
+      "naive_absorbed_foreign_staged": true,
+      "naive_changed_paths": [
+        "src/foreign.py",
+        "src/strategy/alpha.py"
+      ]
+    },
+    {
+      "aiqe_changed_paths": [
+        "src/star*.py"
+      ],
+      "aiqe_verdict": "REVIEWABLE",
+      "control": "NC-COMMIT-PATHSPEC",
+      "control_reproduces_failure": true,
+      "description": "a declared path handed to Git as a pathspec broadens",
+      "invariant": "an owned path is a literal name, never a pattern",
+      "naive_broadened_pathset": true,
+      "naive_changed_paths": [
+        "src/star*.py",
+        "src/starDECOY.py"
+      ]
+    },
+    {
+      "aiqe_commit_created": false,
+      "aiqe_commit_exit": 2,
+      "aiqe_commit_reasons": [
+        "STALE_OWNED_CONTENT"
+      ],
+      "aiqe_index_unchanged": true,
+      "control": "NC-COMMIT-STALE",
+      "control_reproduces_failure": true,
+      "description": "check, edit, commit: the edit is never validated",
+      "invariant": "committed content is the checked content",
+      "naive_commit_created": true,
+      "naive_committed_unchecked_content": true
+    },
+    {
+      "aiqe_commit_created": false,
+      "aiqe_commit_exit": 2,
+      "aiqe_commit_reasons": [
+        "ITA_FAILED"
+      ],
+      "aiqe_index_residue": false,
+      "aiqe_index_unchanged": true,
+      "control": "NC-COMMIT-ITA-ROLLBACK",
+      "control_reproduces_failure": true,
+      "description": "a failed staging sequence leaves intent-to-add residue",
+      "invariant": "a failed completion leaves the index as it found it",
+      "naive_index_residue": true
+    },
+    {
+      "aiqe_commit_created": false,
+      "aiqe_commit_exit": 3,
+      "aiqe_commit_reasons": [
+        "COMMIT_HOOK_POLICY_UNSUPPORTED"
+      ],
+      "aiqe_ran_hook": false,
+      "control": "NC-COMMIT-HOOK-POLICY",
+      "control_reproduces_failure": true,
+      "description": "committing runs the repository's commit hook",
+      "invariant": "AIQE executes no repository-defined commit hook",
+      "naive_ran_hook": true
+    },
+    {
+      "aiqe_commit_created": false,
+      "aiqe_commit_exit": 3,
+      "aiqe_commit_reasons": [
+        "COMMIT_SIGNING_POLICY_UNSUPPORTED"
+      ],
+      "aiqe_ran_signer": false,
+      "control": "NC-COMMIT-SIGNING-POLICY",
+      "control_reproduces_failure": true,
+      "description": "--no-gpg-sign makes the error go away, silently",
+      "invariant": "configured signing is refused, never bypassed",
+      "naive_bypassed_signing_policy": true,
+      "naive_commit_created": true,
+      "naive_commit_signature_state": "N"
+    },
+    {
+      "aiqe_commit_created": false,
+      "aiqe_commit_exit": 3,
+      "aiqe_commit_reasons": [
+        "CHECKIN_FILTER_UNSUPPORTED"
+      ],
+      "aiqe_ran_filter": false,
+      "control": "NC-COMMIT-FILTER",
+      "control_reproduces_failure": true,
+      "description": "checking in a bound path executes its clean filter",
+      "invariant": "AIQE executes no external check-in filter",
+      "naive_ran_filter": true
+    },
+    {
+      "aiqe_commit_created": true,
+      "aiqe_commit_exit": 2,
+      "aiqe_commit_reasons": [
+        "FOREIGN_STAGED_UNKNOWN"
+      ],
+      "aiqe_foreign_staged": "UNKNOWN",
+      "aiqe_receipt_exit": 2,
+      "aiqe_recorded_post_digest": "sha256:df6b943b460001bb67034d89d8f89a02dc5b4455d5e6a49a7e4fff26a2fce463",
+      "aiqe_recorded_pre_digest": "sha256:499bec80418b6720e7715ca6b058efc590d3830c178014b89dfc9d7bc2ed036e",
+      "aiqe_verdict": "INCOMPLETE",
+      "attempts": 1,
+      "concurrent_stage_landed": true,
+      "control": "NC-COMMIT-FOREIGN-RACE",
+      "control_reproduces_failure": true,
+      "description": "foreign staged state changes inside the mutation window",
+      "foreign_staged_delta_changed": true,
+      "invariant": "EXCLUDED is claimed only when before equals after"
+    }
+  ],
+  "negative_controls_reproducing": 8,
+  "negative_controls_total": 8,
+  "platform": "darwin",
+  "schema_version": 1,
+  "totals": {
+    "aiqe_commit_git_writes": 293,
+    "aiqe_core_worktree_mutations": 0,
+    "aiqe_push_calls": 0,
+    "local_state_writes": 0,
+    "model_calls": 0,
+    "network_requests": 0,
+    "policy_canary_executions": 0,
+    "precommit_reviewable_verdicts": 0,
+    "raw_terminal_control_bytes": 0,
+    "reviewable_receipts": 18
+  }
+}
