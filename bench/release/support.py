@@ -203,17 +203,24 @@ def os_arch_support(observations):
     return ordered
 
 
-def git_boundary(observations):
+def git_boundary(observations, enforced_minimum=None):
     """What is known about the Git compatibility boundary, and what is not.
 
-    This deliberately does not return a minimum supported version. It returns
-    the versions that were exercised and the lowest of them, because the only
-    honest statement available is "AIQE has been run against these". Anything
-    below the lowest exercised version is `NOT_PROVEN`, and stays that way
-    until a surface running it exists.
-    """
-    from .environment import git_version_number
+    Three different things get confused under the phrase "minimum supported
+    version", so this returns them separately:
 
+        enforced      the floor the product refuses below, and why
+        exercised     the versions AIQE was actually run against
+        gap           the range that is enforced but never exercised
+
+    The gap is the interesting field and the reason this is not one number.
+    AIQE refuses below 2.32 because that is the release in which the
+    configuration isolation it depends on became available at all - a
+    mechanism argument, backed by a refusal that is proven on a real 2.30.2
+    surface. It is not a claim that 2.32 was run. If every runner in the
+    matrix ships the same modern Git, then the versions between the floor and
+    that one are enforced and untested, and saying so is the whole job.
+    """
     versions = {}
     for observation in observations:
         if observation.get("outcome") != "PASS":
@@ -244,20 +251,51 @@ def git_boundary(observations):
         return ()
 
     exercised = sorted(versions, key=numeric)
+    lowest = exercised[0] if exercised else None
+    floor = (
+        ".".join(str(part) for part in enforced_minimum) if enforced_minimum else None
+    )
+
+    gap = None
+    if floor and lowest is not None:
+        lowest_numbers = numeric(lowest)
+        # Compare only as many components as the floor names. `2.32.0` and
+        # `(2, 32)` are the same version; Python's tuple ordering would call
+        # the first one greater purely because it is longer, and report a gap
+        # against the very version that was run.
+        floor_numbers = tuple(enforced_minimum)
+        comparable = lowest_numbers[: len(floor_numbers)]
+        if comparable and comparable > floor_numbers:
+            gap = (
+                "Git %s is enforced but not exercised: the lowest version AIQE "
+                "was actually run against is %s. Versions from %s up to that "
+                "one are permitted by the floor and covered by no run."
+                % (floor, lowest, floor)
+            )
+
     return {
-        "minimum_claimed": None,
-        "minimum_status": NOT_PROVEN,
-        "lowest_exercised": exercised[0] if exercised else None,
+        "enforced_minimum": floor,
+        "enforced_minimum_basis": (
+            "GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL, which AIQE's configuration "
+            "isolation is built on, were introduced in Git 2.32. Below that they "
+            "are ignored silently. The refusal is proven on a real Git 2.30.2 "
+            "surface; the floor itself is a mechanism argument, not a run."
+        )
+        if floor
+        else None,
+        "lowest_exercised": lowest,
         "highest_exercised": exercised[-1] if exercised else None,
         "exercised": [
             {"git_version": version, "surfaces": sorted(versions[version])}
             for version in exercised
         ],
+        "enforced_but_unexercised_range": gap,
+        "minimum_claimed": floor,
+        "minimum_status": PROVEN if floor else NOT_PROVEN,
         "statement": (
-            "AIQE publishes the Git versions it was run against. It does not "
-            "publish a minimum supported version: no surface below the lowest "
-            "exercised version was executed, so no minimum has been "
-            "demonstrated."
+            "AIQE refuses to run below the enforced minimum rather than running "
+            "under-isolated. Above it, AIQE publishes the versions it was "
+            "actually run against and does not interpolate between them."
         ),
     }
 

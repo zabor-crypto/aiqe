@@ -226,11 +226,32 @@ class SupportGateTests(unittest.TestCase):
         surfaces = support.os_arch_support(observations)
         self.assertEqual(sorted(s["arch"] for s in surfaces), ["arm64", "x86_64"])
 
-    def test_the_git_boundary_claims_no_minimum(self):
+    def test_the_git_boundary_claims_no_minimum_without_an_enforced_one(self):
         result = support.git_boundary(self.both_levels())
         self.assertIsNone(result["minimum_claimed"])
         self.assertEqual(result["minimum_status"], support.NOT_PROVEN)
         self.assertEqual(result["lowest_exercised"], "git version 2.43.0")
+
+    def test_an_enforced_floor_that_was_never_run_is_disclosed_as_such(self):
+        """The distinction the manifest exists to keep: enforced is not tested.
+
+        AIQE refuses below 2.32 on a mechanism argument. If every runner ships
+        a much newer Git, the versions in between are permitted and covered by
+        nothing, and the manifest has to say so rather than let the floor read
+        as a tested boundary.
+        """
+        result = support.git_boundary(self.both_levels(), enforced_minimum=(2, 32))
+        self.assertEqual(result["minimum_claimed"], "2.32")
+        self.assertIsNotNone(result["enforced_but_unexercised_range"])
+        self.assertIn("2.43.0", result["enforced_but_unexercised_range"])
+        self.assertIn("introduced in Git 2.32", result["enforced_minimum_basis"])
+
+    def test_no_gap_is_reported_when_the_floor_itself_was_run(self):
+        result = support.git_boundary(
+            self.both_levels(git_version="git version 2.32.0"),
+            enforced_minimum=(2, 32),
+        )
+        self.assertIsNone(result["enforced_but_unexercised_range"])
 
     def test_the_git_boundary_orders_versions_numerically(self):
         observations = (
@@ -468,11 +489,113 @@ class RetainedManifestTests(unittest.TestCase):
     def test_windows_is_recorded_as_out_of_scope(self):
         self.assertIn("windows", self.manifest["out_of_scope"])
 
-    def test_no_git_minimum_is_claimed(self):
-        self.assertIsNone(self.manifest["git_compatibility"]["minimum_claimed"])
+    def test_the_manifest_git_floor_matches_the_one_the_product_enforces(self):
+        """A manifest that disagreed with the code would be worse than none."""
+        from aiqe import gitq
+
+        expected = ".".join(str(part) for part in gitq.MINIMUM_GIT_VERSION)
         self.assertEqual(
-            self.manifest["git_compatibility"]["minimum_status"], support.NOT_PROVEN
+            self.manifest["git_compatibility"]["enforced_minimum"], expected
         )
+
+    def test_the_manifest_distinguishes_enforced_from_exercised(self):
+        boundary = self.manifest["git_compatibility"]
+        self.assertIn("enforced_but_unexercised_range", boundary)
+        self.assertIn("exercised", boundary)
+        self.assertIn("introduced in Git 2.32", boundary["enforced_minimum_basis"])
+
+
+class ReadmeSupportSectionTests(unittest.TestCase):
+    """The README may not claim a surface the manifest has not proven.
+
+    "Do not write generic 'works on macOS and Linux' if the retained matrix is
+    narrower" is the kind of rule that decays the moment nobody is checking,
+    so it is checked. The README's support block is delimited by markers, and
+    every Python minor it presents as proven has to carry a PROVEN verdict in
+    the retained manifest.
+    """
+
+    BEGIN = "<!-- support:begin -->"
+    END = "<!-- support:end -->"
+
+    def setUp(self):
+        import json
+
+        with open(os.path.join(test_support.ROOT, "README.md"), encoding="utf-8") as h:
+            self.readme = h.read()
+        with open(RetainedManifestTests.MANIFEST, encoding="utf-8") as handle:
+            self.manifest = json.load(handle)
+
+    def block(self):
+        # Membership is asserted without putting the README in the message: a
+        # failure here should name the missing marker, not print the file.
+        self.assertTrue(
+            self.BEGIN in self.readme,
+            "the README support block start marker %s is missing" % (self.BEGIN,),
+        )
+        self.assertTrue(
+            self.END in self.readme,
+            "the README support block end marker %s is missing" % (self.END,),
+        )
+        start = self.readme.index(self.BEGIN) + len(self.BEGIN)
+        return self.readme[start : self.readme.index(self.END, start)]
+
+    def proven_section(self):
+        block = self.block()
+        self.assertIn("PROVEN", block)
+        start = block.index("**PROVEN**")
+        for heading in ("**TESTED**", "**NOT PROVEN**", "**OUT OF SCOPE**"):
+            if heading in block[start:]:
+                return block[start : block.index(heading, start)]
+        return block[start:]
+
+    def test_the_block_exists_and_names_all_four_states(self):
+        block = self.block()
+        for state in ("PROVEN", "TESTED", "NOT PROVEN", "OUT OF SCOPE"):
+            self.assertIn(state, block, state)
+
+    def test_every_python_minor_shown_as_proven_is_proven_in_the_manifest(self):
+        claimed = sorted(set(re.findall(r"\b3\.\d+\b", self.proven_section())))
+        self.assertTrue(claimed, "the README claims no Python version as proven")
+        support_claims = self.manifest["python_support"]
+        for minor in claimed:
+            with self.subTest(minor=minor):
+                self.assertIn(
+                    minor,
+                    support_claims,
+                    "the README presents Python %s as proven, and the manifest "
+                    "has no claim for it at all" % (minor,),
+                )
+                self.assertEqual(
+                    support_claims[minor]["verdict"],
+                    support.PROVEN,
+                    "the README presents Python %s as proven; the manifest says "
+                    "%s" % (minor, support_claims[minor]["verdict"]),
+                )
+
+    def test_the_readme_does_not_quietly_drop_a_proven_minor(self):
+        """The other direction, so the block cannot go stale by omission."""
+        claimed = set(re.findall(r"\b3\.\d+\b", self.proven_section()))
+        proven = {
+            minor
+            for minor, claim in self.manifest["python_support"].items()
+            if claim["verdict"] == support.PROVEN
+        }
+        self.assertEqual(
+            sorted(proven - claimed),
+            [],
+            "the manifest proves Python versions the README does not mention",
+        )
+
+    def test_windows_is_not_presented_as_supported(self):
+        block = self.block().lower()
+        if "windows" in block:
+            out_of_scope = block[block.index("**out of scope**") :]
+            self.assertIn("windows", out_of_scope)
+
+    def test_the_block_points_at_the_evidence(self):
+        block = self.block()
+        self.assertIn("docs/support.md", block)
 
 
 if __name__ == "__main__":

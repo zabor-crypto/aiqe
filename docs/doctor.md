@@ -402,11 +402,20 @@ made.
 **Installing the package uses the network.** That is the installer's behaviour,
 not AIQE's runtime behaviour, and the two are not interchangeable.
 
-**Python 3.11 is the support floor**, and 3.11 and 3.14 are the tested
-endpoints. Versions between them are not claimed. This is a support boundary,
+**Python 3.11 is the support floor**, and every claimed minor is exercised
+rather than inferred from the ends of the range. This is a support boundary,
 not a claim that older interpreters fail.
 
-**macOS is the supported target.** The suite is also run on Linux in CI —
-which is where the arbitrary-byte path case can exist at all, since APFS
-refuses non-UTF-8 filenames — but that is portability evidence, not a Linux
-release claim. Windows is out of scope for v1.
+**Git 2.32 is a hard floor, and AIQE refuses below it.** The configuration
+isolation this document relies on throughout is delivered by
+`GIT_CONFIG_SYSTEM` and `GIT_CONFIG_GLOBAL`, which arrived in that release. An
+older Git ignores them silently, so the isolation would be absent while
+Doctor's answers still looked confident. Doctor does not produce one there.
+See [`support.md`](support.md#3-the-git-compatibility-boundary).
+
+**Which operating systems, architectures and Git versions have actually been
+run** — and at what evidence level — is recorded in the release-proof
+manifest rather than asserted here, because a sentence in a document cannot
+fail a build. Windows is out of scope for v1. Linux is where the
+arbitrary-byte path case can exist at all, since APFS refuses non-UTF-8
+filenames. Method and current verdicts: [`support.md`](support.md).

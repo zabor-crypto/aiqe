@@ -136,6 +136,14 @@ jobs:
         if: matrix.container == ''
         with:
           python-version: ${{ matrix.python }}
+      # A container job runs as root against a workspace owned by the runner
+      # user, so Git declines to operate on it at all. This is the container's
+      # ownership, not AIQE's: the release-proof runner exports the tracked
+      # content with `git ls-files`, and that read has to be possible before
+      # anything can be measured.
+      - name: Let Git read a workspace owned by another user
+        if: matrix.container != ''
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Report toolchain
         run: |
           python3 --version

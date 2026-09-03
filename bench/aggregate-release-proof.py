@@ -81,7 +81,12 @@ def main(argv):
         surfaces, list(claims.CLAIMED_PYTHON_MINORS), list(claims.CLAIMED_OS_FAMILIES)
     )
     os_arch = support.os_arch_support(surfaces)
-    git = support.git_boundary(surfaces)
+    # The floor the product actually enforces is read from the product, not
+    # restated here, so the manifest cannot disagree with the code.
+    sys.path.insert(0, os.path.join(ROOT, "src"))
+    from aiqe import gitq  # noqa: E402
+
+    git = support.git_boundary(surfaces, enforced_minimum=gitq.MINIMUM_GIT_VERSION)
     unproven_pythons = support.unproven(python_claims)
 
     # --- The artifact -----------------------------------------------------

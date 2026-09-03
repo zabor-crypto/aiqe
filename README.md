@@ -60,7 +60,7 @@ be executed while it looks. That is a well-defined question, but it is *not* the
 `git status` answers under every user and global Git configuration, and the label says so
 rather than leaving it to be assumed. Details: [`docs/doctor.md`](docs/doctor.md).
 
-macOS is the supported target for v1 · Linux support is a later proof obligation · Windows is out of scope for v1
+macOS and Linux are proven surfaces · Windows is out of scope for v1 · [where it runs](#where-it-runs)
 
 No telemetry. No network calls. No model calls. No daemon. No background watcher.
 AIQE never pushes.
@@ -76,19 +76,20 @@ newer, and is not published to any index yet, so install it from a clone:
 python3 -m venv .venv && .venv/bin/pip install .
 ```
 
-Or from a built artifact, with pip or with uv — both paths are exercised by the
-release proof against a local wheel:
+```bash
+.venv/bin/aiqe doctor
+```
+
+It also installs from a built wheel or sdist, and runs under uv — `pip install`
+from each artifact, `uv tool install` and `uvx --from` are all exercised by the
+release proof against a local artifact on every surface it runs:
 
 ```bash
 uvx --from ./dist/aiqe-0.1.0a0-py3-none-any.whl aiqe doctor
 ```
 
 Where AIQE has actually been shown to run, and where it has not:
-[`docs/support.md`](docs/support.md).
-
-```bash
-.venv/bin/aiqe doctor
-```
+[Where it runs](#where-it-runs).
 
 `aiqe doctor` works before `aiqe init`, on a repository it has never seen, and on a
 directory that is not a repository at all. It requires no configuration, writes nothing,
@@ -339,6 +340,66 @@ never mentioned is byte-identical afterwards.
 Reference for the scope rules, the state schema and the exit status:
 [`docs/task.md`](docs/task.md).
 
+## Where it runs
+
+Every line below is gated against a run that happened. The evidence is
+[`bench/results/release/release-proof.json`](bench/results/release/release-proof.json),
+the method is [`docs/support.md`](docs/support.md), and a test fails if this
+section claims a Python version the manifest does not.
+
+<!-- support:begin -->
+**PROVEN** — the installed artifact runs the whole workflow to `REVIEWABLE` on
+every claimed OS family, and the full behavioural suite passes:
+
+```
+Python 3.11 · 3.12 · 3.13 · 3.14        macOS and Linux
+```
+
+Under a documented tiering: the installed-artifact end-to-end runs on **both**
+families for **all four** minors; the full suite runs on Linux for all four and
+on macOS at 3.11 and 3.14. What that gives up — a defect only on macOS, only on
+3.12 or 3.13, and only outside the end-to-end — is stated in
+[`docs/support.md`](docs/support.md), and the manifest records which families
+ran the suite for each minor.
+
+**TESTED** — the surfaces actually exercised, at the level recorded:
+
+```
+macOS 26      arm64     full suite · installed artifact
+macOS 15      arm64     installed artifact
+macOS 15      x86_64    installed artifact
+Ubuntu 24.04  x86_64    full suite · installed artifact
+Ubuntu 24.04  arm64     full suite · installed artifact
+Ubuntu 22.04  x86_64    full suite · installed artifact
+Debian 11     x86_64    artifact builds and installs; AIQE refuses to run
+Git 2.55.0              every hosted runner in the matrix
+```
+
+**NOT PROVEN** — no run supports these, so nothing claims them:
+
+```
+Git 2.32 to 2.54        the floor is enforced; no surface runs a Git in it
+Other distributions     only the three above were exercised
+Other macOS releases    only 15 and 26
+Reproducible sdist      the wheel is, under a fixed SOURCE_DATE_EPOCH; the
+                        sdist is not, and every packaged file is identical
+                        either way
+```
+
+**OUT OF SCOPE**
+
+```
+Windows                 no implementation work, and no metadata claims it
+Publication             no tag, no release, nothing on any index
+Standalone executable   DEFERRED - no measured install friction justifies it
+```
+
+Git older than 2.32 is refused rather than degraded: the configuration
+isolation every AIQE command rests on did not exist before that release, and
+an older Git ignores the request silently. See
+[`docs/support.md`](docs/support.md).
+<!-- support:end -->
+
 ## The 30-second problem
 
 An agent edits your backtest. It reports that the tests pass.
@@ -500,10 +561,10 @@ install hooks or run in the background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | `doctor`, `init`, `task`, `check`, `commit` and `receipt` implemented, tested, and benchmarked. The v1 command surface is complete. Nothing released or tagged. |
+| *(current)* | `doctor`, `init`, `task`, `check`, `commit` and `receipt` implemented, tested, and benchmarked. The v1 command surface is complete. Installable artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs). Nothing released or tagged. |
 | `v0.1.0` | First installable alpha: `doctor`, `init`, `task`, `check`, `receipt` on macOS. Real tests in real CI. |
 | `v0.2.0` | `commit` with checked-content binding, all six contracts, benchmark fixtures and retained results. |
-| `v0.3.0` | Linux baseline actually run. Agent adapters. Demo and visual package materialised. |
+| `v0.3.0` | Agent adapters. Demo and visual package materialised. |
 | `v1.0.0` | Every release gate green against retained artifacts. Command surface stable. Every public claim traced to evidence. |
 
 No benchmark number will appear in this README until it is generated from a retained

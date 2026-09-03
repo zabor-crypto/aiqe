@@ -3,19 +3,83 @@
   "artifact_hash_agreement": {
     "sdist": {
       "by_hash": {
-        "e86084d28caf02305eb2a3fcd33d5331aab09d50e9fa329b638ccd54c2df7d89": [
-          "macos/arm64/python 3.14.6"
+        "1a50b9614afc390986a9c0319d1f3fab76dbc7f1e609e2516249b02e216923f3": [
+          "linux/aarch64/python 3.14.7"
+        ],
+        "343233d728fa7919f513003f81bceb98efbe534c29f0dd1f9436320b442c62ac": [
+          "macos/arm64/python 3.13.14"
+        ],
+        "53d39e670ad7425336a6551baa47579c97fbebed4d8504d49c872e73f996d90e": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "5ff12186eff134e290232e0c01cff3c50d8e3e5adafea5abe374e3680703161d": [
+          "macos/arm64/python 3.12.10"
+        ],
+        "8f96753e0144545223a061c15facec8a4b69e2d4887c4b05acb069d9f8e33260": [
+          "linux/x86_64/python 3.12.14"
+        ],
+        "93e509edb5305fd0f461ab782b8fff0ec567638d83d7c8c776de4bc7a7b87cc7": [
+          "linux/x86_64/python 3.11.16"
+        ],
+        "9591d948bed66fae8bf5b621dc7148ea7116487665b148b6fb6a72b7639d866e": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "9a69d3227423194faf9699323d680277f3e0d608a29ab562f36be665b7f75729": [
+          "macos/arm64/python 3.14.7"
+        ],
+        "a41d83eedb51b47394d6cd5ef5894e0b85fbca94ca62f7de8ecb4a04702bd4e1": [
+          "macos/x86_64/python 3.14.7"
+        ],
+        "c52e9475243e4f7b75dc85f2474b5b8c23f5360a72f718974c99896ab76d4d08": [
+          "linux/x86_64/python 3.14.7"
+        ],
+        "db12e53985f9b84fd67feae923d0b0d52b53dd8f378ff134a031f15190e9be07": [
+          "linux/x86_64/python 3.13.15"
+        ],
+        "e4977dbcbff875f6b82c31c0a9260869a6c28192eb2bce2c193146bbba964c82": [
+          "linux/x86_64/python 3.11.16"
         ]
       },
-      "distinct_hashes": 1
+      "distinct_hashes": 12
     },
     "wheel": {
       "by_hash": {
-        "77ef3f006e05e7cae2636161c6dfd14cefa170c565b6f52474b306c226ca4a66": [
-          "macos/arm64/python 3.14.6"
+        "1af1e08e2ec13b07627c50eafe8ec3c8f492a2377a3dbd47018237b657dedb5c": [
+          "macos/arm64/python 3.13.14"
+        ],
+        "278846c963142747df70312f659e32627780bb9922e6d813ca0c9a9ade4f3540": [
+          "macos/arm64/python 3.14.7"
+        ],
+        "4d21eb3b1e2bd668f4b1d14c74e813f02a08ff17fbb072f00ae4a97cf01da96a": [
+          "linux/x86_64/python 3.13.15"
+        ],
+        "55b9b502f4bc1cbaf0613bbc0addcec88114190037026e2b131302e750eabb08": [
+          "linux/x86_64/python 3.12.14"
+        ],
+        "69bea121d69db172b4e8d5d8c924bb0bacc9920364854d2b10f1e4cdcbb8810f": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "752df371fb2ab68a43f28a84e9e5f83f4f7020468cb0432552222655127f7afc": [
+          "linux/x86_64/python 3.11.16"
+        ],
+        "78b3e0af1c12a2584a64a13a939e2854c4e0b189fb40f920e5115d3eeb5c66c7": [
+          "macos/arm64/python 3.11.9"
+        ],
+        "7b4d6dfde5c5a0839eefb3a68546fb6e28b73f7c0c7bcb8a46ffbdc74dd61021": [
+          "linux/aarch64/python 3.14.7"
+        ],
+        "95e22797f07fd5637c70c85161123745c5c72eced08b694b317aadb27ed10104": [
+          "macos/x86_64/python 3.14.7"
+        ],
+        "97b274d65833f2d08ac0801bf002749f6a354b7bfc617fd8afeaccbc15cf7d02": [
+          "linux/x86_64/python 3.11.16",
+          "linux/x86_64/python 3.14.7"
+        ],
+        "c27e9c44bc1be3cd41131d43821974abd0ad84093150c5a7681945bf290eb584": [
+          "macos/arm64/python 3.12.10"
         ]
       },
-      "distinct_hashes": 1,
+      "distinct_hashes": 11,
       "note": "A pure-Python wheel built from one commit should have one hash on every surface only when the build procedure fixes timestamps. Where it does not, the hashes differ while the packaged content does not; see `reproducibility`."
     }
   },
@@ -24,8 +88,8 @@
       "disallowed_members": [],
       "filename": "aiqe-0.1.0a0.tar.gz",
       "member_count": 39,
-      "sha256": "e86084d28caf02305eb2a3fcd33d5331aab09d50e9fa329b638ccd54c2df7d89",
-      "size_bytes": 128453
+      "sha256": "53d39e670ad7425336a6551baa47579c97fbebed4d8504d49c872e73f996d90e",
+      "size_bytes": 128307
     },
     "wheel": {
       "console_scripts": {
@@ -36,7 +100,7 @@
       "license": "Apache-2.0",
       "member_count": 34,
       "root_is_purelib": "true",
-      "sha256": "77ef3f006e05e7cae2636161c6dfd14cefa170c565b6f52474b306c226ca4a66",
+      "sha256": "78b3e0af1c12a2584a64a13a939e2854c4e0b189fb40f920e5115d3eeb5c66c7",
       "size_bytes": 136654,
       "tags": [
         "py3-none-any"
@@ -47,60 +111,116 @@
   "build_tool": [
     "build==1.6.0",
     "packaging==26.3",
-    "pip==26.1.2"
+    "pip==24.0",
+    "setuptools==65.5.0"
   ],
-  "ci_runs": [],
+  "ci_runs": [
+    {
+      "job": "release-proof",
+      "repository": "zabor-crypto/aiqe",
+      "run_attempt": "1",
+      "run_id": "33794516990",
+      "run_number": "16",
+      "sha": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+      "workflow": "checks"
+    },
+    {
+      "job": "surfaces",
+      "repository": "zabor-crypto/aiqe",
+      "run_attempt": "1",
+      "run_id": "33794516990",
+      "run_number": "16",
+      "sha": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+      "workflow": "checks"
+    },
+    {
+      "job": "tests",
+      "repository": "zabor-crypto/aiqe",
+      "run_attempt": "1",
+      "run_id": "33794516990",
+      "run_number": "16",
+      "sha": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+      "workflow": "checks"
+    }
+  ],
   "declared_python_requirement": ">=3.11",
   "git_compatibility": {
+    "enforced_but_unexercised_range": "Git 2.32 is enforced but not exercised: the lowest version AIQE was actually run against is git version 2.55.0. Versions from 2.32 up to that one are permitted by the floor and covered by no run.",
+    "enforced_minimum": "2.32",
+    "enforced_minimum_basis": "GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL, which AIQE's configuration isolation is built on, were introduced in Git 2.32. Below that they are ignored silently. The refusal is proven on a real Git 2.30.2 surface; the floor itself is a mechanism argument, not a run.",
     "exercised": [
       {
-        "git_version": "git version 2.50.1 (Apple Git-155)",
+        "git_version": "git version 2.55.0",
         "surfaces": [
-          "macos macOS 26.6.2 / arm64 / FULL_SUITE",
+          "linux ubuntu 22.04 / x86_64 / FULL_SUITE",
+          "linux ubuntu 22.04 / x86_64 / INSTALLED_ARTIFACT_E2E",
+          "linux ubuntu 24.04 / aarch64 / FULL_SUITE",
+          "linux ubuntu 24.04 / aarch64 / INSTALLED_ARTIFACT_E2E",
+          "linux ubuntu 24.04 / x86_64 / FULL_SUITE",
+          "linux ubuntu 24.04 / x86_64 / INSTALLED_ARTIFACT_E2E",
+          "macos macOS 15.7.7 / arm64 / INSTALLED_ARTIFACT_E2E",
+          "macos macOS 15.7.9 / x86_64 / INSTALLED_ARTIFACT_E2E",
+          "macos macOS 26.5.2 / arm64 / FULL_SUITE",
+          "macos macOS 26.5.2 / arm64 / INSTALLED_ARTIFACT_E2E",
           "macos macOS 26.6.2 / arm64 / INSTALLED_ARTIFACT_E2E"
         ]
       }
     ],
-    "highest_exercised": "git version 2.50.1 (Apple Git-155)",
-    "lowest_exercised": "git version 2.50.1 (Apple Git-155)",
-    "minimum_claimed": null,
-    "minimum_status": "NOT_PROVEN",
-    "statement": "AIQE publishes the Git versions it was run against. It does not publish a minimum supported version: no surface below the lowest exercised version was executed, so no minimum has been demonstrated."
+    "highest_exercised": "git version 2.55.0",
+    "lowest_exercised": "git version 2.55.0",
+    "minimum_claimed": "2.32",
+    "minimum_status": "PROVEN",
+    "statement": "AIQE refuses to run below the enforced minimum rather than running under-isolated. Above it, AIQE publishes the versions it was actually run against and does not interpolate between them."
   },
   "installed_artifact_e2e": {
     "all_reviewable": true,
-    "runs": 1,
+    "runs": 12,
     "verdicts": [
       "REVIEWABLE"
     ]
   },
   "negative_controls": {
     "not_reproducing": [],
-    "reproducing": 3,
+    "reproducing": 6,
     "results": [
       {
         "control": "NC-PACKAGE-SOURCE-IMPORT",
         "reproduced": true,
-        "surface": "surface-artifact-local.json"
+        "surface": "surface-artifact-macos-latest-py3.14/surface.json"
       },
       {
         "control": "NC-PACKAGE-PRIVATE-FILE",
         "reproduced": true,
-        "surface": "surface-artifact-local.json"
+        "surface": "surface-artifact-macos-latest-py3.14/surface.json"
       },
       {
         "control": "NC-SUPPORT-CLAIM",
         "reproduced": true,
-        "surface": "surface-artifact-local.json"
+        "surface": "surface-artifact-macos-latest-py3.14/surface.json"
+      },
+      {
+        "control": "NC-PACKAGE-SOURCE-IMPORT",
+        "reproduced": true,
+        "surface": "surface-artifact-ubuntu-latest-py3.14/surface.json"
+      },
+      {
+        "control": "NC-PACKAGE-PRIVATE-FILE",
+        "reproduced": true,
+        "surface": "surface-artifact-ubuntu-latest-py3.14/surface.json"
+      },
+      {
+        "control": "NC-SUPPORT-CLAIM",
+        "reproduced": true,
+        "surface": "surface-artifact-ubuntu-latest-py3.14/surface.json"
       }
     ],
-    "total": 3
+    "total": 6
   },
   "offline_runtime": {
     "all_pass": true,
     "canary_armed_everywhere": true,
     "network_attempts": 0,
-    "runs": 1,
+    "runs": 2,
     "scope": "AIQE runtime only. Obtaining AIQE, uv or any other tool from an index uses the network by definition; that is installation, and it is not claimed to be offline."
   },
   "out_of_scope": [
@@ -114,75 +234,274 @@
     "results": [
       {
         "outcome": "PASS",
-        "surface": "surface-artifact-local.json",
-        "target": "oss7-portability-release"
+        "surface": "surface-artifact-macos-latest-py3.11/surface.json",
+        "target": "aiqe"
       },
       {
         "outcome": "PASS",
-        "surface": "surface-artifact-local.json",
+        "surface": "surface-artifact-macos-latest-py3.11/surface.json",
         "target": "extracted-sdist"
       },
       {
         "outcome": "PASS",
-        "surface": "surface-artifact-local.json",
+        "surface": "surface-artifact-macos-latest-py3.11/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.12/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.12/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.12/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.13/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.13/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.13/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.14/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.14/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-macos-latest-py3.14/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.11/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.11/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.11/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.12/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.12/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.12/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.13/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.13/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.13/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.14/surface.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.14/surface.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-artifact-ubuntu-latest-py3.14/surface.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-macos-15-intel-py314/surface-artifact.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-macos-15-intel-py314/surface-artifact.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-macos-15-intel-py314/surface-artifact.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-macos-15-py311/surface-artifact.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-macos-15-py311/surface-artifact.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-macos-15-py311/surface-artifact.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-ubuntu-22.04-py311/surface-artifact.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-ubuntu-22.04-py311/surface-artifact.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-ubuntu-22.04-py311/surface-artifact.json",
+        "target": "extracted-wheel"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-ubuntu-24.04-arm-py314/surface-artifact.json",
+        "target": "aiqe"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-ubuntu-24.04-arm-py314/surface-artifact.json",
+        "target": "extracted-sdist"
+      },
+      {
+        "outcome": "PASS",
+        "surface": "surface-extra-ubuntu-24.04-arm-py314/surface-artifact.json",
         "target": "extracted-wheel"
       }
     ],
     "targets": [
+      "aiqe",
       "extracted-sdist",
-      "extracted-wheel",
-      "oss7-portability-release"
+      "extracted-wheel"
     ]
   },
   "python_requirement": ">=3.11",
   "python_support": {
     "3.11": {
-      "evidence": [],
-      "families_by_level": {},
-      "missing": [
-        "INSTALLED_ARTIFACT_E2E on macos",
-        "INSTALLED_ARTIFACT_E2E on linux",
-        "FULL_SUITE on any of linux, macos"
-      ],
-      "verdict": "NOT_PROVEN"
-    },
-    "3.12": {
-      "evidence": [],
-      "families_by_level": {},
-      "missing": [
-        "INSTALLED_ARTIFACT_E2E on macos",
-        "INSTALLED_ARTIFACT_E2E on linux",
-        "FULL_SUITE on any of linux, macos"
-      ],
-      "verdict": "NOT_PROVEN"
-    },
-    "3.13": {
-      "evidence": [],
-      "families_by_level": {},
-      "missing": [
-        "INSTALLED_ARTIFACT_E2E on macos",
-        "INSTALLED_ARTIFACT_E2E on linux",
-        "FULL_SUITE on any of linux, macos"
-      ],
-      "verdict": "NOT_PROVEN"
-    },
-    "3.14": {
       "evidence": [
-        "macos macOS 26.6.2 / arm64 / python 3.14.6 / FULL_SUITE / local",
-        "macos macOS 26.6.2 / arm64 / python 3.14.6 / INSTALLED_ARTIFACT_E2E / local"
+        "linux ubuntu 22.04 / x86_64 / python 3.11.16 / FULL_SUITE / github-hosted runner ubuntu-22.04 (image ubuntu22)",
+        "linux ubuntu 22.04 / x86_64 / python 3.11.16 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-22.04 (image ubuntu22)",
+        "linux ubuntu 24.04 / x86_64 / python 3.11.16 / FULL_SUITE / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "linux ubuntu 24.04 / x86_64 / python 3.11.16 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "macos macOS 15.7.7 / arm64 / python 3.11.9 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-15 (image macos15)",
+        "macos macOS 26.5.2 / arm64 / python 3.11.9 / FULL_SUITE / github-hosted runner macos-latest (image macos26)",
+        "macos macOS 26.5.2 / arm64 / python 3.11.9 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
       ],
       "families_by_level": {
         "FULL_SUITE": [
+          "linux",
           "macos"
         ],
         "INSTALLED_ARTIFACT_E2E": [
+          "linux",
           "macos"
         ]
       },
-      "missing": [
-        "INSTALLED_ARTIFACT_E2E on linux"
+      "missing": [],
+      "verdict": "PROVEN"
+    },
+    "3.12": {
+      "evidence": [
+        "linux ubuntu 24.04 / x86_64 / python 3.12.14 / FULL_SUITE / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "linux ubuntu 24.04 / x86_64 / python 3.12.14 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "macos macOS 26.5.2 / arm64 / python 3.12.10 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
       ],
-      "verdict": "NOT_PROVEN"
+      "families_by_level": {
+        "FULL_SUITE": [
+          "linux"
+        ],
+        "INSTALLED_ARTIFACT_E2E": [
+          "linux",
+          "macos"
+        ]
+      },
+      "missing": [],
+      "verdict": "PROVEN"
+    },
+    "3.13": {
+      "evidence": [
+        "linux ubuntu 24.04 / x86_64 / python 3.13.15 / FULL_SUITE / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "linux ubuntu 24.04 / x86_64 / python 3.13.15 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "macos macOS 26.5.2 / arm64 / python 3.13.14 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
+      ],
+      "families_by_level": {
+        "FULL_SUITE": [
+          "linux"
+        ],
+        "INSTALLED_ARTIFACT_E2E": [
+          "linux",
+          "macos"
+        ]
+      },
+      "missing": [],
+      "verdict": "PROVEN"
+    },
+    "3.14": {
+      "evidence": [
+        "linux ubuntu 24.04 / aarch64 / python 3.14.7 / FULL_SUITE / github-hosted runner ubuntu-24.04-arm (image ubuntu24-arm64)",
+        "linux ubuntu 24.04 / aarch64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-24.04-arm (image ubuntu24-arm64)",
+        "linux ubuntu 24.04 / x86_64 / python 3.14.7 / FULL_SUITE / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "linux ubuntu 24.04 / x86_64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner ubuntu-latest (image ubuntu24)",
+        "macos macOS 15.7.9 / x86_64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-15-intel (image macos15)",
+        "macos macOS 26.5.2 / arm64 / python 3.14.6 / FULL_SUITE / github-hosted runner macos-latest (image macos26)",
+        "macos macOS 26.6.2 / arm64 / python 3.14.7 / INSTALLED_ARTIFACT_E2E / github-hosted runner macos-latest (image macos26)"
+      ],
+      "families_by_level": {
+        "FULL_SUITE": [
+          "linux",
+          "macos"
+        ],
+        "INSTALLED_ARTIFACT_E2E": [
+          "linux",
+          "macos"
+        ]
+      },
+      "missing": [],
+      "verdict": "PROVEN"
     }
   },
   "python_support_rule": "A Python minor is PROVEN only with both a full-suite run and an installed-artifact end-to-end run, on every claimed OS family. Nothing is inferred from the endpoints of a range.",
@@ -244,8 +563,8 @@
       "same_member_set": true
     },
     "sdist_content_identical": true,
-    "sdist_hash_run_1": "79bd025383e8d887f6807d996783e5174c3ee2657164d5d6f1ed13a2a1433d6e",
-    "sdist_hash_run_2": "8c770fcf4592fc8af732ac7f4706c8ca25fe67df003aff761969cda37f74ba7c",
+    "sdist_hash_run_1": "9cca0eee0ae140f8fba337818e58232b80b6add52d628349980c633b2f656c62",
+    "sdist_hash_run_2": "5ab228553217af6c21a4d9196b687158f165bc870e79a90f66ed121ec815b00d",
     "source_date_epoch_used": 1700000000,
     "wheel_cause": null,
     "wheel_comparison_default": {
@@ -276,22 +595,100 @@
       "same_member_set": true
     },
     "wheel_content_identical": true,
-    "wheel_hash_run_1": "78abc674b7a11eb53c6b487c0b740c19326c75e01d1ed6245760e41298378d3c",
-    "wheel_hash_run_2": "31436e27c35d98010e9f77e909e4624a8e8d2ac7a7ea52c82c879edb91a9fcd7"
+    "wheel_hash_run_1": "e54ce6db5c5a974df25eec5524655fe064fe205a6fcfeb746ae25b4e6b063336",
+    "wheel_hash_run_2": "852945acf120ccb414f56c49d787574cb393a358563f39e07b2742691dbcfdca"
   },
   "runtime_dependency_count": 0,
   "schema_version": 1,
-  "source_commit": "3203b362594eb3be8167a67a1da831089aee2128",
-  "source_trees_with_uncommitted_changes": [
-    "surface-artifact-local.json",
-    "surface-suite-local.json"
-  ],
+  "source_commit": "a77e3b16bc6f69c53d949d96cfb1496e8b027391",
+  "source_trees_with_uncommitted_changes": [],
   "statement": "This manifest is private release-proof evidence. It records what was built and what was executed against it. It is not a release announcement, nothing described here is published, and a claim absent from it is a claim that was not demonstrated.",
   "surfaces": [
     {
       "arch": "arm64",
-      "duration_seconds": 99.7,
-      "git_version": "git version 2.50.1 (Apple Git-155)",
+      "duration_seconds": 24.6,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "macos",
+      "os_release": "macOS 26.5.2",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.11.9",
+      "record": "surface-artifact-macos-latest-py3.11/surface.json",
+      "runner_provenance": "github-hosted runner macos-latest (image macos26)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "arm64",
+      "duration_seconds": 24.1,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "macos",
+      "os_release": "macOS 26.5.2",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.12.10",
+      "record": "surface-artifact-macos-latest-py3.12/surface.json",
+      "runner_provenance": "github-hosted runner macos-latest (image macos26)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "arm64",
+      "duration_seconds": 21.3,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "macos",
+      "os_release": "macOS 26.5.2",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.13.14",
+      "record": "surface-artifact-macos-latest-py3.13/surface.json",
+      "runner_provenance": "github-hosted runner macos-latest (image macos26)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "arm64",
+      "duration_seconds": 49.1,
+      "git_version": "git version 2.55.0",
       "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
       "os_release": "macOS 26.6.2",
@@ -307,28 +704,281 @@
         "scan",
         "controls"
       ],
-      "python_version": "3.14.6",
-      "record": "surface-artifact-local.json",
-      "runner_provenance": "local",
+      "python_version": "3.14.7",
+      "record": "surface-artifact-macos-latest-py3.14/surface.json",
+      "runner_provenance": "github-hosted runner macos-latest (image macos26)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 21.7,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.11.16",
+      "record": "surface-artifact-ubuntu-latest-py3.11/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 17.7,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.12.14",
+      "record": "surface-artifact-ubuntu-latest-py3.12/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 16.8,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.13.15",
+      "record": "surface-artifact-ubuntu-latest-py3.13/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 50.0,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "offline",
+        "uv",
+        "reproducibility",
+        "scan",
+        "controls"
+      ],
+      "python_version": "3.14.7",
+      "record": "surface-artifact-ubuntu-latest-py3.14/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 52.0,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "macos",
+      "os_release": "macOS 15.7.9",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.14.7",
+      "record": "surface-extra-macos-15-intel-py314/surface-artifact.json",
+      "runner_provenance": "github-hosted runner macos-15-intel (image macos15)",
       "skips": [],
       "tests_run": null,
       "tests_skipped": null
     },
     {
       "arch": "arm64",
-      "duration_seconds": 936.5,
-      "git_version": "git version 2.50.1 (Apple Git-155)",
-      "level": "FULL_SUITE",
+      "duration_seconds": 19.6,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
       "os_family": "macos",
-      "os_release": "macOS 26.6.2",
+      "os_release": "macOS 15.7.7",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.11.9",
+      "record": "surface-extra-macos-15-py311/surface-artifact.json",
+      "runner_provenance": "github-hosted runner macos-15 (image macos15)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 30.3,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "linux",
+      "os_release": "ubuntu 22.04",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.11.16",
+      "record": "surface-extra-ubuntu-22.04-py311/surface-artifact.json",
+      "runner_provenance": "github-hosted runner ubuntu-22.04 (image ubuntu22)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 84.7,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "linux",
+      "os_release": "ubuntu 22.04",
       "outcome": "PASS",
       "parts_not_run": [],
       "parts_run": [
         "suite"
       ],
-      "python_version": "3.14.6",
-      "record": "surface-suite-local.json",
-      "runner_provenance": "local",
+      "python_version": "3.11.16",
+      "record": "surface-extra-ubuntu-22.04-py311/surface-suite.json",
+      "runner_provenance": "github-hosted runner ubuntu-22.04 (image ubuntu22)",
+      "skips": [],
+      "tests_run": 852,
+      "tests_skipped": 0
+    },
+    {
+      "arch": "aarch64",
+      "duration_seconds": 18.2,
+      "git_version": "git version 2.55.0",
+      "level": "INSTALLED_ARTIFACT_E2E",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [
+        "offline",
+        "uv",
+        "reproducibility",
+        "controls"
+      ],
+      "parts_run": [
+        "artifacts",
+        "install",
+        "e2e",
+        "scan"
+      ],
+      "python_version": "3.14.7",
+      "record": "surface-extra-ubuntu-24.04-arm-py314/surface-artifact.json",
+      "runner_provenance": "github-hosted runner ubuntu-24.04-arm (image ubuntu24-arm64)",
+      "skips": [],
+      "tests_run": null,
+      "tests_skipped": null
+    },
+    {
+      "arch": "aarch64",
+      "duration_seconds": 64.5,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.14.7",
+      "record": "surface-extra-ubuntu-24.04-arm-py314/surface-suite.json",
+      "runner_provenance": "github-hosted runner ubuntu-24.04-arm (image ubuntu24-arm64)",
+      "skips": [],
+      "tests_run": 852,
+      "tests_skipped": 0
+    },
+    {
+      "arch": "arm64",
+      "duration_seconds": 232.7,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "macos",
+      "os_release": "macOS 26.5.2",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.11.9",
+      "record": "surface-suite-macos-latest-py3.11/surface.json",
+      "runner_provenance": "github-hosted runner macos-latest (image macos26)",
       "skips": [
         "test_commit-non-utf8-name (tests.test_commit_fixtures.CommitFixtureTests.test_commit-non-utf8-name)",
         "test_fixture_really_uses_a_non_utf8_name (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_fixture_really_uses_a_non_utf8_name)",
@@ -354,6 +1004,123 @@
       ],
       "tests_run": 852,
       "tests_skipped": 21
+    },
+    {
+      "arch": "arm64",
+      "duration_seconds": 227.8,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "macos",
+      "os_release": "macOS 26.5.2",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.14.6",
+      "record": "surface-suite-macos-latest-py3.14/surface.json",
+      "runner_provenance": "github-hosted runner macos-latest (image macos26)",
+      "skips": [
+        "test_commit-non-utf8-name (tests.test_commit_fixtures.CommitFixtureTests.test_commit-non-utf8-name)",
+        "test_fixture_really_uses_a_non_utf8_name (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_fixture_really_uses_a_non_utf8_name)",
+        "test_no_worktree_path_was_written_by_aiqe (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_no_worktree_path_was_written_by_aiqe)",
+        "test_output_carries_no_raw_terminal_control_bytes (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_output_carries_no_raw_terminal_control_bytes)",
+        "test_the_changed_pathset_is_exactly_the_declared_bytes (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_the_changed_pathset_is_exactly_the_declared_bytes)",
+        "test_the_commit_is_created_and_reviewable (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_the_commit_is_created_and_reviewable)",
+        "test_the_parent_and_foreign_staged_proofs_hold (tests.test_commit_non_utf8.NonUtf8CompletionCommitTests.test_the_parent_and_foreign_staged_proofs_hold)",
+        "test_non_utf8_path (tests.test_doctor_fixtures.DoctorFixtureTests.test_non_utf8_path)",
+        "test_counts_are_correct (tests.test_non_utf8_paths.NonUtf8PathTests.test_counts_are_correct)",
+        "test_doctor_completes_on_byte_paths (tests.test_non_utf8_paths.NonUtf8PathTests.test_doctor_completes_on_byte_paths)",
+        "test_fixture_really_contains_non_utf8_names (tests.test_non_utf8_paths.NonUtf8PathTests.test_fixture_really_contains_non_utf8_names)",
+        "test_json_output_is_valid (tests.test_non_utf8_paths.NonUtf8PathTests.test_json_output_is_valid)",
+        "test_no_path_bytes_reach_the_output (tests.test_non_utf8_paths.NonUtf8PathTests.test_no_path_bytes_reach_the_output)",
+        "test_safety_invariants_hold_on_byte_paths (tests.test_non_utf8_paths.NonUtf8PathTests.test_safety_invariants_hold_on_byte_paths)",
+        "test_non_utf8_owned_path (tests.test_task_fixtures.TaskFixtureTests.test_non_utf8_owned_path)",
+        "test_digest_is_stable_over_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_digest_is_stable_over_byte_paths)",
+        "test_fixture_really_uses_a_non_utf8_name (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_fixture_really_uses_a_non_utf8_name)",
+        "test_lifecycle_succeeds_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_lifecycle_succeeds_on_byte_paths)",
+        "test_output_carries_no_invalid_terminal_bytes (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_output_carries_no_invalid_terminal_bytes)",
+        "test_safety_invariants_hold_on_byte_paths (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_safety_invariants_hold_on_byte_paths)",
+        "test_stored_bytes_equal_the_bytes_declared (tests.test_task_non_utf8.NonUtf8OwnedPathTests.test_stored_bytes_equal_the_bytes_declared)"
+      ],
+      "tests_run": 852,
+      "tests_skipped": 21
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 71.0,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.11.16",
+      "record": "surface-suite-ubuntu-latest-py3.11/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": 852,
+      "tests_skipped": 0
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 76.7,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.12.14",
+      "record": "surface-suite-ubuntu-latest-py3.12/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": 852,
+      "tests_skipped": 0
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 82.7,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.13.15",
+      "record": "surface-suite-ubuntu-latest-py3.13/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": 852,
+      "tests_skipped": 0
+    },
+    {
+      "arch": "x86_64",
+      "duration_seconds": 75.4,
+      "git_version": "git version 2.55.0",
+      "level": "FULL_SUITE",
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "outcome": "PASS",
+      "parts_not_run": [],
+      "parts_run": [
+        "suite"
+      ],
+      "python_version": "3.14.7",
+      "record": "surface-suite-ubuntu-latest-py3.14/surface.json",
+      "runner_provenance": "github-hosted runner ubuntu-latest (image ubuntu24)",
+      "skips": [],
+      "tests_run": 852,
+      "tests_skipped": 0
     }
   ],
   "tested_install_paths": [
@@ -364,30 +1131,136 @@
   ],
   "tested_os_arch_surfaces": [
     {
+      "arch": "x86_64",
+      "git_versions": [
+        "git version 2.55.0"
+      ],
+      "levels": [
+        "FULL_SUITE",
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "linux",
+      "os_release": "ubuntu 22.04",
+      "python_versions": [
+        "3.11.16"
+      ],
+      "runner_provenance": [
+        "github-hosted runner ubuntu-22.04 (image ubuntu22)"
+      ]
+    },
+    {
+      "arch": "aarch64",
+      "git_versions": [
+        "git version 2.55.0"
+      ],
+      "levels": [
+        "FULL_SUITE",
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "python_versions": [
+        "3.14.7"
+      ],
+      "runner_provenance": [
+        "github-hosted runner ubuntu-24.04-arm (image ubuntu24-arm64)"
+      ]
+    },
+    {
+      "arch": "x86_64",
+      "git_versions": [
+        "git version 2.55.0"
+      ],
+      "levels": [
+        "FULL_SUITE",
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "linux",
+      "os_release": "ubuntu 24.04",
+      "python_versions": [
+        "3.11.16",
+        "3.12.14",
+        "3.13.15",
+        "3.14.7"
+      ],
+      "runner_provenance": [
+        "github-hosted runner ubuntu-latest (image ubuntu24)"
+      ]
+    },
+    {
       "arch": "arm64",
       "git_versions": [
-        "git version 2.50.1 (Apple Git-155)"
+        "git version 2.55.0"
+      ],
+      "levels": [
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "macos",
+      "os_release": "macOS 15.7.7",
+      "python_versions": [
+        "3.11.9"
+      ],
+      "runner_provenance": [
+        "github-hosted runner macos-15 (image macos15)"
+      ]
+    },
+    {
+      "arch": "x86_64",
+      "git_versions": [
+        "git version 2.55.0"
+      ],
+      "levels": [
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "macos",
+      "os_release": "macOS 15.7.9",
+      "python_versions": [
+        "3.14.7"
+      ],
+      "runner_provenance": [
+        "github-hosted runner macos-15-intel (image macos15)"
+      ]
+    },
+    {
+      "arch": "arm64",
+      "git_versions": [
+        "git version 2.55.0"
       ],
       "levels": [
         "FULL_SUITE",
         "INSTALLED_ARTIFACT_E2E"
       ],
       "os_family": "macos",
-      "os_release": "macOS 26.6.2",
+      "os_release": "macOS 26.5.2",
       "python_versions": [
+        "3.11.9",
+        "3.12.10",
+        "3.13.14",
         "3.14.6"
       ],
       "runner_provenance": [
-        "local"
+        "github-hosted runner macos-latest (image macos26)"
+      ]
+    },
+    {
+      "arch": "arm64",
+      "git_versions": [
+        "git version 2.55.0"
+      ],
+      "levels": [
+        "INSTALLED_ARTIFACT_E2E"
+      ],
+      "os_family": "macos",
+      "os_release": "macOS 26.6.2",
+      "python_versions": [
+        "3.14.7"
+      ],
+      "runner_provenance": [
+        "github-hosted runner macos-latest (image macos26)"
       ]
     }
   ],
-  "unproven_python_minors": [
-    "3.11",
-    "3.12",
-    "3.13",
-    "3.14"
-  ],
+  "unproven_python_minors": [],
   "zero_tolerance_totals": {
     "disallowed_sdist_members": 0,
     "disallowed_wheel_members": 0,
