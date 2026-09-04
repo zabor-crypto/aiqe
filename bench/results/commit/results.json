@@ -2,7 +2,7 @@
   "aiqe_version": "0.1.0a0",
   "cases": [
     {
-      "aiqe_commit_git_writes": 14,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -25,6 +25,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a CRLF worktree file commits as its normalised blob and stays bound",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 14
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -77,7 +80,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -100,6 +103,9 @@
       ],
       "commit_verdict": null,
       "description": "a detached HEAD is refused rather than silently claimed as supported",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -146,7 +152,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -169,6 +175,9 @@
       ],
       "commit_verdict": null,
       "description": "an unresolvable effective configuration refuses rather than guessing",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 2,
@@ -215,7 +224,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -236,6 +245,9 @@
       ],
       "commit_verdict": "INCOMPLETE",
       "description": "an owned path the task never touched produces no empty completion commit",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -282,7 +294,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 12,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -305,6 +317,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "an executable owned file keeps mode 100755 through the commit",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 13
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/tool.sh"
@@ -357,7 +372,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -380,6 +395,9 @@
       ],
       "commit_verdict": null,
       "description": "a binding from core.attributesFile is resolved and refuses",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -426,7 +444,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 14,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -449,6 +467,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a configured driver bound to no owned path is not a blocker",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -501,7 +522,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -524,6 +545,9 @@
       ],
       "commit_verdict": null,
       "description": "a binding from $GIT_DIR/info/attributes is resolved and refuses",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -570,7 +594,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -593,6 +617,9 @@
       ],
       "commit_verdict": null,
       "description": "a process filter refuses, and is never started",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -641,7 +668,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -664,6 +691,9 @@
       ],
       "commit_verdict": null,
       "description": "a driver defined through a global include still refuses",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -712,7 +742,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -735,6 +765,9 @@
       ],
       "commit_verdict": null,
       "description": "a tracked .gitattributes binding a clean filter refuses, filter unrun",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -783,7 +816,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 17,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -806,6 +839,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a foreign staged addition survives the bounded commit untouched",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 19
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -861,7 +897,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 19,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -884,6 +920,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a foreign staged deletion survives the bounded commit untouched",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 18
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -935,7 +974,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 19,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -958,6 +997,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a foreign staged mode change survives the bounded commit untouched",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 19
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -1013,7 +1055,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 19,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1036,6 +1078,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a foreign staged modification survives the bounded commit untouched",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 19
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -1089,7 +1134,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1112,6 +1157,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a foreign untracked file is neither committed nor staged",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -1162,7 +1210,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1185,6 +1233,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a completion commit driven from a subdirectory of the worktree",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -1235,7 +1286,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -1258,6 +1309,9 @@
       ],
       "commit_verdict": null,
       "description": "an active commit-msg hook refuses, and does not run",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -1304,7 +1358,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -1327,6 +1381,9 @@
       ],
       "commit_verdict": null,
       "description": "an active post-commit hook refuses, and does not run",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -1373,7 +1430,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -1396,6 +1453,9 @@
       ],
       "commit_verdict": null,
       "description": "an active pre-commit hook refuses, and does not run",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -1442,7 +1502,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -1465,6 +1525,9 @@
       ],
       "commit_verdict": null,
       "description": "an active prepare-commit-msg hook refuses, and does not run",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -1511,7 +1574,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -1534,6 +1597,9 @@
       ],
       "commit_verdict": null,
       "description": "a hook reached through core.hooksPath refuses, and does not run",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -1580,7 +1646,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 11,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1601,6 +1667,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "an owned filename beginning with a dash is a name, not an option",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 11
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "-dash.py"
@@ -1653,7 +1722,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 14,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1676,6 +1745,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a completion commit in a linked worktree",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -1726,7 +1798,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 13,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1755,6 +1827,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "owned filenames that are pathspec syntax commit themselves and no decoy",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 13
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/-dash.py",
@@ -1843,7 +1918,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -1866,6 +1941,9 @@
       ],
       "commit_verdict": null,
       "description": "a merge in progress is a topology this build refuses to commit onto",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -1920,7 +1998,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 12,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -1943,6 +2021,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a mode change with identical content is a change, and is committed",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 12
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/plain.sh"
@@ -1995,7 +2076,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 18,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2020,6 +2101,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a modification, a creation and a deletion in one bounded commit",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 17
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/beta.py",
@@ -2078,7 +2162,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 14,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2101,6 +2185,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a new untracked owned file, committed through transactional intent-to-add",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/created.py"
@@ -2159,7 +2246,7 @@
       "problems": []
     },
     {
-      "aiqe_commit_git_writes": 11,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2182,6 +2269,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "an owned path deleted from the worktree is committed as a deletion",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 11
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/gone.py"
@@ -2233,7 +2323,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2256,6 +2346,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "one tracked owned file, modified and committed",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -2306,7 +2399,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 23,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2329,6 +2422,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a later commit stops the receipt claiming a current reviewable state",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 23
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -2381,7 +2477,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 15,
+      "aiqe_commit_git_writes_observed": true,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 8,
@@ -2404,6 +2500,9 @@
       "commit_reasons": [],
       "commit_verdict": "REVIEWABLE",
       "description": "a second completion commit for the same task refuses deterministically",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 15
+      },
       "evidence_push_performed": false,
       "expected_changed_paths": [
         "src/strategy/alpha.py"
@@ -2459,7 +2558,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -2482,6 +2581,9 @@
       ],
       "commit_verdict": null,
       "description": "commit.gpgSign in repository scope refuses, and no signer runs",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -2528,7 +2630,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -2551,6 +2653,9 @@
       ],
       "commit_verdict": null,
       "description": "commit.gpgSign reached through a global include refuses just the same",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 0,
@@ -2597,7 +2702,7 @@
       "task_start_exit": 0
     },
     {
-      "aiqe_commit_git_writes": 0,
+      "aiqe_commit_git_writes_observed": false,
       "aiqe_core_worktree_mutation_detail": [],
       "aiqe_core_worktree_mutations": 0,
       "aiqe_state_changes": 7,
@@ -2620,6 +2725,9 @@
       ],
       "commit_verdict": "INCOMPLETE",
       "description": "an owned file edited after the check refuses before any index mutation",
+      "diagnostics": {
+        "aiqe_commit_git_writes": 0
+      },
       "evidence_push_performed": null,
       "expected_changed_paths": [],
       "fixture_repository_mutations": 1,
@@ -2674,8 +2782,13 @@
   ],
   "cases_total": 37,
   "counts": {
-    "aiqe_commit_git_writes": 290,
+    "cases_with_commit_git_writes": 19,
     "reviewable_receipts": 18
+  },
+  "diagnostics": {
+    "aiqe_commit_git_writes": 294,
+    "excluded_from_comparison": true,
+    "why": "race-dependent between two correct runs; informational only"
   },
   "family": "BOUNDED_COMMIT",
   "negative_controls": [

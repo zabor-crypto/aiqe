@@ -235,7 +235,30 @@ visuals                    generated from result JSON only
 failed / unsupported /
   not-run cases            retained and rendered — never hidden, never filtered
 README numbers             permitted only from retained artifacts
+diagnostics sections       retained, and compared by nothing
 ```
+
+The last line is a narrow exception with one occupant. A quantity belongs in a
+`diagnostics` section when two *correct* runs legitimately disagree about it,
+and `diagnostics` is stripped — at document level and inside every case —
+before `compare-results.py` looks at anything.
+
+`diagnostics.aiqe_commit_git_writes` is why it exists. Several bounded-commit
+cases race a concurrent process against AIQE's own window on purpose, and Git
+writes a different number of objects, lock files and reflog entries depending
+on how that race lands: 292 and 295 were observed on one machine minutes
+apart, from four cases, with every zero-tolerance total and every case outcome
+identical. Comparing that number would make a correct family flaky; deleting
+it would lose a real measurement. So it is recorded and named
+unauthoritative, and the stable fact underneath it —
+`aiqe_commit_git_writes_observed`, whether a case's completion commit wrote
+through Git at all — stays in the authoritative record and is compared like
+everything else.
+
+A regression in [`../tests/test_commit_fixtures.py`](../tests/test_commit_fixtures.py)
+holds the exclusion in place from both directions: two documents differing
+only in that count must agree, and a change to a quantity that does carry
+authority must still be caught.
 
 A result file is an output. Editing one by hand converts the benchmark from evidence into
 decoration.

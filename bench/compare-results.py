@@ -12,6 +12,11 @@ correct machines legitimately produce different bytes. What may not differ is
 how many cases there were, how many failed, how many negative controls
 reproduced their failure, and whether every zero-tolerance total is zero.
 
+A `diagnostics` section, at document level or inside a case, is stripped
+before anything is compared. It holds measurements that two correct runs
+legitimately disagree about, and it is named rather than merely unread so that
+the exclusion is a decision instead of an oversight.
+
 Platform-restricted cases are compared only where both runs actually ran them.
 A case the retained run skipped and this run executed is a case gaining
 coverage, which is not a disagreement - but a case that ran in both and
@@ -36,6 +41,49 @@ RETAINED_BY_FAMILY = {
     "BOUNDED_COMMIT": os.path.join(HERE, "results", "commit", "results.json"),
 }
 
+#: Sections a result document carries for a reader, and that no comparison may
+#: consult. A quantity lands here when two *correct* runs legitimately disagree
+#: about it.
+#:
+#: `diagnostics.aiqe_commit_git_writes` is the reason this exists. Several
+#: bounded-commit cases race a concurrent process against AIQE's own window on
+#: purpose, and Git writes a different number of objects, lock files and reflog
+#: entries depending on how the race lands - 292 and 295 were observed on one
+#: machine minutes apart. Comparing it would make a correct family flaky, and
+#: quietly dropping it would lose a real measurement, so it is recorded and
+#: named unauthoritative instead.
+#:
+#: The stable fact underneath it - whether a case's completion commit wrote
+#: through Git at all - is kept in the authoritative record as
+#: `aiqe_commit_git_writes_observed`, and that one is compared like anything
+#: else.
+NON_AUTHORITATIVE_KEYS = ("diagnostics",)
+
+
+def authoritative(document):
+    """The part of a result document that carries authority.
+
+    Applied to the whole document and to every case record, so that a
+    diagnostics section cannot re-enter the comparison by being nested one
+    level deeper than somebody remembered to check.
+    """
+    stripped = {
+        key: value
+        for key, value in document.items()
+        if key not in NON_AUTHORITATIVE_KEYS
+    }
+    if isinstance(stripped.get("cases"), list):
+        stripped["cases"] = [
+            {
+                key: value
+                for key, value in case.items()
+                if key not in NON_AUTHORITATIVE_KEYS
+            }
+            for case in stripped["cases"]
+        ]
+    return stripped
+
+
 #: Numbers that must agree between any two correct runs, on any platform.
 #: `cases_passed` is deliberately absent: it legitimately differs when one run
 #: could execute a platform-restricted case and the other could not.
@@ -53,7 +101,7 @@ def main(argv):
         return 2
 
     with open(argv[0]) as handle:
-        fresh = json.load(handle)
+        fresh = authoritative(json.load(handle))
 
     family = fresh.get("family")
     if family not in RETAINED_BY_FAMILY:
@@ -63,7 +111,7 @@ def main(argv):
         )
         return 2
     with open(RETAINED_BY_FAMILY[family]) as handle:
-        retained = json.load(handle)
+        retained = authoritative(json.load(handle))
 
     problems = [
         "%s: retained %r, fresh %r" % (field, retained[field], fresh[field])

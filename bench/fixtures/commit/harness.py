@@ -22,11 +22,24 @@ one cause:
 
 ```
 aiqe_state              AIQE's machine-local XDG state
-aiqe_commit_git_writes  the completion commit's own Git writes, under .git
+aiqe_commit_git         the completion commit's own Git writes, under .git
 fixture_writes          the scenario's declared actions, such as a commit the
                         fixture makes deliberately after AIQE's
 aiqe_core_worktree      everything else - and this must be zero
 ```
+
+How many writes the second bucket contains is **not** a stable quantity, and
+it is recorded as a diagnostic rather than as a result. Several cases race a
+concurrent process against AIQE's own window on purpose, and Git legitimately
+writes a different number of objects, lock files and reflog entries depending
+on how that race lands. Two correct runs of this family differ there: 292 and
+295 were observed on one machine minutes apart, from four cases.
+
+What *is* stable, and is therefore what the record carries, is whether the
+completion commit wrote through Git at all. That distinguishes a case that
+committed from a case that refused, which is the thing the bucket was ever
+evidence for. The raw count stays available under `diagnostics`, which no
+comparison reads.
 
 The family's other zeros:
 
@@ -188,7 +201,14 @@ def run_case(case_id, keep=False):
         record = {
             "case": case_id,
             "aiqe_state_changes": len(buckets["aiqe_state"]),
-            "aiqe_commit_git_writes": len(buckets["aiqe_commit_git"]),
+            # Stable: did the completion commit write through Git at all.
+            # The count itself is race-dependent and lives in `diagnostics`.
+            "aiqe_commit_git_writes_observed": bool(buckets["aiqe_commit_git"]),
+            # Non-authoritative. Nothing compares this, and nothing may start
+            # comparing it: see `bench/compare-results.py`.
+            "diagnostics": {
+                "aiqe_commit_git_writes": len(buckets["aiqe_commit_git"]),
+            },
             "aiqe_core_worktree_mutations": len(buckets["aiqe_core_worktree"]),
             "aiqe_core_worktree_mutation_detail": buckets["aiqe_core_worktree"],
             "fixture_repository_mutations": len(buckets["fixture"]),

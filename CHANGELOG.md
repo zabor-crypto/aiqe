@@ -51,6 +51,25 @@ makes the change, not at release time.
 
 ### Changed
 
+- **A race-dependent count no longer sits in the retained bounded-commit result as
+  though it were a result.** Several cases in that family race a concurrent process
+  against AIQE's own window on purpose, and Git legitimately writes a different number
+  of objects, lock files and reflog entries depending on how the race lands: two correct
+  runs on one machine, minutes apart, reported 292 and 295 across four cases, with every
+  zero-tolerance total and every case outcome identical.
+
+  `aiqe_commit_git_writes` moves into a `diagnostics` section — document level and per
+  case — which `compare-results.py` now strips explicitly before comparing anything. The
+  stable fact underneath it stays where it belongs: `aiqe_commit_git_writes_observed`
+  records whether a case's completion commit wrote through Git at all, which is what
+  distinguishes a case that committed from one that refused, and `counts` carries
+  `cases_with_commit_git_writes` in place of the raw sum. No zero-tolerance quantity
+  changed, no case outcome changed, and no headline number changed.
+
+  A regression holds the exclusion from both directions: two documents differing only in
+  that count must agree, and a change to a quantity that does carry authority must still
+  be caught. Without the second half the first would pass for the wrong reason.
+
 - **AIQE now refuses to run on Git older than 2.32, rather than running under-isolated.**
   Every command rests on the invariant that nothing the repository defines is executed,
   and that invariant is delivered by pointing `GIT_CONFIG_SYSTEM` and `GIT_CONFIG_GLOBAL`

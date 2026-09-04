@@ -159,10 +159,32 @@ def main(argv):
             "model_calls": 0,
         },
         "counts": {
-            "aiqe_commit_git_writes": sum(
-                r.get("aiqe_commit_git_writes", 0) for r in records
+            # Stable quantities only. How many Git writes the completion
+            # commits made is race-dependent and lives under `diagnostics`;
+            # how many cases wrote through Git at all does not vary.
+            "cases_with_commit_git_writes": sum(
+                1 for r in records if r.get("aiqe_commit_git_writes_observed")
             ),
             "reviewable_receipts": len(reviewable),
+        },
+        # Explicitly non-authoritative. Recorded because it is a real
+        # measurement worth seeing, excluded from every comparison because it
+        # legitimately differs between two correct runs: several cases race a
+        # concurrent process against AIQE's window, and Git writes a different
+        # number of objects and lock files depending on how that lands.
+        #
+        # A regression in tests/test_commit_fixtures.py holds this exclusion
+        # in place, so that a later "tidy-up" cannot promote it back into the
+        # agreement contract and make the family flaky.
+        "diagnostics": {
+            "excluded_from_comparison": True,
+            "why": (
+                "race-dependent between two correct runs; informational only"
+            ),
+            "aiqe_commit_git_writes": sum(
+                r.get("diagnostics", {}).get("aiqe_commit_git_writes", 0)
+                for r in records
+            ),
         },
         "cases": records,
         "negative_controls": control_records,
