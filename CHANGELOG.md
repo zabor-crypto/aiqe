@@ -12,6 +12,57 @@ makes the change, not at release time.
 
 ### Added
 
+- **[`docs/claims.md`](docs/claims.md), the launch-claims inventory.** Every externally
+  visible factual claim, classified `PROVEN` / `OBSERVED` / `NOT_PROVEN` /
+  `DESIGN_INTENT` / `OUT_OF_SCOPE` against the retained artifact it rests on, with its
+  known limitation and the surfaces allowed to carry it. A claim absent from it may not
+  appear on a public surface. It is a boundary document, deliberately small, and not a
+  claims database.
+- **A definition for every published zero-tolerance quantity**, in
+  [`bench/README.md`](bench/README.md), where the README already sent readers for them.
+  Six of the twelve had none. `local_state_writes` needed one most: it counts writes
+  under the isolated home *outside* AIQE's own permitted state directory, and is not the
+  claim that AIQE writes no local state — a task operation writes machine-local state by
+  design, counted separately as `aiqe_state_changes`.
+- **A positive control for a letter-suffixed internal phase identifier.** The
+  `INTERNAL_PHASE_ID` scanner class accepted a trailing `R` only, so a letter-suffixed
+  id passed the scan and survived in a tracked benchmark fixture and a test docstring.
+  The class now matches any single trailing letter, the corpus carries the shape that
+  got through, and both instances are sanitised. Widening what a class *detects* is not
+  widening it into an ignore, which stays forbidden.
+
+### Fixed
+
+- **The support gate reported no unexercised Git range when there was one.** It took the
+  lowest exercised version overall, which is Git 2.30.2 — a surface exercised only to
+  prove AIQE *refuses* on it. A refusal cannot close a support gap, so the gate now
+  ignores below-floor surfaces, and `enforced_but_unexercised_range` in the retained
+  manifest is corrected to what the gate computes from that manifest's own `exercised`
+  list. Every other field of `git_compatibility` reproduces unchanged from the same
+  inputs. The README already stated the 2.32-to-2.54 gap correctly; the manifest was the
+  surface that did not.
+- **The README claimed Git 2.55.0 on "every hosted runner in the matrix".** The
+  Debian 11 job is a hosted runner in the matrix and runs Git 2.30.2. The line now names
+  the surfaces the manifest records.
+- **Two published durations rested on nothing.** The demo was described as taking about
+  ten seconds, on no retained measurement, against this project's own rule that a prose
+  observation never becomes a published number. Both are removed. Benchmark family E,
+  which would measure time to value, is now marked deferred rather than described in the
+  present tense, and the five-minute quickstart target is recorded as a product target
+  in the claims inventory.
+- **`render-assets.py` reported one more capture than it checked**, counting the index
+  alongside the seven captures.
+
+### Changed
+
+- **The retained release-proof manifest no longer records a repository namespace.**
+  `ci_runs[].repository` was read by no gate, no comparator and no published surface.
+  What binds the manifest to this project is `source_commit` — proven by test to name an
+  object in this repository — together with run identifiers that survive a rename or a
+  transfer, so the namespace added no authority and would become a stale project name
+  after any such move. It is removed from the retained record and no longer collected.
+  A test keeps it out.
+
 - **The failure-first demonstration, materialised.**
   [`examples/lookahead-demo/`](examples/lookahead-demo/) is now runnable rather than
   specified: `run.py` builds four synthetic repositories from nothing, drives the real

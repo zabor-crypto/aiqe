@@ -31,6 +31,7 @@ GIT_SHA_40              commit 0123456789abcdef0123456789abcdef01234567 here
 BENCHMARK_ECONOMICS     saved $1,250.75 per run
 BENCHMARK_ECONOMICS_SUFFIXED    a budget of $5k for the quarter
 INTERNAL_PHASE_ID       phase OSS-7 is pending
+INTERNAL_PHASE_ID       the letter-suffixed form OSS-6C once passed the scan
 INTERNAL_AUTHORITY_ID   AIQE_CANONICAL_EXAMPLE_AUTHORITY
 INTERNAL_ROLE_ID        EXAMPLE_ROLE_SUPERVISOR signed off
 INTERNAL_CORRECTION_ID  correction SC-B9 applies

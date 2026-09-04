@@ -10,8 +10,8 @@ python3 examples/lookahead-demo/run.py
 It builds six repositories from nothing in a temporary directory — one for each
 act, and a second for each act that also runs the reference workflow — drives
 the real `aiqe` entry point against them, and writes what it observed to
-[`results/`](results/). It takes about ten seconds, needs no network, and
-touches nothing outside its temporary directory and that results directory.
+[`results/`](results/). It needs no network, and touches nothing outside its
+temporary directory and that results directory.
 
 The outcomes it must reproduce are declared in [`expected.json`](expected.json),
 which is written before the run. The demo exits non-zero if any of them

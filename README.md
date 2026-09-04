@@ -115,7 +115,7 @@ AIQE does not make your code correct. It makes the boundary between *checked* an
 
 ## Failure-first demo
 
-A synthetic strategy with a one-character causality defect, four acts, ten seconds:
+A synthetic strategy with a one-character causality defect, in four acts:
 
 ```bash
 python3 examples/lookahead-demo/run.py
@@ -676,7 +676,7 @@ Ubuntu 24.04  x86_64    full suite · installed artifact
 Ubuntu 24.04  arm64     full suite · installed artifact
 Ubuntu 22.04  x86_64    full suite · installed artifact
 Debian 11     x86_64    artifact builds and installs; AIQE refuses to run
-Git 2.55.0              every hosted runner in the matrix
+Git 2.55.0              every surface above except Debian 11
 ```
 
 **NOT PROVEN** — no run supports these, so nothing claims them:
@@ -813,6 +813,10 @@ no hooks and runs nothing in the background.
 
 No benchmark number appears in this README unless it is generated from a retained result
 artifact. No result is hidden, including failures and cases that were never run.
+
+Every claim on this page is classified — proven, observed, not proven, design intent or
+out of scope — against the artifact it rests on, in [`docs/claims.md`](docs/claims.md).
+A claim absent from that inventory is one this project does not make.
 
 ## Contributing
 

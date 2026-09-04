@@ -37,6 +37,48 @@ Copying a total out of prose is how a published number stops matching the artifa
 came from, so no number in the README's benchmark block was typed. The test suite runs
 the check-mode invocation, so drift fails there too.
 
+## What the zero-tolerance quantities count
+
+The README publishes these totals, so each one has to mean something exact. Four are
+measured by every family; the rest belong to the family named beside them.
+
+```
+repository_mutations            changed paths anywhere in the repository, `.git`
+                                included. Doctor and Task only: `check` and
+                                `commit` run repository-declared code and create
+                                a commit, so neither can make this claim, and
+                                each narrows it below instead.
+
+repository_defined_executions   canaries that the repository installed and that
+                                fired - a filter driver, a hook, an fsmonitor.
+                                Counts executions AIQE caused, not mutations.
+
+local_state_writes              changes under the isolated HOME and XDG tree
+                                *outside* AIQE's own permitted state home. It is
+                                not a claim that AIQE writes no local state: a
+                                task operation writes machine-local state under
+                                `$XDG_STATE_HOME/aiqe/` by design, and those
+                                changes are counted separately, as
+                                `aiqe_state_changes`, where a non-zero value is
+                                expected. This quantity is what catches a write
+                                landing anywhere else.
+
+model_calls                     invocations of any model endpoint. AIQE contains
+                                none; the quantity exists so that the absence is
+                                measured rather than asserted.
+
+network_requests                sockets opened during the case. See the release
+                                proof for the narrower runtime claim and its
+                                limit: it is conclusive for Python code and says
+                                nothing about a non-Python child process.
+```
+
+Each family's own narrowing - `aiqe_core_repository_mutations`,
+`aiqe_core_worktree_mutations`, `unconsented_validator_executions`,
+`precommit_reviewable_verdicts`, `raw_terminal_control_bytes`,
+`policy_canary_executions` and `aiqe_push_calls` - is defined where that family is
+described below.
+
 ## Running a family
 
 ```
@@ -68,10 +110,10 @@ side effect, the scenario's own declared action, or AIQE core — and only the l
 zero-tolerance:
 
 ```
-AIQE_CORE_REPOSITORY_WRITES         = 0
-UNCONSENTED_VALIDATOR_EXECUTIONS    = 0
-PRECOMMIT_REVIEWABLE_VERDICTS       = 0
-RAW_TERMINAL_CONTROL_BYTES          = 0
+aiqe_core_repository_mutations      = 0
+unconsented_validator_executions    = 0
+precommit_reviewable_verdicts       = 0
+raw_terminal_control_bytes          = 0
 ```
 
 The last of those is counted by any scenario that renders repository-controlled text -
@@ -91,11 +133,11 @@ The bounded-commit family narrows the claim once more, because the command under
 measurement creates a commit:
 
 ```
-AIQE_CORE_WORKTREE_MUTATIONS        = 0
-POLICY_CANARY_EXECUTIONS            = 0
-AIQE_PUSH_CALLS                     = 0
-PRECOMMIT_REVIEWABLE_VERDICTS       = 0
-RAW_TERMINAL_CONTROL_BYTES          = 0
+aiqe_core_worktree_mutations        = 0
+policy_canary_executions            = 0
+aiqe_push_calls                     = 0
+precommit_reviewable_verdicts       = 0
+raw_terminal_control_bytes          = 0
 ```
 
 Changes under `.git` are attributed to the completion commit rather than denied.

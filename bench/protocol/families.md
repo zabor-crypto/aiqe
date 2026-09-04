@@ -1,7 +1,8 @@
 # Benchmark families
 
 Six case families, all P0 for launch. Families A, B, and C carry the zero-tolerance
-gates; D, E, and F characterise the product rather than gate it.
+gates; D, E, and F characterise the product rather than gate it. A, B, C and D are
+materialised and retained; E and F are deferred and publish nothing.
 
 ## A — Change integrity
 
@@ -101,8 +102,11 @@ before the user invests any work?
 
 ## E — Product friction and time to value
 
-How long does a first useful result take on a clean machine, and how many steps does it
-take to get there? Measured, not estimated, on the documented install path.
+**Deferred.** How long a first useful result takes on a clean machine, and how many
+steps it takes to get there, would be measured here on the documented install path. No
+fixture measures it today, so no time-to-value number is published anywhere: the
+five-minute target in the README is a product target, not a measurement, and the
+project's own rule is that a prose observation never becomes a published number.
 
 ## F — Context efficiency
 

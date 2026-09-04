@@ -257,20 +257,32 @@ def git_boundary(observations, enforced_minimum=None):
     )
 
     gap = None
-    if floor and lowest is not None:
-        lowest_numbers = numeric(lowest)
+    if floor and exercised:
         # Compare only as many components as the floor names. `2.32.0` and
         # `(2, 32)` are the same version; Python's tuple ordering would call
         # the first one greater purely because it is longer, and report a gap
         # against the very version that was run.
         floor_numbers = tuple(enforced_minimum)
-        comparable = lowest_numbers[: len(floor_numbers)]
-        if comparable and comparable > floor_numbers:
+
+        def at_or_above_floor(version):
+            comparable = numeric(version)[: len(floor_numbers)]
+            return bool(comparable) and comparable >= floor_numbers
+
+        # Only a version AIQE will actually run can close the gap. A surface
+        # below the floor is exercised as a *refusal* - it proves the product
+        # fails closed there, and says nothing about any supported version. It
+        # was previously allowed to be `lowest`, which made the gap disappear
+        # for the one reason that cannot close it.
+        supported = [version for version in exercised if at_or_above_floor(version)]
+        lowest_supported = supported[0] if supported else None
+        if lowest_supported is not None and numeric(lowest_supported)[
+            : len(floor_numbers)
+        ] > floor_numbers:
             gap = (
                 "Git %s is enforced but not exercised: the lowest version AIQE "
                 "was actually run against is %s. Versions from %s up to that "
                 "one are permitted by the floor and covered by no run."
-                % (floor, lowest, floor)
+                % (floor, lowest_supported, floor)
             )
 
     return {

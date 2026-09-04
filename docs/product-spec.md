@@ -56,6 +56,8 @@ These bind every public surface — README, documentation, assets, and release n
    never typed by hand.
 3. No benchmark number appears anywhere until it is generated from a retained result
    artifact. Prose observations never become published numbers.
+   Every claim is classified against its evidence in [`claims.md`](claims.md), and a
+   claim absent from that inventory may not appear on a public surface.
 4. No fabricated terminal output, screenshots, or receipts. Terminal casts are rendered
    from real recorded output or they do not ship.
 5. No CI badge until CI runs a real test suite against a real implementation. A green

@@ -370,8 +370,8 @@ def main(argv):
         with open(README, "w", encoding="utf-8") as handle:
             handle.write(updated)
         sys.stdout.write(
-            "wrote %d captures and the README benchmark block\n"
-            % (len(rendered),)
+            "wrote %d captures, their index, and the README benchmark block\n"
+            % (len(SURFACES),)
         )
         return 0
 
@@ -396,8 +396,8 @@ def main(argv):
         return 1
 
     sys.stdout.write(
-        "%d captures and the README benchmark block match the retained "
-        "artifacts\n" % (len(rendered),)
+        "%d captures, their index, and the README benchmark block match the "
+        "retained artifacts\n" % (len(SURFACES),)
     )
     return 0
 

@@ -504,6 +504,61 @@ class RetainedManifestTests(unittest.TestCase):
         self.assertIn("exercised", boundary)
         self.assertIn("introduced in Git 2.32", boundary["enforced_minimum_basis"])
 
+    def test_the_unexercised_git_range_is_what_the_gate_recomputes(self):
+        """A derived field must equal what its own inputs produce.
+
+        This one was recorded as `null` - no unexercised range at all - while
+        the README correctly published a 2.32 to 2.54 gap. The cause was that
+        a *below-floor* surface, exercised only to prove AIQE refuses on it,
+        was allowed to count as the lowest version run. A refusal cannot close
+        a support gap, so the gate now ignores those, and this recomputes the
+        field from the retained `exercised` list to keep the two agreeing.
+        """
+        boundary = self.manifest["git_compatibility"]
+        observations = []
+        for entry in boundary["exercised"]:
+            for surface in entry["surfaces"]:
+                family, rest = surface.split(" ", 1)
+                release, arch, level = [part.strip() for part in rest.split("/")]
+                observations.append(
+                    {
+                        "outcome": "PASS",
+                        "git_version": entry["git_version"],
+                        "os_family": family,
+                        "os_release": release,
+                        "arch": arch,
+                        "level": level,
+                    }
+                )
+
+        from aiqe import gitq
+
+        recomputed = support.git_boundary(observations, gitq.MINIMUM_GIT_VERSION)
+        self.assertEqual(
+            recomputed["enforced_but_unexercised_range"],
+            boundary["enforced_but_unexercised_range"],
+            "the retained unexercised-range field is not what the gate "
+            "computes from the manifest's own exercised versions",
+        )
+
+    def test_no_ci_run_record_carries_a_repository_namespace(self):
+        """Retain only correlation that the evidence actually needs.
+
+        Nothing reads the repository namespace: no gate, no comparator, and no
+        published surface. What binds this manifest to this project is
+        `source_commit` - proven elsewhere in this file to name an object in
+        this repository - plus run identifiers that survive a rename or a
+        transfer. A namespace would add no authority and would become a stale
+        name for the project the moment one happened.
+        """
+        for entry in self.manifest["ci_runs"]:
+            self.assertNotIn(
+                "repository",
+                entry,
+                "a ci_runs record carries a repository namespace",
+            )
+            self.assertIn("sha", entry)
+
 
 class ReadmeSupportSectionTests(unittest.TestCase):
     """The README may not claim a surface the manifest has not proven.

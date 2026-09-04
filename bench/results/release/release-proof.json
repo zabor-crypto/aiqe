@@ -123,7 +123,6 @@
   "ci_runs": [
     {
       "job": "release-proof",
-      "repository": "zabor-crypto/aiqe",
       "run_attempt": "1",
       "run_id": "33796372017",
       "run_number": "18",
@@ -132,7 +131,6 @@
     },
     {
       "job": "surfaces",
-      "repository": "zabor-crypto/aiqe",
       "run_attempt": "1",
       "run_id": "33796372017",
       "run_number": "18",
@@ -141,7 +139,6 @@
     },
     {
       "job": "tests",
-      "repository": "zabor-crypto/aiqe",
       "run_attempt": "1",
       "run_id": "33796372017",
       "run_number": "18",
@@ -151,7 +148,7 @@
   ],
   "declared_python_requirement": ">=3.11",
   "git_compatibility": {
-    "enforced_but_unexercised_range": null,
+    "enforced_but_unexercised_range": "Git 2.32 is enforced but not exercised: the lowest version AIQE was actually run against is git version 2.55.0. Versions from 2.32 up to that one are permitted by the floor and covered by no run.",
     "enforced_minimum": "2.32",
     "enforced_minimum_basis": "GIT_CONFIG_SYSTEM and GIT_CONFIG_GLOBAL, which AIQE's configuration isolation is built on, were introduced in Git 2.32. Below that they are ignored silently. The refusal is proven on a real Git 2.30.2 surface; the floor itself is a mechanism argument, not a run.",
     "exercised": [

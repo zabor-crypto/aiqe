@@ -144,13 +144,20 @@ def runner_provenance():
 def ci_run_identity():
     """The CI run this record belongs to, or None outside CI.
 
-    Repository and run identifiers only. No token, no URL with a credential
-    in it, and no private hostname.
+    Run identifiers only. No token, no URL with a credential in it, and no
+    private hostname.
+
+    The repository namespace is deliberately not recorded. Nothing in the
+    manifest, the gate or any comparator reads it, and no published surface
+    shows it, so it is correlation the evidence does not need. What carries
+    the authority is `sha` - bound to an object a test proves belongs to this
+    repository - together with the run identifiers, which survive a rename or
+    a transfer. A namespace retained here would only be a stale name for the
+    project after any such move.
     """
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return None
     identity = {
-        "repository": os.environ.get("GITHUB_REPOSITORY"),
         "workflow": os.environ.get("GITHUB_WORKFLOW"),
         "run_id": os.environ.get("GITHUB_RUN_ID"),
         "run_number": os.environ.get("GITHUB_RUN_NUMBER"),

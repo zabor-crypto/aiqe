@@ -103,7 +103,7 @@ class FixtureCoverageTests(unittest.TestCase):
         self.assertEqual(missing, [])
 
     def test_required_conditions_are_all_covered(self):
-        """Every condition the OSS-6C contract names must have a case."""
+        """Every condition the frozen check contract names must have a case."""
         required = {
             "unclassified_changed_path",
             "config_conflict_refused",

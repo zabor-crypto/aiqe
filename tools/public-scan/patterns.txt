@@ -28,6 +28,12 @@
 #
 # A real host still matches at a word boundary, at end of line, and before a
 # sentence-ending period.
+#
+# INTERNAL_PHASE_ID was widened once, against a demonstrated MISS rather than a
+# false positive: the class accepted a trailing "R" only, so a letter-suffixed
+# phase id passed the scan and survived in a tracked benchmark fixture. Any
+# single trailing letter now matches. Widening what a class detects is not the
+# same as widening it into an ignore, which stays forbidden.
 
 ABSOLUTE_HOME_PATH:::(/Users/|/home/)[A-Za-z0-9._-]+/
 PERSONAL_EMAIL:::[A-Za-z0-9._%+-]+@(gmail|googlemail|yahoo|outlook|hotmail|proton|protonmail|icloud|me)\.[A-Za-z]{2,}
@@ -43,7 +49,7 @@ CRYPTO_WALLET_EVM:::0x[0-9a-fA-F]{40}
 GIT_SHA_40:::[^0-9a-fA-F]([0-9a-f]{40})([^0-9a-fA-F]|$)
 BENCHMARK_ECONOMICS:::\$[[:space:]]?[0-9][0-9,]*(\.[0-9]+|[0-9])
 BENCHMARK_ECONOMICS_SUFFIXED:::\$[[:space:]]?[0-9]+(\.[0-9]+)?[kKmMbB]([^A-Za-z0-9]|$)
-INTERNAL_PHASE_ID:::(^|[^A-Za-z])OSS-(F?[0-9]{1,2}R?)([^A-Za-z0-9]|$)
+INTERNAL_PHASE_ID:::(^|[^A-Za-z])OSS-(F?[0-9]{1,2}[A-Za-z]?)([^A-Za-z0-9]|$)
 INTERNAL_AUTHORITY_ID:::AIQE_(OSS|CANONICAL)_[A-Z0-9_]+
 INTERNAL_ROLE_ID:::[A-Z_]+_(SUPERVISOR|IMPLEMENTER|ARCHITECT)([^A-Za-z0-9]|$)
 INTERNAL_CORRECTION_ID:::(^|[^A-Za-z])SC-B?[0-9]+([^A-Za-z0-9]|$)
