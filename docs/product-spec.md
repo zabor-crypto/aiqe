@@ -72,17 +72,17 @@ Frozen section order:
 
 ```
 hero / status / first command
-the 30-second problem
+AIQE in 30 seconds — the chain, before/after, the three unknowns
 failure-first demo
-5-minute quickstart
+five-minute quickstart
 how it works
 change integrity
 evidence integrity
 numerical integrity
-agent adapters
+working with Claude Code and Codex
 benchmarks
-architecture
-security
+where it runs — support, packaging, external CI
+security and trust model
 what AIQE does not do — and cannot prove
 milestones
 contributing
@@ -93,7 +93,12 @@ Sections without substance yet are omitted or reduced to a single pointer line. 
 headings are not shipped.
 
 Above the fold, in order: wordmark, hero statement, one-sentence explanation, the Task
-Receipt visual, the status line, the first command, and the support line. Nothing else.
+Receipt, one paragraph reading it, the status line, the first command, and the support
+line. Nothing else.
+
+The Task Receipt in the hero is the **post-commit** one — the only place `REVIEWABLE`
+appears. A pre-commit receipt above the fold would put the product's central refusal in
+the position a reader takes for its result.
 
 ## Visual system
 
@@ -114,9 +119,10 @@ RECEIPT CARD    1280 x 640 SVG, fixed field order:
 BENCHMARK CARD  generated from result JSON only, never hand-authored;
                 NOT_RUN rendered explicitly, never omitted
 
-TERMINAL CAST   static SVG rendered from a recorded deterministic
-                transcript of real output; never a screenshot,
-                never hand-typed
+TERMINAL CAST   static SVG rendered from a capture in
+                docs/assets/captures/, which is itself the exact output of a
+                synthetic benchmark case; never a screenshot of a real
+                terminal, never hand-typed
 
 ASSETS          SVG throughout, in docs/assets/.
                 Sole raster exception: the GitHub social preview,

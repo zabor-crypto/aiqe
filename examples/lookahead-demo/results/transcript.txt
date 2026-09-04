@@ -1,0 +1,356 @@
+AIQE - lookahead demonstration
+
+Every line below was printed by a process. Two invocations are
+written differently from the way they ran, and in no other way:
+
+  * AIQE runs here as `python3 -m aiqe` against a source tree and is
+    written `aiqe`, which is the same invocation once the package is
+    installed.
+  * Every Git command carries `-c gc.auto=0 -c maintenance.auto=false`,
+    which suppresses background maintenance so a fixture cannot move
+    while it is being measured. Those two flags are not shown.
+
+The task start timestamp is the only field here that differs between
+two runs of this demonstration.
+
+Reproduce: python3 examples/lookahead-demo/run.py
+
+========================================================================
+ACT 1  the defect a green test suite cannot see
+one character changed: a decision now reads the bar it is made on
+========================================================================
+
+# the repository's own checks, run directly - no AIQE involved
+
+$ ./checks/unit.sh
+[exit 0]
+
+$ ./checks/causality.sh
+CAUSALITY VIOLATION: perturbing a bar moved a decision taken at or before it, at 25 of 64 bars (first: bar 8)
+[exit 1]
+
+$ aiqe task start --own src/strategy/momentum.py
+AIQE TASK
+
+  Task            started
+  Started         2026-09-04T08:58:39Z
+  Start HEAD      recorded
+  Staged at start 0 entries (informational)
+  Owned pathset   1 exact path
+      src/strategy/momentum.py
+  Pathset digest  sha256:ffe34181d52c2d2effd0529dc3ee342b7e0d59a7b04e660e7400c143df2545f4
+[exit 0]
+
+$ aiqe check --allow unit --allow causality
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              CONTRACT_FAILED causality
+
+  Validators
+      unit                   required  PASS
+      causality              required  FAIL         exit 1
+
+  Evidence        CURRENT
+  Completion      NOT_REVIEWABLE
+  Reasons         REQUIRED_VALIDATOR_FAILED · CONTRACT_FAILED
+[exit 1]
+
+$ aiqe receipt
+AIQE RECEIPT
+
+  Owned scope     CHECKED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  OBSERVED
+  Checked content CHECKED
+  Evidence        CURRENT
+  Commit          NONE
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 0 covered · 0 gap · 1 failed · 0 unknown
+  Validators      2 applicable · 1 pass · 1 fail · 0 unknown · 0 unavailable
+  Required        2 of them · 1 passed
+
+  Verdict         NOT_REVIEWABLE
+  Reason          REQUIRED_VALIDATOR_FAILED · CONTRACT_FAILED
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.1.0a0
+[exit 1]
+
+========================================================================
+ACT 2  the same defect, with nothing declared to detect it
+every check the repository has still passes
+========================================================================
+
+# the repository's own checks, run directly
+
+$ ./checks/unit.sh
+[exit 0]
+
+$ aiqe task start --own src/strategy/momentum.py
+AIQE TASK
+
+  Task            started
+  Started         2026-09-04T08:58:40Z
+  Start HEAD      recorded
+  Staged at start 0 entries (informational)
+  Owned pathset   1 exact path
+      src/strategy/momentum.py
+  Pathset digest  sha256:ffe34181d52c2d2effd0529dc3ee342b7e0d59a7b04e660e7400c143df2545f4
+[exit 0]
+
+$ aiqe check --allow unit
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              COVERAGE_GAP   no required validator declares it
+
+  Validators
+      unit                   required  PASS
+
+  Evidence        CURRENT
+  Completion      INCOMPLETE
+  Reasons         COVERAGE_GAP
+[exit 2]
+
+$ aiqe receipt
+AIQE RECEIPT
+
+  Owned scope     CHECKED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  OBSERVED
+  Checked content CHECKED
+  Evidence        CURRENT
+  Commit          NONE
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 0 covered · 1 gap · 0 failed · 0 unknown
+  Validators      1 applicable · 1 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        1 of them · 1 passed
+
+  Verdict         INCOMPLETE
+  Reason          COVERAGE_GAP
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.1.0a0
+[exit 2]
+
+========================================================================
+ACT 3  unrelated staged work, and where it ends up
+a correct change to the strategy, with somebody else's work staged
+========================================================================
+
+# the reference workflow: unrelated work is already staged; stage the change you meant to make, and commit
+
+$ git add -- src/strategy/momentum.py
+[exit 0]
+
+$ git commit --quiet --message 'widen the momentum window'
+[exit 0]
+
+# what that commit actually contains
+
+$ git diff-tree --no-commit-id --name-only -r HEAD
+src/foreign.py
+src/strategy/momentum.py
+[exit 0]
+
+# the same repository, the same staged work, through AIQE
+
+$ aiqe task start --own src/strategy/momentum.py
+AIQE TASK
+
+  Task            started
+  Started         2026-09-04T08:58:42Z
+  Start HEAD      recorded
+  Staged at start 1 entries (informational)
+  Owned pathset   1 exact path
+      src/strategy/momentum.py
+  Pathset digest  sha256:ffe34181d52c2d2effd0529dc3ee342b7e0d59a7b04e660e7400c143df2545f4
+[exit 0]
+
+$ aiqe check --allow unit --allow causality
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              COVERED        causality
+
+  Validators
+      unit                   required  PASS
+      causality              required  PASS
+
+  Evidence        CURRENT
+  Completion      REVIEWABLE_CANDIDATE
+
+  Every pre-commit obligation is discharged. This is not a
+  REVIEWABLE verdict: no bounded commit exists to bind this
+  evidence to. See `aiqe receipt`.
+[exit 0]
+
+$ aiqe receipt
+AIQE RECEIPT
+
+  Owned scope     CHECKED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  OBSERVED
+  Checked content CHECKED
+  Evidence        CURRENT
+  Commit          NONE
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
+  Validators      2 applicable · 2 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        2 of them · 2 passed
+
+  Verdict         INCOMPLETE
+  Reason          BOUNDED_COMMIT_NOT_CREATED
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.1.0a0
+[exit 2]
+
+$ aiqe commit -m 'widen the momentum window'
+AIQE COMMIT
+
+  Owned scope     VERIFIED
+  Committed paths 1
+  Foreign staged  EXCLUDED
+  Checked content BOUND
+  Commit          CREATED
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Verdict         REVIEWABLE
+
+  The commit contains exactly the owned changed pathset, its content is
+  the checked content, and the staged work AIQE did not own is unchanged.
+  See `aiqe receipt`.
+[exit 0]
+
+$ aiqe receipt
+AIQE RECEIPT
+
+  Owned scope     VERIFIED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  EXCLUDED
+  Checked content BOUND
+  Evidence        CURRENT
+  Commit          CREATED
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
+  Validators      2 applicable · 2 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        2 of them · 2 passed
+  Committed paths 1
+
+  Verdict         REVIEWABLE
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.1.0a0
+[exit 0]
+
+$ git diff-tree --no-commit-id --name-only -r HEAD
+src/strategy/momentum.py
+[exit 0]
+
+========================================================================
+ACT 4  the edit that arrived after the check
+the checks passed, then the file changed, then it was committed
+========================================================================
+
+# the reference workflow: run the checks, keep editing, commit. The same check, run again on what was committed
+
+$ ./checks/causality.sh   # before the last edit
+no decision at or before a perturbed bar moved, across 64 bars
+[exit 0]
+
+$ ./checks/causality.sh   # on the committed content
+CAUSALITY VIOLATION: perturbing a bar moved a decision taken at or before it, at 25 of 64 bars (first: bar 9)
+[exit 1]
+
+# the same sequence through AIQE
+
+$ aiqe task start --own src/strategy/momentum.py
+AIQE TASK
+
+  Task            started
+  Started         2026-09-04T08:58:45Z
+  Start HEAD      recorded
+  Staged at start 0 entries (informational)
+  Owned pathset   1 exact path
+      src/strategy/momentum.py
+  Pathset digest  sha256:ffe34181d52c2d2effd0529dc3ee342b7e0d59a7b04e660e7400c143df2545f4
+[exit 0]
+
+$ aiqe check --allow unit --allow causality
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              COVERED        causality
+
+  Validators
+      unit                   required  PASS
+      causality              required  PASS
+
+  Evidence        CURRENT
+  Completion      REVIEWABLE_CANDIDATE
+
+  Every pre-commit obligation is discharged. This is not a
+  REVIEWABLE verdict: no bounded commit exists to bind this
+  evidence to. See `aiqe receipt`.
+[exit 0]
+
+# the owned file is edited again, after the check
+
+$ aiqe commit -m 'widen the momentum window'
+AIQE COMMIT
+
+  The state the check evidence was taken against has changed, so
+  committing now would bind a commit to content nothing checked.
+
+  Commit          NONE
+  Index           unchanged
+  Verdict         INCOMPLETE
+  Reason          STALE_OWNED_CONTENT
+
+  AIQE does not rerun validators here. Run `aiqe check` again.
+[exit 2]
+
+$ aiqe receipt
+AIQE RECEIPT
+
+  Owned scope     CHECKED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  OBSERVED
+  Checked content CHECKED
+  Evidence        STALE
+  Commit          NONE
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
+  Validators      2 applicable · 2 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        2 of them · 2 passed
+
+  Verdict         INCOMPLETE
+  Reason          STALE_OWNED_CONTENT
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.1.0a0
+[exit 2]

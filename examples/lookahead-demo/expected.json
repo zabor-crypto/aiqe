@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "demo": "lookahead",
+  "note": "Declared before the run. `run.py` compares what it observed against this and exits non-zero on any disagreement. Rendered output is deliberately not pinned here: it is the evidence the run produces, and pinning wording would turn an output change into a demo failure.",
+  "acts": [
+    {
+      "act": "defect_is_caught",
+      "why": "The project's own generic suite answers a different question, so it passes over a causality defect. A validator written to ask the causality question fails, the contract fails with it, and the completion verdict is NOT_REVIEWABLE.",
+      "generic_suite_exit": 0,
+      "causality_validator_exit": 1,
+      "check_exit": 1,
+      "receipt_verdict": "NOT_REVIEWABLE"
+    },
+    {
+      "act": "nobody_looked",
+      "why": "The same defect, in a repository that declares no required validator for CAUSALITY. Every check that exists passes. AIQE reports a coverage gap rather than a green result, because silence is not evidence.",
+      "generic_suite_exit": 0,
+      "check_exit": 2,
+      "receipt_verdict": "INCOMPLETE"
+    },
+    {
+      "act": "unrelated_staged_work",
+      "why": "An ordinary commit of a correct change absorbs whatever else was staged. The bounded commit contains exactly the owned changed pathset, and only then is the verdict REVIEWABLE.",
+      "check_exit": 0,
+      "precommit_receipt_verdict": "INCOMPLETE",
+      "reference_changed_paths": ["src/foreign.py", "src/strategy/momentum.py"],
+      "reference_absorbed_unrelated_work": true,
+      "commit_exit": 0,
+      "aiqe_changed_paths": ["src/strategy/momentum.py"],
+      "aiqe_absorbed_unrelated_work": false,
+      "receipt_verdict": "REVIEWABLE"
+    },
+    {
+      "act": "stale_evidence",
+      "why": "Check, keep editing, commit. The reference workflow commits content no check ever saw. AIQE recomputes the binding immediately before the first index mutation, refuses, and creates no commit.",
+      "reference_committed_unchecked_content": true,
+      "commit_exit": 2,
+      "aiqe_commits_created": 0,
+      "receipt_verdict": "INCOMPLETE"
+    }
+  ]
+}

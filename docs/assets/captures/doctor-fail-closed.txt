@@ -1,0 +1,25 @@
+AIQE DOCTOR
+
+  Repository      ordinary worktree · git 2.50.1
+  Git state       repository-safe view · on a branch · 0 staged · ? unstaged · 0 untracked
+  Topology        single worktree · sparse checkout off
+  Operations      none in progress
+  AIQE config     absent
+  Agent surface   Claude Code absent · Codex absent
+  Commit policy   check-in filter configured · tracked .gitattributes
+
+  UNKNOWN      WORKING_STATE_UNSTAGED_UNKNOWN
+      The unstaged count is unknown: determining it would make Git run the
+      check-in filter configured in this repository, and Doctor executes
+      nothing the repository defines.
+
+  FINDING      CHECKIN_FILTER_CONFIGURED
+      A check-in filter driver is configured. Git runs it as a child process
+      when comparing worktree content, so Doctor does not make that
+      comparison.
+
+  FINDING      TRACKED_GITATTRIBUTES
+      A tracked .gitattributes file is present. It can bind paths to filter
+      drivers that change content on check-in.
+
+  1 unknown · 2 findings

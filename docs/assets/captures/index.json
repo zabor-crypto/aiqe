@@ -1,0 +1,76 @@
+{
+  "captures": [
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "doctor.txt",
+      "case": "normal_repository",
+      "description": "Doctor on an ordinary repository, with nothing to report.",
+      "digest": "sha256:5840b495c037c2aeef5f08885b1ed7bb128b54728c7e55b60ad5ddc425326e71",
+      "family": "DOCTOR_FIRST_CONTACT",
+      "field": "human_output",
+      "results": "bench/results/doctor/results.json"
+    },
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "doctor-fail-closed.txt",
+      "case": "checkin_filter_configured",
+      "description": "Doctor declining to answer a question it cannot answer without executing what the repository configured.",
+      "digest": "sha256:a3a19aeccf95f3f03c3f2420e24b12b1b6708f008c3f40e5975e620c7d45ce05",
+      "family": "DOCTOR_FIRST_CONTACT",
+      "field": "human_output",
+      "results": "bench/results/doctor/results.json"
+    },
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "check-reviewable-candidate.txt",
+      "case": "causality_covered",
+      "description": "A completely green check. Every required validator passed and every applicable contract is covered.",
+      "digest": "sha256:e2a7c8c333d0c34eb25c2bf04d4e1c0530653a0ba721bcc13aa90ad000b35ce3",
+      "family": "CHECK_RECEIPT_EVIDENCE",
+      "field": "check_output",
+      "results": "bench/results/check/results.json"
+    },
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "check-unknown.txt",
+      "case": "consent_withheld",
+      "description": "Fail-closed: consent was not given, so the validators did not run and their outcome is UNKNOWN - neither a pass nor a failure.",
+      "digest": "sha256:eecddf907c51992f0055176b845cc9d6e9dc1d0af269f30f2201ee3f408e2baf",
+      "family": "CHECK_RECEIPT_EVIDENCE",
+      "field": "check_output",
+      "results": "bench/results/check/results.json"
+    },
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "receipt-precommit-incomplete.txt",
+      "case": "causality_covered",
+      "description": "The pre-commit receipt for that same green check: INCOMPLETE, because no bounded commit exists for the evidence to bind to.",
+      "digest": "sha256:368647540ac0fb119052405c89eb78bbd3c45cba4cc5ccd97d28158c1f809a97",
+      "family": "CHECK_RECEIPT_EVIDENCE",
+      "field": "receipt_output",
+      "results": "bench/results/check/results.json"
+    },
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "commit-reviewable.txt",
+      "case": "commit-owned-modification",
+      "description": "The bounded completion commit, with the four proofs it rests on.",
+      "digest": "sha256:6ae14b28d0ff1279adfba070e12b6cf80ac055c6ffbd421f54cb4808ea537a52",
+      "family": "BOUNDED_COMMIT",
+      "field": "commit_output",
+      "results": "bench/results/commit/results.json"
+    },
+    {
+      "aiqe_version": "0.1.0a0",
+      "capture": "receipt-postcommit-reviewable.txt",
+      "case": "commit-owned-modification",
+      "description": "The post-commit receipt. The only place REVIEWABLE appears.",
+      "digest": "sha256:c997e58d9ae4acde338f0bf8be8a40857013054002a54bac09eb7e30274eae15",
+      "family": "BOUNDED_COMMIT",
+      "field": "receipt_output",
+      "results": "bench/results/commit/results.json"
+    }
+  ],
+  "note": "Every capture is the exact rendered output of a synthetic benchmark case, copied from the retained result artifact named in its row. Nothing here was typed, and nothing was recorded against a real repository.",
+  "schema_version": 1
+}

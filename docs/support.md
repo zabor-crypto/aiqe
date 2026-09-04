@@ -386,3 +386,52 @@ python3 bench/aggregate-release-proof.py --surfaces /tmp/surfaces --output /tmp/
 `--parts` selects a subset of the release proof, and the surface record always
 states which parts ran and which did not, so a reduced run can never be read
 as a full one.
+
+## 11. The attestation this manifest does not carry
+
+The retained manifest names the commit it was aggregated from, in its
+`source_commit` field. That commit is not necessarily the current `HEAD`, and
+the difference is evidence debt rather than a detail:
+
+```bash
+python3 -c "import json;print(json.load(open('bench/results/release/release-proof.json'))['source_commit'])"
+git rev-parse HEAD
+```
+
+When those differ, the support claims in the README and in this document are
+gated on runs against the earlier commit. They are not a claim that every
+required CI job started and passed at the current `HEAD`.
+
+```
+OSS7_FINAL_HEAD_GITHUB_CI_ATTESTATION = PENDING_EXTERNAL_BILLING_CAPACITY
+```
+
+Two separate things keep that field behind `HEAD`.
+
+Hosted CI minutes for this private repository were exhausted account-wide. A
+workflow run that fails in seconds without starting a step is a billing
+refusal, not a regression, and is not evidence about the code. Reruns and
+workflow edits intended only to manufacture a green result are forbidden here:
+they would produce a badge rather than an attestation.
+
+And the full matrix is now dispatch-gated rather than automatic — see
+[1.1](#11-two-evidence-lanes-and-what-a-green-run-means). An ordinary push
+exercises the fast lane, which produces no macOS surface record and therefore
+no support claim, by design. So the manifest advances only when somebody runs
+the full lane deliberately.
+
+The condition that closes this, and the only thing that does:
+
+```
+EVENT      the full lane is dispatched at the then-current release-proof HEAD,
+           with run capacity available
+ACTION     one full-matrix run, aggregated with --require-all-claims
+REQUIRED   every required job starts, every required job passes, and the
+           release-proof manifest aggregation succeeds
+```
+
+That dispatch is an owner action. Nothing in a documentation task may trigger
+it, retry it, or edit the workflow to make it cheaper to pass.
+
+Until then, nothing in this repository may show a CI badge, claim a green run
+at the current `HEAD`, or present a support statement that depends on one.

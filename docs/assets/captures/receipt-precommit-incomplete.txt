@@ -1,0 +1,20 @@
+AIQE RECEIPT
+
+  Owned scope     CHECKED
+  Owned paths     1 declared · 1 changed
+  Foreign staged  OBSERVED
+  Checked content CHECKED
+  Evidence        CURRENT
+  Commit          NONE
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Classification  1 quant · 0 non-quant · 0 unclassified
+  Contracts       1 applicable · 1 covered · 0 gap · 0 failed · 0 unknown
+  Validators      2 applicable · 2 pass · 0 fail · 0 unknown · 0 unavailable
+  Required        2 of them · 2 passed
+
+  Verdict         INCOMPLETE
+  Reason          BOUNDED_COMMIT_NOT_CREATED
+
+  Receipt schema  2 · policy aiqe.receipt.default.v1
+  AIQE            0.1.0a0

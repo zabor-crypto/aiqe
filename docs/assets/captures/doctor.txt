@@ -1,0 +1,11 @@
+AIQE DOCTOR
+
+  Repository      ordinary worktree · git 2.50.1
+  Git state       repository-safe view · on a branch · 0 staged · 0 unstaged · 0 untracked
+  Topology        single worktree · sparse checkout off
+  Operations      none in progress
+  AIQE config     absent
+  Agent surface   Claude Code absent · Codex absent
+  Commit policy   no local policy signals
+
+  No findings.

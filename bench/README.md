@@ -22,6 +22,21 @@ results/release/    retained release-proof manifest                      PRESENT
 Nothing is present here for a surface that does not exist. The whole v1 command
 surface is implemented, so all four families are materialised.
 
+## Rendering what the results say
+
+Two published surfaces are generated from the retained artifacts rather than written:
+the terminal captures under [`../docs/assets/captures/`](../docs/assets/captures/), and
+the benchmark totals in the README between its `benchmarks:` markers.
+
+```
+python3 bench/render-assets.py            report drift, exit 1 if any
+python3 bench/render-assets.py --write    regenerate both
+```
+
+Copying a total out of prose is how a published number stops matching the artifact it
+came from, so no number in the README's benchmark block was typed. The test suite runs
+the check-mode invocation, so drift fails there too.
+
 ## Running a family
 
 ```

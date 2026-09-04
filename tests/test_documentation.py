@@ -554,5 +554,269 @@ class ReadmeClaimTests(unittest.TestCase):
         self.assertNotIn("src/strategy/alpha.py", case["receipt_output"])
 
 
+class ProductPackageTests(unittest.TestCase):
+    """The presentation artifacts, and the claims they are allowed to make.
+
+    Everything asserted here decays silently: a capture that stopped being the
+    output it names, a benchmark total copied by hand, a flag documented into
+    existence, a CI badge that arrived without the run behind it.
+    """
+
+    def setUp(self):
+        self.readme = read(README)
+
+    def test_the_rendered_assets_are_what_the_retained_artifacts_render(self):
+        """`bench/render-assets.py` without `--write` reports drift and exits
+        non-zero. Running it here is the whole gate: it covers every terminal
+        capture and the README benchmark block in one comparison."""
+        import subprocess
+        import sys
+
+        proc = subprocess.run(
+            [sys.executable, os.path.join(support.ROOT, "bench", "render-assets.py")],
+            cwd=support.ROOT,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=120,
+        )
+        self.assertEqual(
+            proc.returncode,
+            0,
+            "rendered assets have drifted from the retained artifacts:\n%s"
+            % (proc.stderr.decode("utf-8", "replace"),),
+        )
+
+    def test_every_capture_resolves_to_the_case_its_index_names(self):
+        """The index is the provenance, so it has to be checkable."""
+        import json
+
+        directory = os.path.join(support.ROOT, "docs", "assets", "captures")
+        with open(os.path.join(directory, "index.json")) as handle:
+            index = json.load(handle)
+        self.assertTrue(index["captures"], "the capture index is empty")
+        for entry in index["captures"]:
+            with self.subTest(capture=entry["capture"]):
+                with open(os.path.join(support.ROOT, entry["results"])) as handle:
+                    results = json.load(handle)
+                cases = {case["case"]: case for case in results["cases"]}
+                self.assertIn(entry["case"], cases, entry["case"])
+                body = read(os.path.join(directory, entry["capture"]))
+                self.assertEqual(
+                    body.rstrip("\n"),
+                    cases[entry["case"]][entry["field"]].rstrip("\n"),
+                    "%s is not the %s of case %s"
+                    % (entry["capture"], entry["field"], entry["case"]),
+                )
+
+    def test_the_five_screenshotable_surfaces_are_all_captured(self):
+        """The set is stated so that losing one is a failure, not an omission
+        nobody notices: Doctor, a green check, the pre-commit receipt, the
+        post-commit receipt, and a fail-closed UNKNOWN."""
+        directory = os.path.join(support.ROOT, "docs", "assets", "captures")
+        for name in (
+            "doctor.txt",
+            "check-reviewable-candidate.txt",
+            "receipt-precommit-incomplete.txt",
+            "receipt-postcommit-reviewable.txt",
+            "check-unknown.txt",
+        ):
+            self.assertTrue(
+                os.path.exists(os.path.join(directory, name)), name
+            )
+        self.assertIn(
+            "REVIEWABLE_CANDIDATE",
+            read(os.path.join(directory, "check-reviewable-candidate.txt")),
+        )
+        self.assertIn(
+            "UNKNOWN", read(os.path.join(directory, "check-unknown.txt"))
+        )
+
+    def test_every_aiqe_flag_the_readme_shows_exists_in_the_command_surface(self):
+        """A flag documented into existence is the cheapest possible lie."""
+        import re
+
+        from aiqe import cli
+
+        surface = {}
+        for line in cli.USAGE.splitlines():
+            match = re.match(r"\s*(?:usage:)?\s*aiqe\s+(\S+)(.*)", line)
+            if not match:
+                continue
+            subcommand, rest = match.group(1), match.group(2)
+            flags = set(re.findall(r"--[a-z-]+", rest))
+            if subcommand.startswith("--"):
+                flags.add(subcommand)
+                subcommand = ""
+            surface.setdefault(subcommand, set()).update(flags)
+
+        shown = re.findall(r"^\s*(?:\.venv/bin/)?aiqe\s+(.*)$", self.readme, re.M)
+        self.assertTrue(shown, "the README shows no aiqe invocation at all")
+        for invocation in shown:
+            words = invocation.split()
+            subcommand = words[0] if not words[0].startswith("-") else ""
+            with self.subTest(invocation=invocation):
+                self.assertIn(
+                    subcommand,
+                    surface,
+                    "the README shows `aiqe %s`, which is not a command"
+                    % (subcommand,),
+                )
+                for word in words[1:]:
+                    if not word.startswith("--"):
+                        continue
+                    flag = word.split("=")[0]
+                    self.assertIn(
+                        flag,
+                        surface[subcommand],
+                        "the README shows `%s` on `aiqe %s`, and the command "
+                        "surface does not have it" % (flag, subcommand),
+                    )
+
+    def test_every_documented_configuration_is_one_the_product_accepts(self):
+        """A documented `aiqe.toml` the parser would refuse is a worked
+        example that does not work. The parser is fail-closed by design, so
+        this is not hypothetical: a key renamed in the implementation makes
+        every configuration on these pages invalid, silently."""
+        import re
+        import tempfile
+
+        from aiqe import config as config_module
+
+        pages = [README] + [
+            os.path.join(support.ROOT, "docs", name)
+            for name in ("config.md", "agents.md", "architecture.md")
+        ]
+        found = 0
+        for page in pages:
+            for body in re.findall(r"^```toml\n(.*?)^```", read(page), re.S | re.M):
+                found += 1
+                directory = tempfile.mkdtemp(prefix="aiqe-doc-config-")
+                with open(os.path.join(directory, "aiqe.toml"), "w") as handle:
+                    handle.write(body)
+                with self.subTest(page=os.path.basename(page)):
+                    parsed = config_module.load(os.fsencode(directory))
+                    self.assertTrue(
+                        parsed.surfaces,
+                        "%s documents a configuration with no surface"
+                        % (os.path.basename(page),),
+                    )
+        self.assertTrue(found, "no documented configuration was found to check")
+
+    def test_every_launch_contract_is_explained_rather_than_only_listed(self):
+        """Six names in a code block is a list. The README has to say what
+        each one is about, or the section is decoration."""
+        from aiqe import contracts as contracts_module
+
+        for contract in contracts_module.LAUNCH_CONTRACTS:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, self.readme, contract)
+
+    def test_the_contract_claim_is_bounded(self):
+        """The one sentence that keeps a covered contract from being read as
+        a correctness proof."""
+        lowered = self.readme.lower()
+        self.assertIn("does not prove universal numerical truth", lowered)
+        self.assertIn("is not universal correctness", lowered)
+        self.assertIn("coverage_gap", lowered)
+
+    def test_the_trust_boundaries_are_stated_on_the_front_page(self):
+        """A reader who never opens SECURITY.md still has to meet these."""
+        lowered = self.readme.lower()
+        for claim in (
+            "there is no sandbox",
+            "no network-restriction",
+            "explicit local consent",
+            "machine-local",
+            "no telemetry",
+        ):
+            self.assertIn(claim, lowered, claim)
+
+    def test_local_security_is_not_overstated(self):
+        """AIQE defends nothing against a process running as you."""
+        lowered = self.readme.lower()
+        self.assertIn("same-uid", lowered)
+        self.assertIn("or as root", lowered)
+
+    def test_no_badge_appears_anywhere_on_the_page(self):
+        """A badge above the fold is a maturity claim, and the exact-HEAD CI
+        run that would justify one has not happened."""
+        lowered = self.readme.lower()
+        for shape in ("shields.io", "badge.svg", "img.shields", "/badge)"):
+            self.assertNotIn(shape, lowered, shape)
+
+    def test_the_external_ci_debt_is_recorded_rather_than_implied(self):
+        """The README states the substance; the support method document holds
+        the marker and the condition that closes it. The marker is project
+        vocabulary and does not belong in product copy."""
+        lowered = self.readme.lower()
+        self.assertIn("not** the current head", lowered)
+        self.assertIn("no complete ci run has attested", lowered)
+
+        reference = read(os.path.join(support.ROOT, "docs", "support.md"))
+        self.assertIn("OSS7_FINAL_HEAD_GITHUB_CI_ATTESTATION", reference)
+        self.assertIn("PENDING_EXTERNAL_BILLING_CAPACITY", reference)
+        self.assertIn("source_commit", reference)
+        for forbidden in ("shields.io", "badge.svg"):
+            self.assertNotIn(forbidden, reference, forbidden)
+
+    def test_the_packaging_facts_are_stated(self):
+        for fact in (">= 3.11", "wheel and sdist", "uvx --from", "DEFERRED"):
+            self.assertIn(fact, self.readme, fact)
+
+    def test_a_deferred_thing_is_not_presented_as_planned(self):
+        """`DEFERRED` must not quietly become a roadmap entry."""
+        self.assertIn("is not a roadmap entry", self.readme)
+
+    def test_the_demo_is_not_still_described_as_unbuilt(self):
+        lowered = self.readme.lower()
+        for stale in (
+            "materialised alongside the first alpha",
+            "for the specification",
+            "not yet implemented",
+        ):
+            self.assertNotIn(stale, lowered, stale)
+
+
+class AgentReferenceTests(unittest.TestCase):
+    """`docs/agents.md` is where a reader decides how to wire AIQE into an
+    agent, which makes it the easiest place to imply an integration that does
+    not exist."""
+
+    REFERENCE = os.path.join(support.ROOT, "docs", "agents.md")
+
+    def setUp(self):
+        self.reference = read(self.REFERENCE)
+
+    def test_no_integration_that_does_not_exist_is_implied(self):
+        lowered = self.reference.lower()
+        self.assertIn("no plugin", lowered)
+        self.assertIn("no mcp server", lowered)
+        self.assertIn("no adapter", lowered)
+
+    def test_the_agent_finding_codes_it_quotes_are_real(self):
+        for code in (
+            "CLAUDE_PERMISSIONS_BROAD",
+            "CODEX_PERMISSIONS_BROAD",
+            "AGENT_CONFIG_UNREADABLE",
+        ):
+            with self.subTest(code=code):
+                self.assertIn(code, findings.ALL_CODES, code)
+                self.assertIn(code, self.reference, code)
+
+    def test_the_scope_and_consent_rules_are_not_delegated_to_the_agent(self):
+        lowered = self.reference.lower()
+        self.assertIn("you declare the scope, before the agent starts", lowered)
+        self.assertIn("you give consent", lowered)
+
+    def test_it_does_not_claim_to_supervise_the_agent(self):
+        lowered = self.reference.lower()
+        self.assertIn("does not supervise your agent", lowered)
+        self.assertIn("does not sandbox it", lowered)
+
+    def test_the_readme_points_at_it(self):
+        self.assertIn("docs/agents.md", read(README))
+
+
 if __name__ == "__main__":
     unittest.main()

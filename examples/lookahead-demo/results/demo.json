@@ -1,0 +1,64 @@
+{
+  "acts": [
+    {
+      "act": "defect_is_caught",
+      "causality_validator_exit": 1,
+      "check_exit": 1,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              CONTRACT_FAILED causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  FAIL         exit 1\n\n  Evidence        CURRENT\n  Completion      NOT_REVIEWABLE\n  Reasons         REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n",
+      "generic_suite_exit": 0,
+      "receipt_exit": 1,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 0 gap \u00b7 1 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 1 pass \u00b7 1 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 1 passed\n\n  Verdict         NOT_REVIEWABLE\n  Reason          REQUIRED_VALIDATOR_FAILED \u00b7 CONTRACT_FAILED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
+      "receipt_verdict": "NOT_REVIEWABLE",
+      "title": "the defect a green test suite cannot see"
+    },
+    {
+      "act": "nobody_looked",
+      "check_exit": 2,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERAGE_GAP   no required validator declares it\n\n  Validators\n      unit                   required  PASS\n\n  Evidence        CURRENT\n  Completion      INCOMPLETE\n  Reasons         COVERAGE_GAP\n\n",
+      "generic_suite_exit": 0,
+      "receipt_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 0 covered \u00b7 1 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      1 applicable \u00b7 1 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        1 of them \u00b7 1 passed\n\n  Verdict         INCOMPLETE\n  Reason          COVERAGE_GAP\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
+      "receipt_verdict": "INCOMPLETE",
+      "title": "the same defect, with nothing declared to detect it"
+    },
+    {
+      "act": "unrelated_staged_work",
+      "aiqe_absorbed_unrelated_work": false,
+      "aiqe_changed_paths": [
+        "src/strategy/momentum.py"
+      ],
+      "check_exit": 0,
+      "check_output": "AIQE CHECK\n\n  Owned paths     1 declared \u00b7 1 changed\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n\n  Contracts\n      CAUSALITY              COVERED        causality\n\n  Validators\n      unit                   required  PASS\n      causality              required  PASS\n\n  Evidence        CURRENT\n  Completion      REVIEWABLE_CANDIDATE\n\n  Every pre-commit obligation is discharged. This is not a\n  REVIEWABLE verdict: no bounded commit exists to bind this\n  evidence to. See `aiqe receipt`.\n\n",
+      "commit_exit": 0,
+      "commit_output": "AIQE COMMIT\n\n  Owned scope     VERIFIED\n  Committed paths 1\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Verdict         REVIEWABLE\n\n  The commit contains exactly the owned changed pathset, its content is\n  the checked content, and the staged work AIQE did not own is unchanged.\n  See `aiqe receipt`.\n\n",
+      "precommit_receipt_exit": 2,
+      "precommit_receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        CURRENT\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          BOUNDED_COMMIT_NOT_CREATED\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
+      "precommit_receipt_verdict": "INCOMPLETE",
+      "receipt_exit": 0,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     VERIFIED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  EXCLUDED\n  Checked content BOUND\n  Evidence        CURRENT\n  Commit          CREATED\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n  Committed paths 1\n\n  Verdict         REVIEWABLE\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
+      "receipt_verdict": "REVIEWABLE",
+      "reference_absorbed_unrelated_work": true,
+      "reference_changed_paths": [
+        "src/foreign.py",
+        "src/strategy/momentum.py"
+      ],
+      "title": "unrelated staged work, and where it ends up"
+    },
+    {
+      "act": "stale_evidence",
+      "aiqe_commits_created": 0,
+      "commit_exit": 2,
+      "commit_output": "AIQE COMMIT\n\n  The state the check evidence was taken against has changed, so\n  committing now would bind a commit to content nothing checked.\n\n  Commit          NONE\n  Index           unchanged\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  AIQE does not rerun validators here. Run `aiqe check` again.\n\n",
+      "receipt_exit": 2,
+      "receipt_output": "AIQE RECEIPT\n\n  Owned scope     CHECKED\n  Owned paths     1 declared \u00b7 1 changed\n  Foreign staged  OBSERVED\n  Checked content CHECKED\n  Evidence        STALE\n  Commit          NONE\n  Push            NOT_PERFORMED_BY_AIQE\n\n  Classification  1 quant \u00b7 0 non-quant \u00b7 0 unclassified\n  Contracts       1 applicable \u00b7 1 covered \u00b7 0 gap \u00b7 0 failed \u00b7 0 unknown\n  Validators      2 applicable \u00b7 2 pass \u00b7 0 fail \u00b7 0 unknown \u00b7 0 unavailable\n  Required        2 of them \u00b7 2 passed\n\n  Verdict         INCOMPLETE\n  Reason          STALE_OWNED_CONTENT\n\n  Receipt schema  2 \u00b7 policy aiqe.receipt.default.v1\n  AIQE            0.1.0a0\n\n",
+      "receipt_verdict": "INCOMPLETE",
+      "reference_check_exit_on_committed_content": 1,
+      "reference_check_exit_when_run": 0,
+      "reference_committed_unchecked_content": true,
+      "title": "the edit that arrived after the check"
+    }
+  ],
+  "aiqe_version": "0.1.0a0",
+  "demo": "lookahead",
+  "schema_version": 1
+}

@@ -12,6 +12,39 @@ makes the change, not at release time.
 
 ### Added
 
+- **The failure-first demonstration, materialised.**
+  [`examples/lookahead-demo/`](examples/lookahead-demo/) is now runnable rather than
+  specified: `run.py` builds four synthetic repositories from nothing, drives the real
+  entry point against them, and runs the reference workflow against copies of the same
+  repositories so the contrast is measured. A one-character causality defect passes the
+  project's own generic suite and fails a native causality validator; removing that
+  validator leaves everything green and produces `COVERAGE_GAP`; an ordinary commit
+  absorbs unrelated staged work that the bounded commit excludes; and a check-then-edit
+  sequence commits unchecked content that AIQE refuses with `STALE_OWNED_CONTENT`.
+  Outcomes are declared in `expected.json` before the run, and everything the run
+  produced is retained under `examples/lookahead-demo/results/`, failures included.
+- **`bench/render-assets.py`.** Renders the screenshotable terminal surfaces into
+  [`docs/assets/captures/`](docs/assets/captures/) and the README's benchmark totals
+  between markers, both from the retained result artifacts. Without `--write` it
+  reports drift and exits non-zero, so a published number cannot part company with the
+  artifact it came from and a capture cannot stop being the output it names. Each
+  capture carries its provenance — family, result artifact, case and field — in
+  `captures/index.json`.
+- **[`docs/agents.md`](docs/agents.md).** How to use AIQE with Claude Code and Codex
+  through ordinary shell invocation, what belongs in `CLAUDE.md` or `AGENTS.md`, and
+  which two decisions — the owned scope and validator consent — must not be delegated
+  to the agent. There is no plugin, adapter or MCP server, and the page says so.
+- **[`docs/assets/README.md`](docs/assets/README.md).** What the captures are, how they
+  are regenerated, and the rules any later rendered asset has to follow.
+- **`tests/test_demo.py`.** Runs the demo, compares what it produced against what is
+  retained, and asserts that the retained transcript differs from a fresh one in
+  exactly the task start timestamps and nowhere else.
+- **Documentation gates for the claims the new pages make**, in
+  `tests/test_documentation.py`: every `aiqe` flag shown in the README exists in the
+  command surface, every documented `aiqe.toml` is one the fail-closed parser accepts,
+  every launch contract is explained rather than only listed, the trust boundaries and
+  the bounded contract claim are present, no badge appears, and the rendered assets
+  still match the retained artifacts.
 - **A release proof, and a support gate that can refuse.** Every CI job that is
   support evidence now writes a *surface record* naming the machine, the interpreter,
   the Git version, the runner provenance, the evidence level and every test it
@@ -51,6 +84,21 @@ makes the change, not at release time.
 
 ### Changed
 
+- **The README is reorganised around the product rather than the build order.** The
+  hero is the post-commit Task Receipt; a 30-second explanation and a before/after
+  table come next, then the demo, then a five-minute quickstart following the real
+  command sequence. New sections explain what each of the six launch contracts is
+  about, state exactly what a contract result does and does not prove, summarise the
+  trust boundaries on the front page, record the packaging facts, and publish the
+  benchmark totals from the retained artifacts. Every terminal block on the page is
+  still copied from a retained result, and tests still check that it is.
+- **The external CI attestation is recorded rather than implied.** The README states
+  that the release-proof manifest was aggregated at a source commit which is not the
+  current HEAD, and that no complete CI run has attested the current HEAD. No badge
+  appears on the page, and a test fails if one does.
+- **`docs/architecture.md` no longer describes agent adapters as though they exist.**
+  It states the actual integration — an ordinary command with a uniform exit status —
+  and points at [`docs/agents.md`](docs/agents.md).
 - **A race-dependent count no longer sits in the retained bounded-commit result as
   though it were a result.** Several cases in that family race a concurrent process
   against AIQE's own window on purpose, and Git legitimately writes a different number

@@ -1,0 +1,18 @@
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              COVERED        causality
+
+  Validators
+      unit                   required  PASS
+      causality              required  PASS
+
+  Evidence        CURRENT
+  Completion      REVIEWABLE_CANDIDATE
+
+  Every pre-commit obligation is discharged. This is not a
+  REVIEWABLE verdict: no bounded commit exists to bind this
+  evidence to. See `aiqe receipt`.

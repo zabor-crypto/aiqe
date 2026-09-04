@@ -1,0 +1,15 @@
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              CONTRACT_UNKNOWN causality
+
+  Validators
+      unit                   required  UNKNOWN      CONSENT_REQUIRED
+      causality              required  UNKNOWN      CONSENT_REQUIRED
+
+  Evidence        CURRENT
+  Completion      INCOMPLETE
+  Reasons         REQUIRED_VALIDATOR_UNKNOWN · CONTRACT_UNKNOWN

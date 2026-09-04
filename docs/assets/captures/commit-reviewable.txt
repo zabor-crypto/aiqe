@@ -1,0 +1,14 @@
+AIQE COMMIT
+
+  Owned scope     VERIFIED
+  Committed paths 1
+  Foreign staged  EXCLUDED
+  Checked content BOUND
+  Commit          CREATED
+  Push            NOT_PERFORMED_BY_AIQE
+
+  Verdict         REVIEWABLE
+
+  The commit contains exactly the owned changed pathset, its content is
+  the checked content, and the staged work AIQE did not own is unchanged.
+  See `aiqe receipt`.

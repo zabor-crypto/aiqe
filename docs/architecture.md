@@ -65,8 +65,9 @@ References: [`config.md`](config.md) for `aiqe.toml` and `init`,
 [`check.md`](check.md), [`receipt.md`](receipt.md).
 
 The task boundary answers which exact repository paths a unit of work owns — a declared
-path owns itself and nothing else — and deliberately nothing further — not whether checks passed, whether evidence is fresh, or whether the work
-is reviewable. Reference: [`task.md`](task.md).
+path owns itself and nothing else — and deliberately nothing further: not whether checks
+passed, not whether evidence is fresh, and not whether the work is reviewable.
+Reference: [`task.md`](task.md).
 
 Doctor runs before init. That ordering is intentional: nothing is written into a
 repository before the environment has been inspected.
@@ -284,10 +285,15 @@ Verdict            REVIEWABLE only if every completion invariant holds
 `VERIFIED` and `EXCLUDED` never appear before the proof exists. The user-facing verdict
 vocabulary is exactly `REVIEWABLE`, `INCOMPLETE`, and `NOT_REVIEWABLE`.
 
-## Agent adapters
+## Agents
 
-Claude Code and Codex are adapters behind a narrow common interface. An adapter may not
-widen the core command surface.
+There is no adapter, plugin, extension, MCP server or hook, and none is required: an
+agent invokes `aiqe` as an ordinary command, like any other tool in its shell.
+`doctor`, `check` and `receipt` take `--format json`; every command's exit status is
+the uniform one above. That is the whole machine-readable interface.
+
+Should an adapter ever exist, it may not widen the core command surface. Working
+guidance for Claude Code and Codex: [`agents.md`](agents.md).
 
 ## Explicit non-features
 
