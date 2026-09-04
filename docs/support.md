@@ -77,6 +77,36 @@ extrapolation an ordinary matrix invites — 3.11 passed, 3.14 passed, therefore
 3.11–3.14 — and requires that the gate refuses it. If that control stops
 reproducing, the gate has stopped gating.
 
+### 1.1 Two evidence lanes, and what a green run means
+
+[`.github/workflows/checks.yml`](../.github/workflows/checks.yml) runs in one
+of two lanes, because a macOS runner bills at ten times a Linux one and
+running the whole matrix on every push exhausted a month's CI allowance in
+three days:
+
+```
+FAST   push, pull_request         Linux surfaces only
+FULL   tag, manual dispatch       every claimed surface, macOS included
+```
+
+**A green FAST run is not a support claim, and does not pretend to be one.**
+It produces no macOS surface record, so the gate above marks every claimed
+Python minor `NOT_PROVEN` and names the observation it did not get —
+`INSTALLED_ARTIFACT_E2E on macos`. That is the gate working. Only the FULL
+lane is aggregated with `--require-all-claims`, so it remains impossible to
+reach a manifest that passes the gate without the whole matrix having actually
+run.
+
+What this trades away is latency, not honesty: a macOS-only regression is now
+found when a release is prepared rather than on the push that introduced it.
+Nothing that is claimed is narrowed, and no run reports a surface it did not
+touch. The manifest artifact is named for its lane
+(`release-proof-manifest-full` / `-fast`) so a fast run's record cannot later
+be mistaken for release evidence.
+
+Run the full lane from the Actions tab (**Run workflow → lane: full**), or by
+pushing a tag.
+
 ## 2. Architecture is never inferred
 
 A pure-Python wheel is not an argument about a processor. `macos / arm64`

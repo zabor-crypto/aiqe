@@ -3,8 +3,26 @@ name: checks
 on:
   push:
     branches: [main]
+    # A tag is the moment a claim is published, so a tag always runs the full
+    # evidence lane below.
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      lane:
+        description: "full = every claimed surface incl. macOS; fast = Linux only"
+        type: choice
+        options: [full, fast]
+        default: full
+
+# A newer commit on the same ref makes an older FAST run irrelevant, so it is
+# cancelled. A FULL run never is: its manifest is the evidence a release rests
+# on, and re-earning it costs ten macOS runners. Keyed on the event as well as
+# the ref so a push run and a pull_request run of one branch stay independent,
+# and so a push to main cannot cancel a full lane dispatched from main.
+concurrency:
+  group: checks-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')) }}
 
 permissions:
   contents: read
@@ -18,32 +36,150 @@ permissions:
 # claim needs a named surface, a named evidence level and a recorded skip
 # list, and `--require-all-claims` makes a missing one fail the build rather
 # than quietly narrow the manifest.
+#
+# --- Two lanes, and why -------------------------------------------------
+#
+# A macOS runner bills at ten times a Linux one. Running the nine macOS jobs
+# on every push spent 1800 of this account's 2000 monthly Actions minutes in
+# three days and then stopped CI dead for everything else, which is a worse
+# outcome for evidence than not running them on every push.
+#
+# So the matrix is split by *when a claim is made* rather than trimmed:
+#
+#   FAST  (push, pull_request)   Linux only. ~14 minutes of quota per run.
+#   FULL  (tag, workflow_dispatch)  every claimed surface. ~146 per run.
+#
+# This narrows nothing that is claimed, because the manifest is gated on
+# observations rather than on a green tick: a fast run has no macOS surface
+# record, so `python_support` marks every claimed minor NOT_PROVEN and says
+# which observation is missing. Only the full lane passes
+# `--require-all-claims`, so a release still cannot be cut without the whole
+# matrix having actually run. The failure mode this cannot produce is the
+# dangerous one - a run that claims macOS without having touched a Mac.
 
 jobs:
-  # --- Full suite, on every claimed Python minor and OS family ------------
+  # --- Which lane this run is --------------------------------------------
   #
-  # The literal minimum the release matrix asks for: all of 3.11 to 3.14, on
-  # both claimed families. The interior minors are not inferred from the
-  # endpoints, which is what the NC-SUPPORT-CLAIM control exists to
-  # demonstrate.
+  # One place decides, so the four gated jobs and the manifest's gate flag can
+  # never disagree about it. It also writes the answer into the run summary:
+  # a green `checks` run means two different things now, and a reader must not
+  # have to reconstruct which from the job list.
+  lane:
+    name: evidence lane
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.decide.outputs.full }}
+    steps:
+      - id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          # `github.event.inputs` is readable on every event - absent, and so
+          # empty, on all but workflow_dispatch. The `:-full` below covers the
+          # empty case, so the two agree on the default rather than relying on
+          # the form's one alone.
+          REQUESTED: ${{ github.event.inputs.lane }}
+        run: |
+          set -euo pipefail
+          full=false
+          case "$EVENT" in
+            workflow_dispatch)
+              if [ "${REQUESTED:-full}" != "fast" ]; then full=true; fi
+              ;;
+            push)
+              case "$REF" in
+                refs/tags/*) full=true ;;
+              esac
+              ;;
+          esac
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          if [ "$full" = "true" ]; then
+            {
+              echo "## Evidence lane: FULL"
+              echo
+              echo "Every claimed surface runs, including macOS, and the"
+              echo "manifest is gated with \`--require-all-claims\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## Evidence lane: FAST"
+              echo
+              echo "Linux surfaces only. The macOS jobs are skipped, so this"
+              echo "run proves nothing about macOS and the manifest will"
+              echo "record every claimed Python minor as NOT_PROVEN. That is"
+              echo "the gate working, not a regression."
+              echo
+              echo "Run the full lane from the Actions tab (Run workflow ->"
+              echo "lane: full) or by pushing a tag."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # --- Full suite, on every claimed Python minor --------------------------
+  #
+  # The literal minimum the release matrix asks for: all of 3.11 to 3.14. The
+  # interior minors are not inferred from the endpoints, which is what the
+  # NC-SUPPORT-CLAIM control exists to demonstrate. The macOS half of this
+  # matrix is `tests-macos` below, and runs in the full lane only.
   tests:
     name: suite (${{ matrix.os }}, python ${{ matrix.python }})
     strategy:
       fail-fast: false
       matrix:
-        # A documented tiering, not a rounding-down. Linux runs the whole
-        # behavioural suite on every claimed interpreter minor. macOS runs it
-        # on the ends of the range, and carries the installed-artifact
-        # end-to-end on all four through the `release-proof` job below.
-        #
-        # The support gate encodes exactly that split - the artifact evidence
-        # is required on every claimed family, the suite on at least one - and
-        # the manifest records, per minor, which families actually ran the
-        # suite. What the tiering gives up is a defect that appears only on
-        # macOS, only on 3.12 or 3.13, and only in a case the end-to-end does
-        # not reach.
+        # Linux runs the whole behavioural suite on every claimed
+        # interpreter minor, on every run, in both lanes. It is the cheap
+        # surface, so nothing about it is rationed.
         os: [ubuntu-latest]
         python: ["3.11", "3.12", "3.13", "3.14"]
+    runs-on: ${{ matrix.os }}
+    env:
+      AIQE_RUNNER_LABEL: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Report toolchain
+        run: |
+          python --version
+          git --version
+      - name: Run the test suite and record the surface
+        run: |
+          python bench/run-suite.py \
+            --output "${RUNNER_TEMP}/surface.json" --verbose
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-suite-${{ matrix.os }}-py${{ matrix.python }}
+          path: ${{ runner.temp }}/surface.json
+
+  # --- The same suite on macOS, in the full lane only ---------------------
+  #
+  # A documented tiering, not a rounding-down. macOS runs the behavioural
+  # suite on the ends of the claimed range, and carries the installed-artifact
+  # end-to-end on all four minors through `release-proof-macos` below.
+  #
+  # The support gate encodes exactly that split - the artifact evidence is
+  # required on every claimed family, the suite on at least one - and the
+  # manifest records, per minor, which families actually ran the suite. What
+  # the tiering gives up is a defect that appears only on macOS, only on 3.12
+  # or 3.13, and only in a case the end-to-end does not reach.
+  #
+  # The matrix is written as `include` rows rather than a `python:` list
+  # because it is deliberately not the whole claimed range; a `python:` list
+  # here would be a list that omits claimed minors, which is the shape the
+  # workflow tests refuse.
+  tests-macos:
+    name: suite (${{ matrix.os }}, python ${{ matrix.python }})
+    needs: lane
+    if: needs.lane.outputs.full == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
         include:
           - os: macos-latest
             python: "3.11"
@@ -92,11 +228,9 @@ jobs:
   #                      behaviours, and the only honest way to publish a
   #                      boundary is to run the whole suite against an old
   #                      Git rather than to reason about release notes.
-  #   macos-15           One macOS release below the newest hosted image, so
-  #                      the product does not come to depend on the newest
-  #                      environment by accident.
-  #   macos-15-intel     x86_64 macOS. Without it, Intel Macs are NOT_PROVEN;
-  #                      a pure-Python wheel does not prove an architecture.
+  #
+  # The two macOS surfaces this list used to carry are in `surfaces-macos`
+  # below, unchanged, and run in the full lane only.
   surfaces:
     name: surface ${{ matrix.label }}
     strategy:
@@ -113,12 +247,6 @@ jobs:
             os: ubuntu-latest
             container: python:3.11-bullseye
             proves: git-floor-refusal
-          - label: macos-15-py311
-            os: macos-15
-            python: "3.11"
-          - label: macos-15-intel-py314
-            os: macos-15-intel
-            python: "3.14"
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     env:
@@ -149,11 +277,11 @@ jobs:
           python3 --version
           git --version
       # Linux surfaces are cheap, so they carry the whole suite. The macOS
-      # ones carry the artifact evidence only, for the reason the `tests`
-      # matrix states: the suite answers the same questions on a second macOS
-      # release, at ten times the price.
+      # ones in `surfaces-macos` carry the artifact evidence only, for the
+      # reason the `tests-macos` matrix states: the suite answers the same
+      # questions on a second macOS release, at ten times the price.
       - name: Run the test suite and record the surface
-        if: matrix.proves != 'git-floor-refusal' && !startsWith(matrix.os, 'macos')
+        if: matrix.proves != 'git-floor-refusal'
         run: |
           python3 bench/run-suite.py --output "${RUNNER_TEMP:-/tmp}/surface-suite.json"
       - name: Prove the installed artifact on this surface
@@ -219,6 +347,65 @@ jobs:
           path: ${{ runner.temp }}/surface-*.json
           if-no-files-found: error
 
+  # --- The macOS surfaces, in the full lane only --------------------------
+  #
+  #   macos-15           One macOS release below the newest hosted image, so
+  #                      the product does not come to depend on the newest
+  #                      environment by accident.
+  #   macos-15-intel     x86_64 macOS. Without it, Intel Macs are NOT_PROVEN;
+  #                      a pure-Python wheel does not prove an architecture.
+  #
+  # These carry the installed-artifact evidence only, never the suite. The
+  # container plumbing and the Git lower-bound steps of `surfaces` are absent
+  # rather than switched off: a macOS runner cannot run a Linux container, so
+  # here they would be conditions that can never be true.
+  surfaces-macos:
+    name: surface ${{ matrix.label }}
+    needs: lane
+    if: needs.lane.outputs.full == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macos-15-py311
+            os: macos-15
+            python: "3.11"
+          - label: macos-15-intel-py314
+            os: macos-15-intel
+            python: "3.14"
+    runs-on: ${{ matrix.os }}
+    env:
+      AIQE_RUNNER_LABEL: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Report toolchain
+        run: |
+          python3 --version
+          git --version
+      - name: Prove the installed artifact on this surface
+        run: |
+          python3 bench/run-release-proof.py \
+            --parts artifacts,install,e2e,scan \
+            --output "${RUNNER_TEMP:-/tmp}/surface-artifact.json"
+      # A glob rather than a named path, to stay identical to the record
+      # `surfaces` uploads: this job writes the artifact record and no suite
+      # record, and `if-no-files-found: error` still catches a job that wrote
+      # neither.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-extra-${{ matrix.label }}
+          path: ${{ runner.temp }}/surface-*.json
+          if-no-files-found: error
+
   # --- Arbitrary-byte paths, which must never be skipped ------------------
   non-utf8-e2e:
     name: linux arbitrary-byte paths (must not skip)
@@ -265,7 +452,51 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Run the Doctor benchmark family
+        run: python bench/run-doctor-fixtures.py --output "${RUNNER_TEMP}/doctor.json"
+      - name: Compare the Doctor run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/doctor.json"
+      - name: Run the Task benchmark family
+        run: python bench/run-task-fixtures.py --output "${RUNNER_TEMP}/task.json"
+      - name: Compare the Task run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/task.json"
+      - name: Run the check, evidence and receipt benchmark family
+        run: python bench/run-check-fixtures.py --output "${RUNNER_TEMP}/check.json"
+      - name: Compare the check run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/check.json"
+      - name: Run the bounded-commit benchmark family
+        run: python bench/run-commit-fixtures.py --output "${RUNNER_TEMP}/commit.json"
+      - name: Compare the commit run against the retained artifact
+        run: python bench/compare-results.py "${RUNNER_TEMP}/commit.json"
+
+  # --- The same benchmark families on macOS, in the full lane only --------
+  #
+  # This job uploads no surface record and is therefore not support evidence;
+  # it is a regression check that the retained per-family artifacts still
+  # reproduce on a second OS. `manifest` still waits for it, so a benchmark
+  # that stops reproducing on macOS fails a full lane rather than being
+  # reported after it.
+  benchmark-macos:
+    name: benchmark families and controls (${{ matrix.os }})
+    needs: lane
+    if: needs.lane.outputs.full == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -307,13 +538,60 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: ubuntu-latest
+            python: "3.14"
+            parts: artifacts,install,e2e,offline,uv,reproducibility,scan,controls
+    runs-on: ${{ matrix.os }}
+    env:
+      AIQE_RUNNER_LABEL: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history. The retained manifest names the commit an
+          # artifact was built from, and the test that keeps a foreign
+          # object id out of it has to be able to look that commit up.
+          # A shallow clone makes every id look foreign.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Report toolchain
+        run: |
+          python --version
+          git --version
+      - name: Build, install and exercise the artifact
+        run: |
+          python bench/run-release-proof.py \
+            --parts "${{ matrix.parts || 'artifacts,install,e2e,scan' }}" \
+            --output "${RUNNER_TEMP}/surface.json"
+      - name: Show the surface record
+        if: always()
+        run: cat "${RUNNER_TEMP}/surface.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-artifact-${{ matrix.os }}-py${{ matrix.python }}
+          path: ${{ runner.temp }}/surface.json
+
+  # --- The installed artifact on macOS, in the full lane only -------------
+  #
+  # This is the evidence `REQUIRED_EVERYWHERE` asks for: without these four
+  # rows no claimed Python minor can be PROVEN, because the artifact would be
+  # unproven on a claimed OS family. That is why a fast run's manifest reports
+  # every minor NOT_PROVEN, and why only the full lane may be released from.
+  release-proof-macos:
+    name: release proof (${{ matrix.os }}, python ${{ matrix.python }})
+    needs: lane
+    if: needs.lane.outputs.full == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
         python: ["3.11", "3.12", "3.13", "3.14"]
         include:
           - os: macos-latest
-            python: "3.14"
-            parts: artifacts,install,e2e,offline,uv,reproducibility,scan,controls
-          - os: ubuntu-latest
             python: "3.14"
             parts: artifacts,install,e2e,offline,uv,reproducibility,scan,controls
     runs-on: ${{ matrix.os }}
@@ -403,13 +681,35 @@ jobs:
   #
   # Collects every surface record and applies the gate. `--require-all-claims`
   # turns a NOT_PROVEN claimed minor into a failure here, which is what makes
-  # the README's support section something CI can keep honest.
+  # the README's support section something CI can keep honest. It is passed in
+  # the FULL lane only: a fast run has no macOS records, so requiring them
+  # there would fail every push for the absence of evidence nobody asked it to
+  # produce. The manifest still *records* that absence either way - the claim
+  # is refused, not narrowed.
   #
   # The manifest is uploaded as an ephemeral artifact of this private
   # repository. Nothing is published.
   manifest:
     name: release-proof manifest
-    needs: [tests, surfaces, release-proof, benchmark, non-utf8-e2e, public-scan, links]
+    needs:
+      - lane
+      - tests
+      - tests-macos
+      - surfaces
+      - surfaces-macos
+      - benchmark
+      - benchmark-macos
+      - release-proof
+      - release-proof-macos
+      - non-utf8-e2e
+      - public-scan
+      - links
+    # A skipped `needs` entry skips the dependent job by default, and in the
+    # fast lane the four macOS jobs are always skipped. This runs whenever
+    # nothing upstream actually failed or was cancelled - the behaviour the
+    # bare `needs:` list had back when every job in it always ran. It must not
+    # be `always()`: a failed suite has to keep the manifest from being built.
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -429,17 +729,31 @@ jobs:
       - name: List the surface records collected
         run: find "${RUNNER_TEMP}/surfaces" -name '*.json' | sort
       - name: Aggregate and gate the support claims
+        env:
+          FULL_LANE: ${{ needs.lane.outputs.full }}
         run: |
-          python bench/aggregate-release-proof.py \
-            --surfaces "${RUNNER_TEMP}/surfaces" \
-            --output "${RUNNER_TEMP}/release-proof.json" \
-            --require-all-claims
+          set -euo pipefail
+          args=(
+            --surfaces "${RUNNER_TEMP}/surfaces"
+            --output "${RUNNER_TEMP}/release-proof.json"
+          )
+          if [ "$FULL_LANE" = "true" ]; then
+            args+=(--require-all-claims)
+          else
+            echo "fast lane: claims are recorded, not required." \
+                 "Every claimed minor will read NOT_PROVEN because no macOS" \
+                 "surface record exists in this run."
+          fi
+          python bench/aggregate-release-proof.py "${args[@]}"
       - name: Scan the manifest itself
         run: ./tools/public-scan/public-scan.sh "${RUNNER_TEMP}/release-proof.json"
       - name: Show the manifest
         if: always()
         run: cat "${RUNNER_TEMP}/release-proof.json"
+      # The lane is in the artifact's name because the Actions UI shows the
+      # name and not the JSON, and a fast-lane manifest must never be picked
+      # up months later as though it were release evidence.
       - uses: actions/upload-artifact@v4
         with:
-          name: release-proof-manifest
+          name: release-proof-manifest-${{ needs.lane.outputs.full == 'true' && 'full' || 'fast' }}
           path: ${{ runner.temp }}/release-proof.json
