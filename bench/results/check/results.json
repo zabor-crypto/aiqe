@@ -2052,6 +2052,7 @@
         "causality": "FAIL"
       },
       "validator_repository_mutations": 0,
+      "validator_start_observed": true,
       "validators_fired": [
         "causality"
       ]
@@ -2110,6 +2111,7 @@
         "determinism": "FAIL"
       },
       "validator_repository_mutations": 0,
+      "validator_start_observed": true,
       "validators_fired": [
         "determinism"
       ]

@@ -217,6 +217,75 @@ class FixtureCoverageTests(unittest.TestCase):
         self.assertEqual(accepted["executions_added_by_persisted_run"], 1)
         self.assertEqual(accepted["executions_added_by_drifted_run"], 0)
 
+    def test_the_loud_output_fixtures_prove_the_validator_started(self):
+        """An absent retained tail has two causes, and only one is a defect.
+
+        These two scenarios exist to show that enormous - in one case endless -
+        validator output stays bounded. Every one of those observations is
+        downstream of the validator having run: if it never started, there is
+        no output to bound, and the run would otherwise report an absent
+        retained tail as though the bound had broken.
+
+        So the start is asserted as a precondition in its own right, next to
+        the bounds it licenses. Dropping it would leave two cases that could
+        fail for a reason they do not name.
+        """
+        by_id = {case["id"]: case["expect"] for case in support.check_cases()}
+        for case_id in ("large_output_bounded", "large_output_with_timeout"):
+            expect = by_id[case_id]
+            self.assertTrue(expect["validator_start_observed"], case_id)
+            self.assertEqual(expect["executions"], 1, case_id)
+            self.assertTrue(expect["retained_output_present"], case_id)
+            self.assertTrue(
+                expect["retained_output_bytes_within_budget"], case_id
+            )
+            self.assertTrue(expect["evidence_record_bounded"], case_id)
+            self.assertTrue(expect["completed_promptly"], case_id)
+
+    def test_the_promptness_ceiling_can_actually_fail(self):
+        """A ceiling above the harness's own cap is not an assertion.
+
+        `run_cli` raises at `CLI_TIMEOUT_SECONDS`, so a promptness ceiling at
+        or above it can never be the thing that fails - the run has already
+        become an error. The ceiling has to sit below that cap, and above what
+        the slowest loud scenario actually takes, or it is decoration.
+        """
+        self.assertLess(
+            support.check_builders.LOUD_PROMPT_RETURN_SECONDS,
+            support.task_builders.CLI_TIMEOUT_SECONDS,
+            "the promptness ceiling is above the harness cap that precedes it",
+        )
+        self.assertGreater(
+            support.check_builders.LOUD_PROMPT_RETURN_SECONDS,
+            2 * support.check_builders.STRESS_TIMEOUT_SECONDS,
+            "the promptness ceiling is too close to the deadline it observes",
+        )
+
+    def test_the_endless_output_deadline_clears_validator_startup(self):
+        """The deadline must measure termination, not the shell's startup.
+
+        Measured end to end on the macOS RC surface - `aiqe check` invoked to
+        the validator's first line - this scenario starts in a median of 0.94s
+        with an observed worst of 3.32s, and a sibling fixture on the same
+        surface was caught at 3.99s. A deadline that is a small multiple of
+        that is racing startup rather than observing a termination, which is
+        the defect this bound exists to keep out.
+
+        The deadline also has to leave the whole check inside the harness cap:
+        start, plus deadline, plus drain.
+        """
+        observed_worst_start = 4
+        self.assertGreaterEqual(
+            support.check_builders.STRESS_TIMEOUT_SECONDS,
+            5 * observed_worst_start,
+            "the deadline no longer clears the measured startup tail",
+        )
+        self.assertLess(
+            observed_worst_start + support.check_builders.STRESS_TIMEOUT_SECONDS + 5,
+            support.task_builders.CLI_TIMEOUT_SECONDS,
+            "the check can no longer finish inside the harness cap",
+        )
+
     def test_the_termination_claim_has_a_fixture_that_bounds_it(self):
         """A detached child must be observed surviving the group kill.
 

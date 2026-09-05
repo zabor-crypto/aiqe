@@ -128,6 +128,18 @@ def _shell_quote(path):
     return "'" + path.replace("'", "'\\''") + "'"
 
 
+#: What an observation reports when its own precondition did not hold, so that
+#: "the scenario did not run" cannot be read as "the claim was refuted". It is
+#: deliberately not `False` and deliberately not `None`: both of those are
+#: answers, and this is the absence of one. No expectation may name it, so a
+#: case reporting it fails.
+#:
+#: Shared by every scenario whose observations are downstream of a validator
+#: having started, which on this surface is the ones with a deadline short
+#: enough to race the validator's own startup.
+NOT_MEASURED = "NOT_MEASURED"
+
+
 def executions(case, validator_id):
     """How many times that validator actually ran."""
     marker = case.marker(validator_id)
@@ -944,13 +956,41 @@ LOUD_CONFIG = config(
     ]
 )
 
-#: Four seconds, not one. Measured, not guessed: on macOS the first execution
-#: of a freshly written script costs 0.7-1.1s of loader and security work
-#: before the script's own first line runs, so a one-second timeout races the
-#: shell's startup rather than the behaviour under test. These fixtures are
-#: about bounding output and honouring the deadline, so they get a window they
-#: can actually be observed in.
-STRESS_TIMEOUT_SECONDS = 4
+#: The deadline the endless-output validator is terminated by.
+#:
+#: Measured for *this* scenario, end to end - `aiqe check` invoked, to the
+#: validator's own first line - rather than inherited from a shell-only
+#: figure. Thirty-two runs on the macOS RC surface:
+#:
+#:     min 0.273s    median 0.942s    max 3.323s
+#:
+#: The median is under a second and the distribution has a long cold tail: one
+#: run in a fresh process pays macOS loader and security-assessment cost, and
+#: the stall is not proportional to load. Four seconds left 0.68s of margin
+#: over the worst start observed here, and a sibling fixture on this same
+#: surface was caught starting at 3.99s.
+#:
+#: That margin is the defect. A start that overran the deadline would not have
+#: failed the way a real regression does: the validator would never run, and a
+#: scenario about *bounding endless output* would report itself as an absent
+#: retained tail. So the deadline is set at six times the worst start observed,
+#: which puts it clear of the tail rather than just past the median.
+#:
+#: Upper bound on this number: `run_cli` caps every CLI invocation at
+#: `CLI_TIMEOUT_SECONDS`, and this check runs for roughly the start plus the
+#: deadline plus a fifth of a second of drain. At twenty seconds that is about
+#: 24s against a 60s cap.
+STRESS_TIMEOUT_SECONDS = 20
+
+#: The ceiling `completed_promptly` is measured against.
+#:
+#: It was 120s, which could never fire: `run_cli` raises at
+#: `CLI_TIMEOUT_SECONDS` = 60 first, so any run slow enough to trip a 120s
+#: assertion had already become an error. A ceiling above the harness's own cap
+#: is not an assertion. Forty-five seconds sits between the expected
+#: completion of both loud scenarios - about 21-24s for the endless one and a
+#: few seconds for the finite one - and that cap, so it can now actually fail.
+LOUD_PROMPT_RETURN_SECONDS = 45
 
 TIMEOUT_LOUD_CONFIG = config(
     [
@@ -1016,6 +1056,21 @@ def _evidence_size(root, env):
 
 
 def _loud_observation(case, env, root, validator_id):
+    """Run one loud-output scenario and record what it bounded.
+
+    Every observation below except the first is *downstream of the validator
+    having run at all*. A retained tail that is absent because eight megabytes
+    were correctly truncated and a retained tail that is absent because the
+    validator never started look identical in the record, and only one of them
+    is a defect - so the start is measured first, as its own precondition, and
+    the rest report NOT_MEASURED when it did not hold.
+
+    That is not a way of passing a run that did not happen: `executions` is
+    still compared against 1, and NOT_MEASURED is not the `True` any of these
+    expectations name, so such a run fails either way. What it buys is a
+    failure that says the validator did not start rather than one that accuses
+    the output bound of having broken.
+    """
     started = time.monotonic()
     run_cli(root, env, b"task", b"start", b"--own", OWNED)
     machine = run_cli(
@@ -1033,15 +1088,24 @@ def _loud_observation(case, env, root, validator_id):
     receipt = run_cli(root, env, b"receipt", b"--format", b"json")
     ended = run_cli(root, env, b"task", b"end")
 
+    ran = executions(case, validator_id)
+
     observation = {
         "check_exit": machine.returncode,
-        "retained_output_present": bool(retained),
+        "validator_start_observed": ran >= 1,
+        "retained_output_present": bool(retained) if ran else NOT_MEASURED,
         "retained_output_bytes_within_budget": (
-            retained is not None and retained <= 2 * RENDERED_TAIL_LIMIT
+            (retained is not None and retained <= 2 * RENDERED_TAIL_LIMIT)
+            if ran
+            else NOT_MEASURED
         ),
-        "evidence_record_bounded": size is not None and size < 262144,
-        "completed_promptly": elapsed < 120,
-        "executions": executions(case, validator_id),
+        "evidence_record_bounded": (
+            (size is not None and size < 262144) if ran else NOT_MEASURED
+        ),
+        "completed_promptly": (
+            elapsed < LOUD_PROMPT_RETURN_SECONDS if ran else NOT_MEASURED
+        ),
+        "executions": ran,
         "active_after_end": read_active(root, env) is not None,
         "end_exit": ended.returncode,
         "terminal_safe": terminal_safe(machine, receipt, ended),
@@ -1058,18 +1122,11 @@ def operate_large_output(case, env, root):
 
 
 def operate_large_output_with_timeout(case, env, root):
-    """Output that never stops, under a one-second timeout."""
+    """Output that never stops, terminated by the validator's own deadline."""
     return _loud_observation(case, env, root, "determinism")
 
 
 # --- Scenario: what the process-group claim does not cover ------------------
-
-#: What an observation reports when its own precondition did not hold, so that
-#: "the scenario did not run" cannot be read as "the claim was refuted". It is
-#: deliberately not `False` and deliberately not `None`: both of those are
-#: answers, and this is the absence of one. No expectation may name it, so a
-#: case reporting it fails.
-NOT_MEASURED = "NOT_MEASURED"
 
 #: The validator's deadline. These numbers are budgets, not preferences, and
 #: every one of them was measured on the macOS RC surface rather than guessed.

@@ -1399,7 +1399,8 @@
         "unconsented_validator_executions": 0,
         "validator_outcomes": {
           "causality": "FAIL"
-        }
+        },
+        "validator_start_observed": true
       },
       "id": "large_output_bounded"
     },
@@ -1436,7 +1437,8 @@
         "unconsented_validator_executions": 0,
         "validator_outcomes": {
           "determinism": "FAIL"
-        }
+        },
+        "validator_start_observed": true
       },
       "id": "large_output_with_timeout"
     },
