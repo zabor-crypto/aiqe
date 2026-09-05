@@ -1064,12 +1064,58 @@ def operate_large_output_with_timeout(case, env, root):
 
 # --- Scenario: what the process-group claim does not cover ------------------
 
-#: The validator's deadline, and how long its detached child outlives it. The
-#: child must still be alive when the process group is terminated, or the
+#: What an observation reports when its own precondition did not hold, so that
+#: "the scenario did not run" cannot be read as "the claim was refuted". It is
+#: deliberately not `False` and deliberately not `None`: both of those are
+#: answers, and this is the absence of one. No expectation may name it, so a
+#: case reporting it fails.
+NOT_MEASURED = "NOT_MEASURED"
+
+#: The validator's deadline. These numbers are budgets, not preferences, and
+#: every one of them was measured on the macOS RC surface rather than guessed.
+#:
+#: The deadline has to clear the *start* of the validator by a wide margin.
+#: Starting it is not free: AIQE's own startup and git work happen before the
+#: validator is spawned at all, and macOS then pays loader and security-
+#: assessment cost on the first execution of a freshly written script. Measured
+#: over forty runs on this surface, the interval from invoking `aiqe check` to
+#: the validator's first line was:
+#:
+#:     median 1.8s    typical worst 2.1s    observed worst 3.99s
+#:
+#: of which 0.80-1.15s is the shell's own cold `exec`. The distribution has a
+#: tail: security assessment stalls, and the stall is not proportional to load.
+#:
+#: A three-second deadline sat *inside* that tail. The run that exceeded it did
+#: not fail the way a real defect would - the validator simply never ran, and a
+#: case about a *surviving child* then reported itself as a refuted containment
+#: claim. The margin, not the claim, was wrong.
+#:
+#: Twenty seconds is five times the worst start observed. The previous budget
+#: was about 2.7 times a then-believed worst of 1.1s, and choosing another
+#: small multiple of a small sample would repeat exactly that mistake, so the
+#: multiple is taken against the *observed tail* rather than the median.
+DETACHED_TIMEOUT_SECONDS = 20
+
+#: The child has to still be alive when the group is terminated, or the
 #: scenario proves nothing: it would be indistinguishable from a child that had
-#: simply already finished.
-DETACHED_TIMEOUT_SECONDS = 3
-DETACHED_CHILD_LIFETIME_SECONDS = 6.0
+#: simply already finished. Its lifetime therefore has to clear the deadline,
+#: and it clears it by ten seconds.
+DETACHED_CHILD_LIFETIME_SECONDS = 30.0
+
+#: How long the validator would run if nothing terminated it. It exists to
+#: separate two outcomes that must never be confused: a terminated validator
+#: returns in about `DETACHED_TIMEOUT_SECONDS` plus the start, and one that was
+#: never terminated runs for this long instead. Keeping the two far apart is
+#: what makes `check_completed_promptly` a discriminator rather than a
+#: formality - the old pairing put the unbounded case exactly on the boundary
+#: it was being tested against.
+DETACHED_VALIDATOR_UNBOUNDED_SECONDS = 90
+
+#: The ceiling `check_completed_promptly` is measured against, with a wide
+#: margin on both sides: a terminated check returns in about 22-24s, and one
+#: that was never terminated takes 90s.
+DETACHED_PROMPT_RETURN_SECONDS = 40
 
 DETACHED_CONFIG = config(
     [
@@ -1092,23 +1138,37 @@ started; it does not supervise a process tree, and a descendant that calls
 `setsid` is in a different session and survives. Proving that is better than
 wording around it.
 
+The escape is recorded rather than assumed. The group it was born into is read
+before `setsid`, its own group after, and both are written into the marker: a
+`setsid` that silently failed would otherwise leave a fixture that still passed
+while proving nothing.
+
 Short-lived and self-terminating, so the fixture leaves nothing behind.
 """
 
+import json
 import os
 import sys
 import time
 
+inherited_pgid = os.getpgid(0)
 os.setsid()
+own_pgid = os.getpgid(0)
+
 time.sleep(%(delay)s)
+
 with open(%(marker)r, "w") as handle:
-    handle.write("survived")
+    handle.write(json.dumps({
+        "inherited_pgid": inherited_pgid,
+        "own_pgid": own_pgid,
+        "left_the_group": inherited_pgid != own_pgid,
+    }))
 sys.exit(0)
 '''
 
 
 def build_detached_child(case, env):
-    """A validator whose child escapes the group, under a one-second timeout."""
+    """A validator whose child escapes the group, under a bounded deadline."""
     root = init_repo(case.repo_path, env)
     write(os.path.join(root, "src", "strategy", "alpha.py"), "SIGNAL = 1\n")
     write(os.path.join(root, "tests", "test_alpha.py"), "def test():\n    pass\n")
@@ -1127,7 +1187,8 @@ def build_detached_child(case, env):
         # process-group escape and nothing else.
         body=(
             "%s ./checks/detach.py </dev/null >/dev/null 2>&1 &\n"
-            "sleep 30" % (_shell_quote(sys.executable),)
+            "sleep %d"
+            % (_shell_quote(sys.executable), DETACHED_VALIDATOR_UNBOUNDED_SECONDS)
         ),
     )
     write(os.path.join(root, "aiqe.toml"), DETACHED_CONFIG)
@@ -1139,6 +1200,20 @@ def build_detached_child(case, env):
     return root
 
 
+def _detached_child_escape(survivor):
+    """What the detached child recorded about the group it left, if anything.
+
+    Returns `None` when the child left no marker at all, which is a different
+    statement from "it recorded that it did not escape" and has to stay
+    distinguishable from it.
+    """
+    try:
+        with open(survivor) as handle:
+            return json.load(handle)
+    except (OSError, ValueError):
+        return None
+
+
 def operate_detached_child(case, env, root):
     """The validator times out; its detached child is outside the mechanism.
 
@@ -1146,6 +1221,22 @@ def operate_detached_child(case, env, root):
     documented claim is that it terminates the process group it created, and a
     fixture that could not distinguish that from "terminates every descendant"
     would let the stronger, false claim back into the documentation unnoticed.
+
+    Four things have to be true for that observation to mean anything, and each
+    one is measured here rather than assumed:
+
+        the validator started                 `validator_start_observed`
+        its child left the process group      `detached_child_left_the_process_group`
+        the group deadline terminated it      `check_exit`, `check_completed_promptly`
+        the child was alive afterwards        `detached_child_survived_the_group_kill`
+
+    The first is a *precondition*, and separating it from the rest is the point.
+    A validator that never started proves nothing about containment, so
+    reporting that run as `detached_child_survived_the_group_kill = False` would
+    be a false refutation of the claim rather than the true statement that the
+    scenario did not run. It is reported as NOT_MEASURED instead - which is
+    still not the expected `True`, so the case still fails, and it fails naming
+    the thing that actually went wrong.
     """
     survivor = case.marker("observed.detached-child-survived")
     run_cli(root, env, b"task", b"start", b"--own", OWNED)
@@ -1163,12 +1254,21 @@ def operate_detached_child(case, env, root):
         time.sleep(0.1)
 
     ended = run_cli(root, env, b"task", b"end")
+
+    ran = executions(case, "determinism")
+    escape = _detached_child_escape(survivor)
+    survived = os.path.exists(survivor)
+
     observation = {
         "check_exit": machine.returncode,
-        "check_completed_promptly": elapsed < 30,
+        "check_completed_promptly": elapsed < DETACHED_PROMPT_RETURN_SECONDS,
         "check_ended_before_the_child_did": elapsed < DETACHED_CHILD_LIFETIME_SECONDS,
-        "detached_child_survived_the_group_kill": os.path.exists(survivor),
-        "executions": executions(case, "determinism"),
+        "validator_start_observed": ran >= 1,
+        "detached_child_left_the_process_group": (
+            bool(escape and escape.get("left_the_group")) if ran else NOT_MEASURED
+        ),
+        "detached_child_survived_the_group_kill": survived if ran else NOT_MEASURED,
+        "executions": ran,
         "active_after_end": read_active(root, env) is not None,
         "end_exit": ended.returncode,
         "terminal_safe": terminal_safe(machine, ended),

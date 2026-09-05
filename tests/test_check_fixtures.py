@@ -223,9 +223,18 @@ class FixtureCoverageTests(unittest.TestCase):
         Without it, "terminates the process group it created" and "bounds every
         descendant" look the same from the outside, and the stronger, false
         claim could return to the documentation unnoticed.
+
+        The survival is only evidence if the scenario actually ran, so the two
+        preconditions are asserted here as well: the validator has to have
+        started, and its child has to have genuinely left the group. A future
+        edit that dropped either one would leave a case that still passed while
+        proving less than its name says.
         """
         by_id = {case["id"]: case["expect"] for case in support.check_cases()}
         detached = by_id["detached_child_escapes_the_process_group"]
+        self.assertTrue(detached["validator_start_observed"])
+        self.assertEqual(detached["executions"], 1)
+        self.assertTrue(detached["detached_child_left_the_process_group"])
         self.assertTrue(detached["detached_child_survived_the_group_kill"])
         self.assertTrue(detached["check_ended_before_the_child_did"])
 

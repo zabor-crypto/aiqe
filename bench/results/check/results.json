@@ -2138,6 +2138,7 @@
         "DETERMINISM": "CONTRACT_FAILED"
       },
       "description": "The boundary of the termination claim, measured rather than worded. A validator spawns a child that calls setsid, leaving the process group AIQE created. The timeout terminates that group; the detached child survives it and finishes on its own afterwards. AIQE terminates the process group it created - it does not contain a process tree, and this case exists so that the stronger, false claim cannot return to the documentation unnoticed.",
+      "detached_child_left_the_process_group": true,
       "detached_child_survived_the_group_kill": true,
       "end_exit": 0,
       "executions": 1,
@@ -2161,6 +2162,7 @@
         "determinism": "FAIL"
       },
       "validator_repository_mutations": 0,
+      "validator_start_observed": true,
       "validators_fired": [
         "determinism"
       ]

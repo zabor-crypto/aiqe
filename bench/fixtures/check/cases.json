@@ -1458,6 +1458,7 @@
         "coverage_states": {
           "DETERMINISM": "CONTRACT_FAILED"
         },
+        "detached_child_left_the_process_group": true,
         "detached_child_survived_the_group_kill": true,
         "end_exit": 0,
         "executions": 1,
@@ -1469,7 +1470,8 @@
         "unconsented_validator_executions": 0,
         "validator_outcomes": {
           "determinism": "FAIL"
-        }
+        },
+        "validator_start_observed": true
       },
       "id": "detached_child_escapes_the_process_group"
     },
