@@ -24,7 +24,13 @@ BENCH      bench/results/{doctor,task,check,commit}/results.json
 MANIFEST   bench/results/release/release-proof.json
 DEMO       examples/lookahead-demo/results/demo.json
 CAPTURES   docs/assets/captures/index.json
+SUITE      the local project suite, named test module and assertion
 ```
+
+`SUITE` is the weakest of the five and is used only where the claim is a
+property of the code rather than a measurement over fixtures: a boundary that
+is asserted every run, not a number that was observed once. A `SUITE` claim
+names the module that would fail if the boundary moved.
 
 `MANIFEST` was aggregated at source commit `5b477a9`, which is **not** the
 current `HEAD`. Every claim resting on it inherits that gap; see
@@ -48,6 +54,9 @@ current `HEAD`. Every claim resting on it inherits that gap; see
 | `no-push` | AIQE never pushes | PROVEN | BENCH commit `aiqe_push_calls = 0`; Git allowlist carries no network subcommand | — | README, `architecture.md`, `SECURITY.md` |
 | `pass-is-not-truth` | `PASS` is the recorded outcome of a declared command; it is not universal numerical correctness | DESIGN_INTENT | the product's own boundary statement, asserted by `test_documentation.py` | AIQE proves declared contract coverage and evidence, never universal quant truth | README, `check.md`, `product-spec.md` |
 | `no-sandbox` | AIQE makes no filesystem or network claim about a validator | NOT_PROVEN (by design) | fixture `detached_child_escapes_the_process_group` | a descendant calling `setsid` outlives the group kill, and a fixture demonstrates it | README, `SECURITY.md` |
+| `default-receipt-privacy` | The default receipt discloses no identity: no path, filename, repository name, remote, branch, commit or parent id, persistent repository identity, machine-local key, validator argv or output, username, hostname or task label | PROVEN | SUITE `test_receipt.py`, 30 tests: a closed field allowlist and a closed string-value allowlist, plus an exclusion list checked against the fixture's real values | the shareable surface is the default; `--local` is opt-in and deliberately richer | README, `SECURITY.md`, `receipt.md` |
+| `local-state-owner-only` | AIQE's own local state is owner-only whatever the umask, and state AIQE did not create is refused rather than repaired | PROVEN | SUITE `test_local_state_privacy.py`, 28 tests: directory and file modes asserted under `umask(0)`, including each temporary file before its rename; symlink, ownership and permission refusals | validates AIQE's own components only; the directories above `$XDG_STATE_HOME` are the operating system's business | README, `SECURITY.md` |
+| `no-network-client` | The deterministic product contains no network client | PROVEN | SUITE `test_network.py`, 9 tests: no network-capable import in any source file or on import of the package, no socket entry point reached during a Doctor run, Git the only program spawned, and no remote-contacting subcommand in either Git allowlist | a validator AIQE runs is ordinary local code and may reach the network; that is `no-sandbox`, not this | README, `SECURITY.md`, `architecture.md` |
 
 ## Numeric claims
 
@@ -59,7 +68,7 @@ the README's benchmark block was typed.
 | `bench-totals` | 149 cases · 146 passed · 0 failed · 3 skipped · 24 of 24 controls | PROVEN | BENCH, rendered by `render-assets.py`, drift-checked in the suite | one retained run, AIQE 0.1.0a0 on darwin; skips are named, not dropped | README benchmark block |
 | `zero-tolerance` | Twelve zero-tolerance quantities, all at zero | PROVEN | BENCH `totals` in all four families | each counts what [`../bench/README.md`](../bench/README.md) defines; `local_state_writes = 0` is **not** "AIQE writes no local state" | README benchmark block |
 | `runtime-deps` | 0 third-party runtime dependencies | PROVEN | MANIFEST `runtime_dependency_count`, measured by installing into a fresh environment | — | README, `support.md`, `architecture.md` |
-| `local-suite` | 897 tests, 0 failed, 0 errored, 21 skipped | OBSERVED | local run, this machine, 2026-09-04 | a local result; the surfaces CI proves are in MANIFEST | not published |
+| `local-suite` | 899 tests, 0 failed, 0 errored, 21 skipped | OBSERVED | local run, this machine, 2026-09-05 | a local result; the surfaces CI proves are in MANIFEST | not published |
 | `race-diagnostic` | `aiqe_commit_git_writes` | NOT_PROVEN (non-authoritative) | BENCH commit `diagnostics`, excluded from every comparison | two correct runs legitimately disagree; the stable fact is `aiqe_commit_git_writes_observed` | `bench/README.md` only |
 | `time-to-value` | a first useful result in about five minutes | DESIGN_INTENT | none — family E is deferred | no fixture measures it, so no duration is published anywhere | README section title |
 

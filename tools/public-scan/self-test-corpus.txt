@@ -1,9 +1,17 @@
 # Positive control corpus for the public sanitisation scanner.
 #
-# Every pattern class in patterns.txt must match at least one line in this
-# file. self-test.sh asserts exactly that, so a class added without a control
-# fails the self-test, and a class that stops matching after being tightened
-# fails it too.
+# Every pattern class in patterns.txt must match the line in this file that
+# carries its name as a leading label. self-test.sh asserts exactly that, so a
+# class added without a control fails the self-test, a class that stops
+# matching after being tightened fails it too, and so does a class whose own
+# control was deleted while another class's control happened to keep it firing.
+#
+# The leading label is therefore load-bearing, not decoration: it is how a
+# control is attributed to the class it protects. `TRANSCRIPT_MARKER` is the
+# one class whose pattern is anchored to the start of the line and so cannot
+# carry a label; self-test.sh names that exception explicitly. Two
+# INTERNAL_HOSTNAME controls exercise an end-of-line boundary, so nothing may
+# be appended to them either.
 #
 # Every value here is a synthetic, non-functional placeholder. None is a real
 # credential, host, account or identifier.

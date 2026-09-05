@@ -5,9 +5,11 @@ specific about the few things that genuinely matter for this project.
 
 ## Before you start
 
-AIQE has no released artifact yet. One command is implemented — `aiqe doctor` — and
-everything else in the frozen surface is still specification. Useful contributions are
-to Doctor, to the benchmark fixtures, to the specification, and to the documentation.
+AIQE has no released artifact yet. The v1 workflow — `doctor`, `init`, `task`, `check`,
+`receipt` and `commit` — is implemented and tested, and the benchmark materialises four
+families over it: Doctor, task, check and commit. Useful contributions are to any of
+those commands, to the benchmark fixtures, to the specification, and to the
+documentation.
 
 The architecture and the benchmark protocol are **frozen**. That is deliberate: the
 product was specified before it was built so that the benchmark tests the design rather
@@ -37,9 +39,15 @@ The other checks CI runs:
 ```
 python3 bench/run-doctor-fixtures.py
 python3 bench/run-task-fixtures.py
+python3 bench/run-check-fixtures.py
+python3 bench/run-commit-fixtures.py
+python3 bench/render-assets.py
 ./tools/public-scan/self-test.sh
 ./tools/public-scan/public-scan.sh
 ```
+
+`render-assets.py` checks rather than writes: it fails if the captures or the README
+benchmark block have drifted from the retained result artifacts.
 
 Two cases are restricted to Linux: the arbitrary-byte path fixtures need a filesystem
 that accepts non-UTF-8 filenames, and APFS does not. They are reported as skipped

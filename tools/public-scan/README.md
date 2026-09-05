@@ -26,8 +26,16 @@ It runs in CI on every push and pull request, and must be run locally before any
 
 A gate that has never been shown to fail is not a gate. The self-test builds a temporary
 tree, scans a corpus of synthetic positive controls, and asserts that **every** declared
-pattern class fires. A class added without a control fails the self-test, and so does a
+pattern class fires **on its own control** — the corpus line carrying that class's name
+as a leading label. A class added without a control fails the self-test, and so does a
 class that was tightened until it no longer detects anything.
+
+Attributing each control to its class is what makes the assertion worth making. "The
+class produced a finding somewhere" is too weak: one control can satisfy two classes by
+accident, and then deleting one class's control leaves the gate green. `GIT_SHA_40` was
+exactly that — the `CRYPTO_WALLET_EVM` control is `0x` followed by forty hex characters,
+which is also a bare object id — so its control could be removed without failing
+anything. It cannot now.
 
 It then scans a second tree of benign content and asserts a clean result. That half
 records the strings that previously produced false positives, so that a later

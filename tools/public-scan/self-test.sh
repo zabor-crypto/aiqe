@@ -6,9 +6,13 @@
 # two things about the scanner, and it is the control that must accompany any
 # change to patterns.txt:
 #
-#   1. Every declared pattern class still matches its positive control.
-#      A class added without a control fails here. A class tightened until it
-#      no longer matches real private material fails here too.
+#   1. Every declared pattern class still matches *its own* positive control,
+#      identified by the leading label its corpus line carries. A class added
+#      without a control fails here. A class tightened until it no longer
+#      matches real private material fails here too. So does a class whose
+#      control has been deleted and which is now only firing on some other
+#      class's control - the failure mode that let `GIT_SHA_40` rest on the
+#      `CRYPTO_WALLET_EVM` line.
 #
 #   2. The known false positives stay negative. When a pattern is narrowed
 #      against a demonstrated false positive, the string that caused it is
@@ -52,6 +56,38 @@ if [ "$positive_status" -ne 1 ]; then
   failures=$((failures + 1))
 fi
 
+# A class must match *its own* control, not merely something in the corpus.
+#
+# "The class produced a finding" is too weak an assertion, because one control
+# line can satisfy two classes by accident. `GIT_SHA_40` was exactly that: the
+# `CRYPTO_WALLET_EVM` control is `0x` followed by forty hex characters, so it
+# also satisfied the bare-object-id class, and deleting `GIT_SHA_40`'s own
+# control left this self-test passing. A control that can be deleted without
+# failing the gate is not protecting anything.
+#
+# So each class is required to match a line the corpus *designates* as its
+# control. The designation is the leading label every corpus line carries.
+control_designation() {
+  # `TRANSCRIPT_MARKER` is anchored to the start of the line and therefore
+  # cannot carry a leading label - and it must not be given a trailing one,
+  # because two of the controls exist to exercise an end-of-line boundary.
+  # Its control is identified by the shape it is testing instead.
+  case "$1" in
+    TRANSCRIPT_MARKER) printf '^Human:[[:space:]]' ;;
+    *) printf '^%s[[:space:]]' "$1" ;;
+  esac
+}
+
+# The content of every line the scanner reported for one class, with grep's
+# `file:lineno:` prefix removed.
+matched_lines() {
+  printf '%s\n' "$positive_output" | awk -v want="FINDING [$1]" '
+    $0 == want { collecting = 1; next }
+    collecting && /^FINDING \[/ { collecting = 0 }
+    collecting && $0 ~ /^[[:space:]]+[^[:space:]]/ { print }
+  ' | sed -E 's/^[[:space:]]*[^:]*:[0-9]+://'
+}
+
 while IFS= read -r line; do
   case "$line" in
     ''|'#'*) continue ;;
@@ -63,6 +99,13 @@ while IFS= read -r line; do
     echo "      Either the class was tightened until it no longer detects"
     echo "      anything, or it was added without a control. Add one to"
     echo "      self-test-corpus.txt."
+    failures=$((failures + 1))
+  elif ! matched_lines "$class" | grep -qE "$(control_designation "$class")"; then
+    echo "FAIL: pattern class $class matched the corpus, but not its own"
+    echo "      control line. Either the control was removed - in which case"
+    echo "      the class is now resting on another class's control and is"
+    echo "      unprotected - or it was renamed away from its leading label."
+    echo "      Add or restore the $class line in self-test-corpus.txt."
     failures=$((failures + 1))
   fi
 done < "$patterns"

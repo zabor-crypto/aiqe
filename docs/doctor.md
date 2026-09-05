@@ -1,7 +1,7 @@
 # `aiqe doctor`
 
 First-contact repository diagnosis. It runs before `aiqe init`, needs no configuration,
-and is the only AIQE command that is implemented today.
+and is the one AIQE command that requires none: no task, no consent, and no local state.
 
 ```
 aiqe doctor
