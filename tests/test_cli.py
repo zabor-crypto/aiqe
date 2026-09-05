@@ -1,8 +1,12 @@
 """The command surface, and the exit status it produces.
 
-The surface is closed: `--version` and `doctor [--format json]`. Everything
-else is an invalid invocation, and an invalid invocation exits 3 - never 2,
-which means INCOMPLETE and belongs to commands that adjudicate completion.
+The surface is closed. Everything outside it is an invalid invocation, and an
+invalid invocation exits 3 - never 2, which means INCOMPLETE and belongs to
+commands that adjudicate completion.
+
+Asking for help is inside the surface, and it succeeds. A tool whose only
+answer to `--help` is a usage error on standard error is one every wrapper,
+package check and first-time reader has to be told about individually.
 """
 
 import io
@@ -35,6 +39,65 @@ class VersionTests(unittest.TestCase):
         status, _out, err = run(["--version", "extra"])
         self.assertEqual(status, exits.UNSUPPORTED)
         self.assertIn("takes no arguments", err)
+
+
+class HelpTests(unittest.TestCase):
+    """`--help`, `-h` and `help`: one text, on stdout, exit 0."""
+
+    SPELLINGS = ("--help", "-h", "help")
+
+    def test_every_spelling_succeeds(self):
+        for spelling in self.SPELLINGS:
+            status, out, err = run([spelling])
+            self.assertEqual(status, exits.OK, spelling)
+            self.assertEqual(err, "", spelling)
+            self.assertTrue(out.startswith("usage: aiqe"), spelling)
+
+    def test_every_spelling_prints_the_same_canonical_text(self):
+        """One text, so no two spellings can document different products."""
+        rendered = set()
+        for spelling in self.SPELLINGS:
+            _status, out, _err = run([spelling])
+            rendered.add(out)
+        self.assertEqual(len(rendered), 1)
+
+    def test_help_lists_the_whole_frozen_surface(self):
+        _status, out, _err = run(["--help"])
+        for command in ("--version", "doctor", "init", "task", "check",
+                        "commit", "receipt"):
+            self.assertIn(command, out)
+
+    def test_help_answers_without_reaching_a_repository(self):
+        """Help must work where every other command would refuse.
+
+        It is answered before the Git preflight, so an unsupported Git, a
+        missing Git or a directory that is not a repository does not stop the
+        one question that has to be answerable everywhere.
+        """
+        outside = tempfile.mkdtemp(prefix="aiqe-help-test-")
+        self.addCleanup(shutil.rmtree, outside, True)
+        status, out, err = run(["--help"], cwd=outside, env={"PATH": ""})
+        self.assertEqual(status, exits.OK, err)
+        self.assertTrue(out.startswith("usage: aiqe"))
+
+    def test_help_takes_no_arguments(self):
+        for spelling in self.SPELLINGS:
+            status, out, err = run([spelling, "extra"])
+            self.assertEqual(status, exits.UNSUPPORTED, spelling)
+            self.assertEqual(out, "", spelling)
+            self.assertIn("takes no arguments", err)
+
+    def test_an_unknown_command_still_fails(self):
+        """Help succeeding must not soften anything else.
+
+        `--halp` is not help, and a tool that answered it as though it were
+        would exit 0 on a typo in a script.
+        """
+        for argv in (["--halp"], ["helpme"], ["-H"], ["frobnicate"]):
+            status, out, err = run(argv)
+            self.assertEqual(status, exits.UNSUPPORTED, argv)
+            self.assertEqual(out, "", argv)
+            self.assertNotEqual(err, "")
 
 
 class InvalidInvocationTests(unittest.TestCase):

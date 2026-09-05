@@ -56,6 +56,37 @@ that is a tree or a link in the baseline commit — is refused, not reinterprete
 That is the fail-closed resolution the frozen task contract deferred to this
 operation.
 
+## A glob-shaped declaration that owns nothing
+
+`--own` takes literal paths. A caller who typed `--own 'src/strategy/**'` has
+declared one path with that name, it does not exist, and the files they meant are
+owned by nobody — so the arithmetic below is perfect and the answer is empty:
+nought changed owned paths, no classification, no contracts, exit `0`.
+
+`check` refuses that result rather than reporting it. When a declared value is
+glob-shaped (`*`, `?` or `[`), names no file in either the baseline commit or the
+worktree, and — read as a [surface pattern](config.md) — selects a changed
+repository path the task does not own, the outcome is:
+
+```
+OWNED_PATH_GLOB_AMBIGUITY -> INCOMPLETE, exit 2
+```
+
+and the previous evidence record is removed. That removal is load-bearing rather
+than tidy: the owned binding does not move when an *unowned* file changes, so a
+green record written before the change would still look current to `aiqe receipt`
+and would answer for it.
+
+The diagnostic names the declaration, one changed path that escaped it, and how
+many did. It does not expand anything — no matched path becomes owned, because
+claiming files the caller did not declare is the failure this command exists to
+refuse, not a convenience it can offer. The remedy is to declare each path.
+
+All three conditions are required, so the ordinary cases are untouched: an
+existing file called `notes[1].md` is a filename, and a metacharacter-bearing
+path declared before it is created stays legal until something it would have
+matched actually changes.
+
 ## A moved baseline
 
 The task records the commit it started from, and that stays the causal baseline. If

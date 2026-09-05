@@ -24,6 +24,8 @@ AIQE v1 is deterministic and contains no model calls.
 The v1 surface is closed. There are no other commands and no other flags.
 
 ```
+aiqe --help | -h | help
+
 aiqe --version
 
 aiqe doctor  [--format json]
@@ -310,7 +312,10 @@ the toolchain cannot deliver the invariant every command rests on.
 3   GIT_VERSION_UNKNOWN                the version could not be read
 ```
 
-`aiqe --version` is exempt: it reaches no repository.
+`aiqe --version` and the three help spellings are exempt: they reach no
+repository. Asking a tool how it is invoked is the one question it has to be
+able to answer on a machine where it would refuse to do anything else, so help
+is answered before the preflight and exits `0`.
 
 AIQE's configuration isolation works by pointing `GIT_CONFIG_SYSTEM` and
 `GIT_CONFIG_GLOBAL` at the null device. Both were introduced in Git 2.32. An

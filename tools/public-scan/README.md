@@ -83,7 +83,7 @@ positive recorded in `self-test.sh` and the class's positive control still firin
 legitimate file trips a pattern, the answer is a narrower pattern or a different file —
 not a broader exception.
 
-## Scanning an artifact, and the one recorded exception
+## Scanning an artifact, and the two recorded exceptions
 
 ```
 ./tools/public-scan/public-scan.sh                     the source tree
@@ -95,12 +95,14 @@ A source tree that scans clean says nothing about what a build backend swept int
 distribution, so the extracted artifacts are scanned as trees in their own right rather
 than assumed to inherit the source result.
 
-One class is deliberately not applied to one kind of file, and it is the only exception
-in the scanner:
+One class is deliberately not applied in two places, and they are the only exceptions in
+the scanner:
 
 ```
 GIT_SHA_40   not applied to a file whose content identifies it as the
              release-proof manifest
+GIT_SHA_40   not applied to a line that is nothing but a pinned action
+             reference: `- uses: owner/repo@<40 hex> # v1.2.3`
 ```
 
 The manifest's job is to record which commit an artifact was built from, so it
@@ -115,7 +117,24 @@ catch — an object id from *another* repository — so a stronger check replace
 is an object that exists in this repository; a foreign id fails that test. Every skipped
 match is reported as `JUSTIFIED` and counted in the summary, never silently dropped.
 
-A second exception would need the same treatment: a named reason, and a check stronger
+The second exception is the supply-chain control itself. Every `uses:` in the release
+workflow is pinned to a full commit id rather than to a mutable major tag, because a tag
+resolves to whatever it points at when the job runs — so the code producing release
+evidence could change with no change in this repository. Those pins are bare
+40-character object ids, and without an exception the scan would report the control as a
+leak.
+
+That exception is scoped to a *line shape*, not to a file, and the shape is anchored at
+both ends: the whole line must be a `uses:` pin and nothing else. A bare object id
+anywhere else in the same workflow is still a finding, which is what keeps the class
+doing its job. The stronger check that replaces it is
+`tests/test_workflow_pinning.py`, which asserts that every `uses:` in every workflow is
+pinned to a 40-character object id, carries a readable version comment, and names a
+first-party action owner from a short reviewed list — none of which `GIT_SHA_40` was
+checking. `tools/public-scan/self-test.sh` carries a pinned reference among its benign
+strings, so dropping the exception fails the self-test rather than passing quietly.
+
+A third exception would need the same treatment: a named reason, and a check stronger
 than the one being skipped.
 
 ## What it does not prove

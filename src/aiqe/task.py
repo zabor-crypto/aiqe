@@ -259,7 +259,9 @@ def start(cwd, owned, label=None, env=None):
     except taskstate.StateError as error:
         return TaskOutcome(error.code, 3, ["aiqe: " + error.message])
 
-    return TaskOutcome(TASK_STARTED, 0, _render(record, "started"), record)
+    lines = _render(record, "started")
+    lines.extend(_glob_shape_warning(owned_paths, repository.worktree))
+    return TaskOutcome(TASK_STARTED, 0, lines, record)
 
 
 def status(cwd, env=None):
@@ -472,6 +474,45 @@ def decode_owned_paths(record):
 
 
 # --- Rendering -------------------------------------------------------------
+
+
+def _glob_shape_warning(owned_paths, worktree):
+    """Warn at declaration time about a glob-shaped path that names no file.
+
+    This is a courtesy, not the control. The control is in `aiqe check`, which
+    refuses outright once such a declaration is demonstrably letting a changed
+    file escape ownership - a warning printed at the top of a session is not
+    something a later green result can be allowed to depend on anyone having
+    read.
+
+    Started as a warning rather than a refusal because the declaration may be
+    entirely correct: `notes[1].md` is a legal filename, and declaring a path
+    before creating it is the ordinary case.
+    """
+    shaped = [
+        path
+        for path in owned_paths
+        if scope_module.is_glob_shaped(path)
+        and not os.path.lexists(os.path.join(worktree, path))
+    ]
+    if not shaped:
+        return []
+
+    lines = ["", "  Note            these declared paths name no file yet and"]
+    lines.append("                  contain pattern characters:")
+    for path in shaped:
+        lines.append("      %s" % (display_bytes(path),))
+    lines.extend(
+        [
+            "",
+            "  `--own` takes literal paths and never expands one, so each is",
+            "  owned exactly as spelled. If you meant several files, declare",
+            "  each of them; `aiqe check` refuses rather than reporting a",
+            "  green result while a file this would have matched changes",
+            "  outside the owned pathset.",
+        ]
+    )
+    return lines
 
 
 def _render(record, state):

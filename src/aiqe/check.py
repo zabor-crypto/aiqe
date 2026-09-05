@@ -68,6 +68,7 @@ UNKNOWN_VALIDATOR_ID = "UNKNOWN_VALIDATOR_ID"
 REQUIRED_VALIDATOR_FAILED = "REQUIRED_VALIDATOR_FAILED"
 REQUIRED_VALIDATOR_UNKNOWN = "REQUIRED_VALIDATOR_UNKNOWN"
 REQUIRED_VALIDATOR_UNAVAILABLE = "REQUIRED_VALIDATOR_UNAVAILABLE"
+OWNED_PATH_GLOB_AMBIGUITY = pathstate.OWNED_PATH_GLOB_AMBIGUITY
 
 #: What the user is told before being asked to let a repository-declared
 #: command run as them. It is blunt because every word of it is true, and
@@ -192,6 +193,32 @@ def run(cwd, allow=(), env=None, prompt=None):
     except pathstate.PathStateError as error:
         return CheckOutcome(
             error.code, exits.UNSUPPORTED, ["aiqe: " + error.message]
+        )
+
+    try:
+        ambiguities = pathstate.glob_ambiguities(
+            repository.runner, repository.worktree, owned_states, baseline
+        )
+    except pathstate.PathStateError as error:
+        return CheckOutcome(
+            error.code, exits.UNSUPPORTED, ["aiqe: " + error.message]
+        )
+
+    if ambiguities:
+        # The previous record was written under this same declaration, and it
+        # cannot have accounted for what is escaping it now. Leaving it in
+        # place would let `aiqe receipt` answer from it: the owned binding
+        # does not move when an unowned file changes, so a stale green here
+        # would look current rather than look old.
+        try:
+            evidence_module.remove(state_directory)
+        except taskstate.StateError as error:
+            return _state_refusal(error)
+        return CheckOutcome(
+            OWNED_PATH_GLOB_AMBIGUITY,
+            exits.INCOMPLETE,
+            _render_glob_ambiguity(ambiguities),
+            document=_glob_ambiguity_document(ambiguities),
         )
 
     changed = [state.path for state in owned_states if state.changed]
@@ -415,6 +442,63 @@ def _drift(repository, config, owned_paths, baseline, definitions, before):
 
     after = evidence_module.Authority(head, digest, binding, definitions)
     return before.differences(after)
+
+
+def _render_glob_ambiguity(ambiguities):
+    """Say what was declared, what escaped it, and what to type instead.
+
+    The remedy is the whole point of the message. `--own` takes literal paths
+    and will keep taking literal paths, so the caller is not told to quote
+    something differently or to expect expansion - they are told to name the
+    files.
+    """
+    lines = [
+        "AIQE CHECK",
+        "",
+        "  An owned path was declared that names no file, and files it would",
+        "  have selected as a pattern have changed. `--own` takes literal",
+        "  paths - it never expands one - so those changes are owned by",
+        "  nobody, and a result computed from this declaration would report",
+        "  no obligations for them.",
+        "",
+    ]
+    for ambiguity in ambiguities:
+        lines.append("  Declared        %s" % (display_bytes(ambiguity.declared),))
+        lines.append("      names no file in the baseline commit or the worktree")
+        lines.append(
+            "      read as a pattern it selects %d changed unowned path%s, "
+            "including:"
+            % (ambiguity.total, "" if ambiguity.total == 1 else "s")
+        )
+        lines.append("        %s" % (display_bytes(ambiguity.example),))
+        lines.append("")
+    lines.extend(
+        [
+            "  Evidence        NOT CURRENT",
+            "  Completion      INCOMPLETE",
+            "  Reason          " + OWNED_PATH_GLOB_AMBIGUITY,
+            "",
+            "  Declare each path this task owns explicitly:",
+            "",
+            "      aiqe task end",
+            "      aiqe task start --own <path> --own <path> ...",
+            "",
+            "  AIQE will not decide on your behalf which files a pattern was",
+            "  meant to cover. Claiming them would be claiming ownership you",
+            "  did not declare.",
+        ]
+    )
+    return lines
+
+
+def _glob_ambiguity_document(ambiguities):
+    document = _incomplete_document(
+        (OWNED_PATH_GLOB_AMBIGUITY,), evidence="NOT_CURRENT"
+    )
+    document["owned_path_glob_ambiguity"] = [
+        ambiguity.as_record() for ambiguity in ambiguities
+    ]
+    return document
 
 
 def _render_drift(drift):

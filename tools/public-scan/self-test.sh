@@ -115,6 +115,14 @@ done < "$patterns"
 # Each entry is a string that a previous version of a pattern matched
 # incorrectly. They are written literally here because, by construction, they
 # are benign.
+#
+# The last entry is different in kind: it is not a narrowed pattern but the
+# recorded `GIT_SHA_40` exception for a pinned action reference, kept here so
+# that the exception is exercised rather than merely described. Its object id
+# is the same synthetic placeholder the positive corpus uses, so if the
+# exception were ever dropped this line would start being reported - which is
+# the regression worth catching. A *bare* id in a workflow is still a finding;
+# that narrowness is asserted in `tests/test_workflow_pinning.py`.
 
 negative="$workdir/negative"
 mkdir -p "$negative/tools/public-scan" || exit 2
@@ -127,6 +135,7 @@ Reading .claude/settings.json and .claude/settings.local.json is bounded.
 The relative path tools/public-scan/patterns.txt is not a hostname.
 The identifier receipt.LOCAL_REDACTION_POLICY is a dotted attribute reference.
 A local receipt names policy aiqe.receipt.local.v1 in its own output.
+      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567 # v4.0.0
 BENIGN
 
 negative_output=$("$negative/tools/public-scan/public-scan.sh" 2>&1)

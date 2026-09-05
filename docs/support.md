@@ -151,7 +151,8 @@ that the isolation behind it never happened.
 AIQE reads `git --version`; below 2.32, or when the version cannot be read at
 all, it refuses with exit `3` and reason `GIT_TOO_OLD_FOR_CONFIG_ISOLATION` or
 `GIT_VERSION_UNKNOWN`, naming the version it found and the floor it needs.
-`aiqe --version` still answers, because it reaches no repository.
+`aiqe --version` and `aiqe --help` still answer, because they reach no
+repository.
 
 Refusing on an *unreadable* version is deliberate: the alternative is assuming
 the best about an unknown toolchain, which is the shape of the defect this

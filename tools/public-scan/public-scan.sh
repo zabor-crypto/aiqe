@@ -96,7 +96,18 @@ justified=0
 # every 40-character object id in the manifest is an object that exists in
 # this repository. A foreign id fails that test.
 #
-# Nothing else is excepted. A second entry here needs the same treatment: a
+# The second exception is a pinned GitHub Actions reference. An action pinned
+# to a full commit id is the supply-chain control the release workflow is
+# required to carry, so the scan would otherwise punish exactly the thing it
+# wants. This exception is scoped to one class on one *line shape* rather than
+# to a file: the whole line must be a `uses:` pin and nothing else, so a bare
+# object id elsewhere in the same workflow is still a finding. The stronger
+# check that replaces it is `tests/test_workflow_pinning.py`, which asserts
+# that every `uses:` in every workflow is pinned to a 40-character object id,
+# carries a version comment, and names a canonical first-party action
+# repository - none of which the skipped class was checking.
+#
+# Nothing else is excepted. A third entry here needs the same treatment: a
 # named reason and a check that is stronger than the one being skipped.
 #: Files that identify themselves as the release-proof manifest. Recognised by
 #: content rather than by path, because the manifest is scanned both in place
@@ -110,12 +121,29 @@ for f in "${files[@]}"; do
   fi
 done
 
+#: A whole line that is nothing but a pinned action reference:
+#:
+#:     - uses: owner/repo@<40 hex> # v1.2.3
+#:
+#: Anchored at both ends on purpose. A line that merely *contains* a pin could
+#: carry a foreign object id alongside it, and that is the case this class
+#: exists for.
+action_pin_line='^[[:space:]]*-?[[:space:]]*uses:[[:space:]]+[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{40}([[:space:]]+#[[:space:]]*[^[:space:]].*)?$'
+
 justified_match() {
-  local class="$1" line="$2" file="${2%%:*}"
+  local class="$1" line="$2" file="${2%%:*}" rest content
   [ "$class" = "GIT_SHA_40" ] || return 1
+
   case $'\n'"$manifest_files" in
     *$'\n'"$file"$'\n'*) return 0 ;;
   esac
+
+  # `path:lineno:content` - drop the path, then the line number.
+  rest="${line#*:}"
+  content="${rest#*:}"
+  if printf '%s' "$content" | LC_ALL=C grep -qE -- "$action_pin_line"; then
+    return 0
+  fi
   return 1
 }
 

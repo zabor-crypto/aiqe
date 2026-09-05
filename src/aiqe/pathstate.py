@@ -63,6 +63,10 @@ OWNED_PATH_UNSUPPORTED_OBJECT = "OWNED_PATH_UNSUPPORTED_OBJECT"
 OWNED_PATH_UNREADABLE = "OWNED_PATH_UNREADABLE"
 BASELINE_UNREADABLE = "BASELINE_UNREADABLE"
 
+#: A glob-shaped owned declaration that names no file, while a changed file
+#: the glob would have selected lies outside the owned pathset.
+OWNED_PATH_GLOB_AMBIGUITY = "OWNED_PATH_GLOB_AMBIGUITY"
+
 
 class PathStateError(Exception):
     """An owned path whose current identity AIQE will not guess at."""
@@ -297,3 +301,179 @@ def foreign_staged_count(runner, owned_paths):
         return None
     owned = set(owned_paths)
     return sum(1 for name in result.nul_fields() if name not in owned)
+
+
+# --- Glob/literal ambiguity ------------------------------------------------
+
+
+class GlobAmbiguity(object):
+    """One glob-shaped declaration, and a changed path that escaped it.
+
+    `declared` is the owned value exactly as the task recorded it. `example`
+    is the lowest-sorted changed repository path the same value would have
+    selected had it been a pattern, and `total` is how many such paths were
+    found. One example is enough to show the caller what they lost; the count
+    tells them whether naming it is the whole fix.
+    """
+
+    __slots__ = ("declared", "example", "total")
+
+    def __init__(self, declared, example, total):
+        self.declared = declared
+        self.example = example
+        self.total = total
+
+    def as_record(self):
+        import base64
+
+        return {
+            "declared_b64": base64.b64encode(self.declared).decode("ascii"),
+            "example_b64": base64.b64encode(self.example).decode("ascii"),
+            "matched_changed_count": self.total,
+        }
+
+
+def glob_ambiguities(runner, worktree, owned_states, baseline_sha):
+    """Changed paths a glob-shaped owned declaration would have selected.
+
+    `--own` takes literal paths, and that is not changing. But a caller who
+    typed `--own 'src/strategy/**'` and got one absent literal path back has
+    declared ownership of nothing, and every file they meant is unowned. The
+    check that follows is then arithmetically correct and completely
+    misleading: zero changed owned paths, no obligations, and a green result.
+
+    So a declaration is refused when all three of these hold:
+
+      * it is glob-shaped - it contains `*`, `?` or `[`;
+      * it names no file - neither the baseline commit nor the worktree has
+        it, so it cannot be a filename that merely contains those bytes;
+      * read as a surface pattern it selects at least one repository path
+        that has changed and that the task does not own.
+
+    Any one of those failing means there is no false green to prevent. A real
+    file called `weird[1].csv` is a filename, and stays one. A glob-shaped
+    declaration for a file that does not exist yet is the ordinary
+    declare-before-create case, and stays one until something it would have
+    matched actually changes.
+
+    **Nothing is expanded.** No matched path becomes owned, and the owned
+    pathset is untouched. The only outcome is a refusal that names what was
+    missed, so the caller can declare those paths themselves.
+
+    Cost is paid only on the exceptional branch: with no glob-shaped absent
+    declaration this makes no Git calls at all.
+    """
+    from . import scope as scope_module
+
+    suspects = [
+        state.path
+        for state in owned_states
+        if state.state == PENDING_ABSENT
+        and scope_module.is_glob_shaped(state.path)
+    ]
+    if not suspects:
+        return ()
+
+    patterns = []
+    for declared in suspects:
+        pattern = _compile_or_none(declared)
+        if pattern is not None:
+            patterns.append((declared, pattern))
+    if not patterns:
+        # Glob-shaped but not a compilable pattern - `a**b`, an unterminated
+        # byte class. There is no reading of it under which it selects a set,
+        # so there is no ambiguity to report.
+        return ()
+
+    owned = set(state.path for state in owned_states)
+    candidates, baseline = _candidate_paths(runner, baseline_sha)
+
+    ambiguities = []
+    for declared, pattern in patterns:
+        matched = []
+        for path in candidates:
+            if path in owned or not pattern.matches(path):
+                continue
+            if _is_changed(runner, worktree, path, baseline.get(path)):
+                matched.append(path)
+        if matched:
+            ambiguities.append(GlobAmbiguity(declared, matched[0], len(matched)))
+    return tuple(ambiguities)
+
+
+def _compile_or_none(declared):
+    from . import patterns as patterns_module
+
+    try:
+        return patterns_module.compile_pattern(declared)
+    except patterns_module.PatternError:
+        return None
+
+
+def _candidate_paths(runner, baseline_sha):
+    """Every path a pattern could select, and the baseline entries for them.
+
+    Two sources, and neither reads file content through Git:
+
+      * `ls-tree -r` lists the baseline commit's blobs out of the object
+        database;
+      * `ls-files --others --exclude-standard` lists untracked worktree files
+        by name.
+
+    Names only. The changed/unchanged decision stays where this module already
+    makes it - AIQE's own byte comparison - so a check-in filter is no more
+    reachable from here than from anywhere else in this file.
+
+    Returns (sorted candidate paths, {path: baseline entry}). Sorting is by raw
+    bytes so the reported example does not depend on Git's output order.
+    """
+    baseline = {}
+    result = runner.run("ls-tree", "-r", "-z", "--full-tree", baseline_sha)
+    if not result.ok:
+        raise PathStateError(
+            BASELINE_UNREADABLE,
+            "the task's baseline commit could not be listed while resolving a "
+            "glob-shaped owned declaration.",
+        )
+    for field in result.nul_fields():
+        entry = _parse_tree_entry(field)
+        if entry is not None:
+            baseline[entry["path"]] = entry
+
+    candidates = set(baseline)
+    # `--full-name` and the `:(top)` pathspec are both required, and for two
+    # different reasons. The runner is rooted at the *invocation* directory,
+    # not the worktree root, and a bare `ls-files --others` there would report
+    # paths relative to that subdirectory *and* look only inside it - so a
+    # check run from `src/` would compare `strategy/a.py` against a pattern
+    # written from the repository root, and would never see an untracked file
+    # anywhere else. `ls-tree --full-tree` above is already root-relative.
+    untracked = runner.run(
+        "ls-files",
+        "-z",
+        "--others",
+        "--exclude-standard",
+        "--full-name",
+        "--",
+        ":(top)",
+    )
+    if untracked.ok:
+        candidates.update(untracked.nul_fields())
+    return sorted(candidates), baseline
+
+
+def _is_changed(runner, worktree, path, baseline_entry):
+    """Is this candidate part of the current change?
+
+    A candidate whose identity cannot be resolved is reported as unchanged,
+    which is safe here and would not be safe for a declared path. The states
+    that raise are the ones where the path is not a regular file, and AIQE v1
+    cannot own one of those under any spelling - so naming it explicitly would
+    not have produced a different result, and there is no false green being
+    concealed.
+    """
+    try:
+        state = _resolve_one(runner, worktree, path, baseline_entry)
+    except PathStateError:
+        return False
+    return state.changed

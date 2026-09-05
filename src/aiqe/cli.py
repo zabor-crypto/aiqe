@@ -2,6 +2,7 @@
 
 This build implements exactly the surface below:
 
+    aiqe --help | -h | help
     aiqe --version
     aiqe doctor  [--format json]
     aiqe init    [--print] [--yes]
@@ -49,7 +50,8 @@ from . import report as report_module
 from .doctor import inspect
 from .gitq import GitRunner, parse_version
 
-USAGE = """usage: aiqe --version
+USAGE = """usage: aiqe --help | -h | help
+       aiqe --version
        aiqe doctor  [--format json]
        aiqe init    [--print] [--yes]
        aiqe task    start --own <path>... [--label <text>]
@@ -68,6 +70,18 @@ def main(argv, stdout, stderr, cwd, env=None, prompt=None):
     """Run one AIQE invocation. Returns the process exit status."""
     if not argv:
         return _usage(stderr, "no command given")
+
+    if argv[0] in ("--help", "-h", "help"):
+        # Answered before the Git preflight below, and before anything reaches
+        # a repository. Asking a tool how to invoke it is the one question it
+        # must be able to answer on a machine where it would refuse to do
+        # anything else, and an exit status is part of the answer: a help
+        # request that succeeded exits 0. Every spelling prints the same
+        # canonical text, so no two of them can drift apart.
+        if len(argv) > 1:
+            return _usage(stderr, "%s takes no arguments" % (argv[0],))
+        stdout.write(USAGE + "\n")
+        return exits.OK
 
     if argv[0] == "--version":
         if len(argv) > 1:

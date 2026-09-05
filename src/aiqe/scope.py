@@ -71,6 +71,29 @@ OWNED_PATH_NOT_REGULAR = "OWNED_PATH_NOT_REGULAR"
 DUPLICATE_OWNED_PATH = "DUPLICATE_OWNED_PATH"
 
 
+#: The bytes that make a declared value look like a surface pattern rather
+#: than a filename. They are exactly the metacharacters of the surface pattern
+#: grammar in `patterns.py`, because the question this supports is "would a
+#: reader have expected this to behave like a surface pattern".
+GLOB_METACHARACTERS = (b"*", b"?", b"[")
+
+
+def is_glob_shaped(path):
+    """Does this declared path *look* like a pattern?
+
+    This decides nothing about ownership. Ownership stays exactly literal:
+    `owns` is still raw-byte equality, and nothing here expands anything.
+    What this answers is the narrower question that a fail-closed ambiguity
+    check needs - whether a caller who typed this value could plausibly have
+    believed it selected more than one file.
+
+    Shape is not intent, so a positive answer is never acted on by itself. A
+    declaration whose value exists as a real path is a filename that happens
+    to contain these bytes, and it is treated as one.
+    """
+    return any(character in path for character in GLOB_METACHARACTERS)
+
+
 def canonicalise(raw, cwd_components):
     """Turn one declared path into canonical repository-relative bytes.
 

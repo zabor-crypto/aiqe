@@ -134,14 +134,14 @@ jobs:
     env:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ matrix.python }}
       - name: Report toolchain
@@ -152,7 +152,7 @@ jobs:
         run: |
           python bench/run-suite.py \
             --output "${RUNNER_TEMP}/surface.json" --verbose
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: surface-suite-${{ matrix.os }}-py${{ matrix.python }}
           path: ${{ runner.temp }}/surface.json
@@ -189,14 +189,14 @@ jobs:
     env:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ matrix.python }}
       - name: Report toolchain
@@ -207,7 +207,7 @@ jobs:
         run: |
           python bench/run-suite.py \
             --output "${RUNNER_TEMP}/surface.json" --verbose
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: surface-suite-${{ matrix.os }}-py${{ matrix.python }}
           path: ${{ runner.temp }}/surface.json
@@ -253,14 +253,14 @@ jobs:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
       AIQE_CONTAINER_IMAGE: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         if: matrix.container == ''
         with:
           python-version: ${{ matrix.python }}
@@ -341,7 +341,7 @@ jobs:
       # no suite record, because on that Git AIQE refuses to run - and
       # `if-no-files-found: error` treats a named path that matches nothing as
       # a failure even when the other one matched.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: surface-extra-${{ matrix.label }}
           path: ${{ runner.temp }}/surface-*.json
@@ -377,14 +377,14 @@ jobs:
     env:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ matrix.python }}
       - name: Report toolchain
@@ -400,7 +400,7 @@ jobs:
       # `surfaces` uploads: this job writes the artifact record and no suite
       # record, and `if-no-files-found: error` still catches a job that wrote
       # neither.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: surface-extra-${{ matrix.label }}
           path: ${{ runner.temp }}/surface-*.json
@@ -411,14 +411,14 @@ jobs:
     name: linux arbitrary-byte paths (must not skip)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.14"
       - name: Confirm the filesystem accepts a non-UTF-8 filename
@@ -455,14 +455,14 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.14"
       - name: Run the Doctor benchmark family
@@ -499,14 +499,14 @@ jobs:
         os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.14"
       - name: Run the Doctor benchmark family
@@ -548,14 +548,14 @@ jobs:
     env:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ matrix.python }}
       - name: Report toolchain
@@ -570,7 +570,7 @@ jobs:
       - name: Show the surface record
         if: always()
         run: cat "${RUNNER_TEMP}/surface.json"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: surface-artifact-${{ matrix.os }}-py${{ matrix.python }}
           path: ${{ runner.temp }}/surface.json
@@ -598,14 +598,14 @@ jobs:
     env:
       AIQE_RUNNER_LABEL: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ matrix.python }}
       - name: Report toolchain
@@ -620,7 +620,7 @@ jobs:
       - name: Show the surface record
         if: always()
         run: cat "${RUNNER_TEMP}/surface.json"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: surface-artifact-${{ matrix.os }}-py${{ matrix.python }}
           path: ${{ runner.temp }}/surface.json
@@ -630,7 +630,7 @@ jobs:
     name: public sanitisation scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
@@ -646,7 +646,7 @@ jobs:
     name: markdown link check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
@@ -712,17 +712,17 @@ jobs:
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Full history. The retained manifest names the commit an
           # artifact was built from, and the test that keeps a foreign
           # object id out of it has to be able to look that commit up.
           # A shallow clone makes every id look foreign.
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.14"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           path: ${{ runner.temp }}/surfaces
           pattern: surface-*
@@ -753,7 +753,7 @@ jobs:
       # The lane is in the artifact's name because the Actions UI shows the
       # name and not the JSON, and a fast-lane manifest must never be picked
       # up months later as though it were release evidence.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-proof-manifest-${{ needs.lane.outputs.full == 'true' && 'full' || 'fast' }}
           path: ${{ runner.temp }}/release-proof.json

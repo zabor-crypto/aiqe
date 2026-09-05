@@ -64,6 +64,38 @@ benchmark's `NC_TASK_PATHSPEC_EXPANSION` control shows the alternative: in a
 repository containing a file legally named `*`, pathspec handling turns one
 declaration into ownership of every tracked file.
 
+**A glob-shaped declaration that names no file is refused by `aiqe check`.**
+Literal is right, and it is also surprising: `--own 'src/strategy/**'` declares
+one path called `src/strategy/**`, that path does not exist, and every file the
+caller meant is unowned. The check that follows is then correct and useless —
+nought changed owned paths, no obligations, exit 0 — and indistinguishable from
+a task that genuinely had nothing to report.
+
+So `aiqe check` refuses when all three of these hold:
+
+* the declared value contains `*`, `?` or `[`;
+* it names no file, in the baseline commit or the worktree;
+* read as a [surface pattern](config.md) it selects at least one repository
+  path that has changed and that the task does not own.
+
+The reason code is `OWNED_PATH_GLOB_AMBIGUITY`, the completion state is
+`INCOMPLETE`, and the exit status is `2`. `aiqe task start` prints a note about
+a glob-shaped absent declaration when it records one, but the note is a
+courtesy — the refusal is the control, because a green result must never depend
+on somebody having read a warning.
+
+Nothing is expanded by this. No matched path becomes owned, the declared
+pathset is untouched, and the remedy is to name each path:
+
+```
+aiqe task start --own src/strategy/alpha.py --own src/strategy/beta.py
+```
+
+A real file whose name contains those bytes is unaffected: `notes[1].md` exists,
+so it is a filename, and it is owned exactly as spelled. So is a
+metacharacter-bearing path declared before it is created — until something it
+would have matched actually changes, there is no green result being bought.
+
 **A declaration is not an observation.** An owned path need not exist:
 
 ```

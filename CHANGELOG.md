@@ -12,6 +12,15 @@ makes the change, not at release time.
 
 ### Added
 
+- **`aiqe --help`, `aiqe -h` and `aiqe help`.** All three print the canonical usage
+  text on standard output and exit `0`. The surface previously had no help spelling at
+  all: `--help` fell through to the unknown-argument path, printing usage to standard
+  error and exiting `3`, so the conventional way to ask a tool how to run it looked
+  like a failure to every wrapper, packaging check and first-time reader. Help is
+  answered before the Git preflight, so it works where every other command would
+  refuse. Unknown commands still exit `3`, and no CLI framework or dependency was
+  added.
+
 - **[`docs/claims.md`](docs/claims.md), the launch-claims inventory.** Every externally
   visible factual claim, classified `PROVEN` / `OBSERVED` / `NOT_PROVEN` /
   `DESIGN_INTENT` / `OUT_OF_SCOPE` against the retained artifact it rests on, with its
@@ -33,6 +42,51 @@ makes the change, not at release time.
 
 ### Fixed
 
+- **A glob-shaped `--own` value could buy a green check.** `aiqe task start --own
+  'src/strategy/**'` records one literal path with that name — which is the documented
+  behaviour and is not changing — but that path does not exist, so every file the
+  caller meant was unowned. Modifying `src/strategy/model.py` then produced `1 declared
+  / 0 changed`, `REVIEWABLE_CANDIDATE` and exit `0`, while declaring the same file
+  literally correctly produced a quant `COVERAGE_GAP` and exit `2`. A result that
+  reports no obligations because it was asked about nothing is indistinguishable from
+  one that had nothing to report, which makes it worse than a failure.
+
+  `aiqe check` now refuses when a declared value contains `*`, `?` or `[`, names no
+  file in the baseline commit or the worktree, and — read as a surface pattern —
+  selects a changed repository path the task does not own: reason
+  `OWNED_PATH_GLOB_AMBIGUITY`, completion `INCOMPLETE`, exit `2`. Any previous evidence
+  record is removed, because the owned binding does not move when an unowned file
+  changes and a stale green would otherwise still answer `aiqe receipt`. `aiqe task
+  start` also notes a glob-shaped absent declaration, but the note is a courtesy: a
+  green result must not depend on somebody having read a warning.
+
+  Ownership stays exactly literal. Nothing is expanded, no matched path becomes owned,
+  and a real file named `notes[1].md` is still a filename. Declaring a
+  metacharacter-bearing path before creating it also still works, until something it
+  would have matched actually changes.
+- **Every action in the release workflow was pinned to a mutable major tag.**
+  `actions/checkout@v4`, `actions/setup-python@v5`, `actions/upload-artifact@v4` and
+  `actions/download-artifact@v4` all resolve to whatever their major tag points at
+  today, so the code running in the workflow that produces release evidence could
+  change without any change to this repository. Each is now pinned to a full-length
+  commit SHA resolved from its canonical upstream repository, with the released version
+  retained as a comment. No workflow semantics, permissions or actions changed.
+
+  A pin is a bare 40-character object id, so `tools/public-scan/public-scan.sh` would
+  have reported the control as a leak. Its `GIT_SHA_40` class now has a second recorded
+  exception, scoped to a line that is nothing but a `uses:` pin and anchored at both
+  ends — a bare id anywhere else in the same workflow is still a finding. The stronger
+  check that replaces it is the new `tests/test_workflow_pinning.py`: every `uses:` in
+  every workflow must be pinned to a full object id, carry a version comment, and name
+  a first-party owner from a short reviewed list. The scanner self-test carries a
+  pinned reference among its benign strings, so dropping the exception fails the
+  self-test rather than passing quietly.
+- **`SECURITY.md` said private vulnerability reporting would be enabled before the
+  repository became public.** It cannot be: private vulnerability reporting is a
+  public-repository feature, so it is not available while this repository is private.
+  The policy now states that it is enabled and verified as part of making the
+  repository public — not beforehand — and that there is no private reporting channel
+  until then.
 - **The support gate reported no unexercised Git range when there was one.** It took the
   lowest exercised version overall, which is Git 2.30.2 — a surface exercised only to
   prove AIQE *refuses* on it. A refusal cannot close a support gap, so the gate now

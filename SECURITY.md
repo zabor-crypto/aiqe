@@ -21,7 +21,13 @@ Pre-1.0 releases carry no backport commitment.
 **Do not open a public issue for a security vulnerability.**
 
 Use GitHub's private vulnerability reporting on this repository (Security → Report a
-vulnerability). It will be enabled before the repository becomes public.
+vulnerability). Private vulnerability reporting is a public-repository feature, so it
+cannot be turned on while this repository is private: it is enabled and verified as
+part of making the repository public, not beforehand, and promotion does not continue
+until that has been confirmed on the public repository itself.
+
+Until then there is no private reporting channel on this repository, and the paragraph
+above describes where to report once there is.
 
 Please include what you observed, the steps to reproduce it, the platform and Git
 version, and what you believe the impact is. A proof-of-concept against a synthetic
