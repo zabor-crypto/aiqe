@@ -413,12 +413,21 @@ def _compile_or_none(declared):
 def _candidate_paths(runner, baseline_sha):
     """Every path a pattern could select, and the baseline entries for them.
 
-    Two sources, and neither reads file content through Git:
+    Three sources, and none of them reads file content through Git:
 
       * `ls-tree -r` lists the baseline commit's blobs out of the object
         database;
-      * `ls-files --others --exclude-standard` lists untracked worktree files
-        by name.
+      * `ls-files --cached` lists what the index holds;
+      * `ls-files --others --exclude-standard` lists untracked worktree files.
+
+    The index is not an optional third source. A file that has been created
+    and `git add`-ed is in neither of the other two - it is absent from the
+    baseline tree and it is no longer *other* - so a pathset built from those
+    alone silently omits exactly the file a caller has just staged, and the
+    ambiguity this function exists to find goes unfound. Both `ls-files`
+    selectors are asked for in one invocation, and the union is taken as a
+    set: a path is itself in every source, so de-duplication is by raw bytes
+    and changes no path's identity.
 
     Names only. The changed/unchanged decision stays where this module already
     makes it - AIQE's own byte comparison - so a check-in filter is no more
@@ -443,22 +452,25 @@ def _candidate_paths(runner, baseline_sha):
     candidates = set(baseline)
     # `--full-name` and the `:(top)` pathspec are both required, and for two
     # different reasons. The runner is rooted at the *invocation* directory,
-    # not the worktree root, and a bare `ls-files --others` there would report
-    # paths relative to that subdirectory *and* look only inside it - so a
-    # check run from `src/` would compare `strategy/a.py` against a pattern
-    # written from the repository root, and would never see an untracked file
-    # anywhere else. `ls-tree --full-tree` above is already root-relative.
-    untracked = runner.run(
+    # not the worktree root, and a bare `ls-files` there would report paths
+    # relative to that subdirectory *and* look only inside it - so a check run
+    # from `src/` would compare `strategy/a.py` against a pattern written from
+    # the repository root, and would never see a file anywhere else. Both are
+    # therefore correctness requirements, not tidiness: without them the
+    # answer depends on which directory the command was typed in.
+    # `ls-tree --full-tree` above is already root-relative.
+    listed = runner.run(
         "ls-files",
         "-z",
+        "--cached",
         "--others",
         "--exclude-standard",
         "--full-name",
         "--",
         ":(top)",
     )
-    if untracked.ok:
-        candidates.update(untracked.nul_fields())
+    if listed.ok:
+        candidates.update(listed.nul_fields())
     return sorted(candidates), baseline
 
 

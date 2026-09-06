@@ -76,7 +76,9 @@ So `aiqe check` refuses when all three of these hold:
 * the declared value contains `*`, `?` or `[`;
 * it names no file, in the baseline commit or the worktree;
 * read as a [surface pattern](config.md) it selects at least one repository
-  path that has changed and that the task does not own.
+  path that has changed and that the task does not own — searched across the
+  baseline commit, the index and the untracked files, so a path that has been
+  created and staged counts.
 
 The reason code is `OWNED_PATH_GLOB_AMBIGUITY`, the completion state is
 `INCOMPLETE`, and the exit status is `2`. `aiqe task start` prints a note about

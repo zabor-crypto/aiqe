@@ -42,6 +42,42 @@ makes the change, not at release time.
 
 ### Fixed
 
+- **A staged file escaped the glob-ambiguity refusal entirely.** The candidate pathset
+  was the baseline commit's paths union the untracked ones, and a file that has been
+  created and `git add`-ed is in neither: it is absent from the baseline tree, and
+  staging stops it being untracked. So the whole refusal was bypassed by the most
+  ordinary next action after creating a file — `aiqe check` returned `1 declared /
+  0 changed`, `REVIEWABLE_CANDIDATE` and exit `0` with the staged file sitting unowned.
+  The index is now a third candidate source, read by name only in the same `ls-files`
+  invocation, and the union is taken by raw bytes so no path's identity changes.
+- **`aiqe receipt` reported stale evidence as `CURRENT` after a matching path
+  appeared.** With a glob-shaped declaration, a green check recorded while the
+  declaration named nothing stayed authoritative: the owned binding is a digest over
+  the *declared* paths, the declared path is still absent, so none of the four
+  freshness comparisons moved while the file that should have been in scope appeared
+  beside it. A receipt asked without an intervening `aiqe check` answered `Owned scope
+  CHECKED / Checked content CHECKED / Evidence CURRENT`.
+
+  Receipt now runs the same detector `aiqe check` runs, on the same inputs, and reports
+  `OWNED_PATH_GLOB_AMBIGUITY` with evidence that is not `CURRENT`. It remains read-only:
+  no validator runs, no stored evidence is rewritten or removed, and no path becomes
+  owned. Unrelated foreign staged or untracked changes still leave a receipt `CURRENT`,
+  and `STALE_OWNED_CONTENT` and `STALE_HEAD` behave exactly as before.
+- **The action-pin checks tested shape, not identity.** A 40-character object id was
+  accepted from any first-party action, so `actions/checkout@<any 40 hex>` passed — a
+  typo, a commit from a fork, or an id an attacker chose — which is most of what
+  pinning exists to prevent. `tests/test_workflow_pinning.py` now holds the four
+  reviewed owner/action/object-id/version tuples and requires every `uses:` to match one
+  exactly, with negative controls for a random id, a real id belonging to a different
+  approved action, a wrong or missing version comment, an unreviewed first-party action,
+  a third-party action and a mutable major tag. The check is offline; the identities
+  were established by review, not by a lookup at validation time.
+- **The scanner's action-pin exception applied in any file.** It was scoped to a line
+  shape alone, so a foreign object id could reach public content from a document, a
+  source file or a test by being written as an action reference. It now requires a
+  workflow path *and* the pin line shape, and `self-test.sh` builds an action-shaped
+  line in `docs/`, one in a source file, and a bare object id inside a workflow, and
+  requires the scanner to report all three.
 - **A glob-shaped `--own` value could buy a green check.** `aiqe task start --own
   'src/strategy/**'` records one literal path with that name — which is the documented
   behaviour and is not changing — but that path does not exist, so every file the

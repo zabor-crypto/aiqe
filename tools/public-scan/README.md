@@ -102,7 +102,8 @@ the scanner:
 GIT_SHA_40   not applied to a file whose content identifies it as the
              release-proof manifest
 GIT_SHA_40   not applied to a line that is nothing but a pinned action
-             reference: `- uses: owner/repo@<40 hex> # v1.2.3`
+             reference — `- uses: owner/repo@<40 hex> # v1.2.3` — and only
+             inside `.github/workflows/<name>.yml` or `.yaml`
 ```
 
 The manifest's job is to record which commit an artifact was built from, so it
@@ -124,15 +125,28 @@ evidence could change with no change in this repository. Those pins are bare
 40-character object ids, and without an exception the scan would report the control as a
 leak.
 
-That exception is scoped to a *line shape*, not to a file, and the shape is anchored at
-both ends: the whole line must be a `uses:` pin and nothing else. A bare object id
-anywhere else in the same workflow is still a finding, which is what keeps the class
-doing its job. The stronger check that replaces it is
-`tests/test_workflow_pinning.py`, which asserts that every `uses:` in every workflow is
-pinned to a 40-character object id, carries a readable version comment, and names a
-first-party action owner from a short reviewed list — none of which `GIT_SHA_40` was
-checking. `tools/public-scan/self-test.sh` carries a pinned reference among its benign
-strings, so dropping the exception fails the self-test rather than passing quietly.
+That exception is scoped by two independent conditions, and both are required. The file
+must be a workflow, and the line must be a `uses:` pin anchored at both ends — the whole
+line, nothing else. Neither half is sufficient. Shape alone would let a foreign object
+id through anywhere in the tree by dressing it up as an action reference in a document,
+a source file or a test; path alone would let a bare object id through anywhere in a
+workflow. `self-test.sh` builds all three of those cases and requires the scanner to
+report them, so relaxing either half fails the self-test rather than passing quietly.
+
+The stronger check that replaces the skipped class is `tests/test_workflow_pinning.py`,
+and it checks identity rather than shape. It holds the four reviewed
+owner/action/object-id/version tuples and requires every `uses:` to match one of them
+exactly. Shape checking would accept `actions/checkout@<any 40 hex>` — a typo, a commit
+from a fork, an id an attacker chose — which is most of what pinning exists to prevent.
+The reviewed identities were resolved from the canonical upstream repositories; that is
+a review step taken when a pin changes, not a network call made at validation time, so
+the check is offline and deterministic.
+
+The two controls answer different questions and both are needed. The scanner asks
+whether a bare object id is reaching public content, and a syntactically correct pin
+answers that whatever id it carries. The pin validator asks whether the identity is the
+reviewed one, which the scanner has no way to ask. A wrong id therefore passes the
+scanner and still fails the gate.
 
 A third exception would need the same treatment: a named reason, and a check stronger
 than the one being skipped.

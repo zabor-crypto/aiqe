@@ -114,6 +114,11 @@ CONFIG_ABSENT = "CONFIG_ABSENT"
 NO_ACTIVE_TASK = "NO_ACTIVE_TASK"
 OWNED_PATH_UNRESOLVED = "OWNED_PATH_UNRESOLVED"
 
+#: The same code `aiqe check` refuses with, and deliberately the same string.
+#: A receipt that invented a second name for one condition would make the two
+#: surfaces look like they disagreed about it.
+OWNED_PATH_GLOB_AMBIGUITY = pathstate.OWNED_PATH_GLOB_AMBIGUITY
+
 RECEIPT_PRODUCED = "RECEIPT_PRODUCED"
 RECEIPT_REFUSED = "RECEIPT_REFUSED"
 
@@ -189,6 +194,26 @@ def run(cwd, local=False, env=None):
             ],
         )
 
+    try:
+        # The same detector `aiqe check` runs, on the same inputs. Receipt
+        # asks the question again rather than trusting the stored answer,
+        # because the whole point here is that the repository moved since
+        # that answer was written. It reads and nothing else: no validator
+        # runs, no evidence is rewritten, and no path becomes owned.
+        ambiguities = pathstate.glob_ambiguities(
+            repository.runner, repository.worktree, owned_states, baseline
+        )
+    except pathstate.PathStateError:
+        return _refusal(
+            OWNED_PATH_UNRESOLVED,
+            exits.UNSUPPORTED,
+            [
+                "aiqe: the task's baseline could not be read, so the owned "
+                "declarations cannot be resolved against it.",
+                "Run `aiqe check` for the detail, which names it locally.",
+            ],
+        )
+
     config = None
     config_digest = None
     if config_module.present(repository.worktree):
@@ -258,7 +283,9 @@ def run(cwd, local=False, env=None):
         definitions,
     )
 
-    state = _assess(record, stored, current, config, committed, repository)
+    state = _assess(
+        record, stored, current, config, committed, repository, ambiguities
+    )
     document = _document(
         __version__, record, stored, committed, owned_states, state, local
     )
@@ -273,7 +300,8 @@ def _refusal(code, exit_code, lines):
 # --- Adjudication ----------------------------------------------------------
 
 
-def _assess(record, stored, current, config, committed, repository):
+def _assess(record, stored, current, config, committed, repository,
+            ambiguities=()):
     """Decide the receipt's verdict from evidence and current authority.
 
     Once a completion commit exists the freshness question changes shape. The
@@ -283,6 +311,15 @@ def _assess(record, stored, current, config, committed, repository):
     reach. What is asked instead is the question that is actually load-bearing
     after a commit: is the repository still on the commit AIQE created?
     """
+    if ambiguities:
+        # Checked before anything else, and before the post-commit branch,
+        # because it is the one condition under which every other answer this
+        # function could give would be a confident one about the wrong
+        # pathset. The stored evidence is not wrong about what it measured -
+        # it is no longer a statement about this repository, which is exactly
+        # what STALE means here and everywhere else in this file.
+        return _assess_glob_ambiguity(stored, committed)
+
     if committed is not None:
         return _assess_post_commit(committed, repository)
 
@@ -368,6 +405,53 @@ def _assess(record, stored, current, config, committed, repository):
         "exit_code": exits.INCOMPLETE,
         "reasons": recorded_reasons or (EVIDENCE_NONE,),
         "staleness": (),
+    }
+
+
+def _assess_glob_ambiguity(stored, committed):
+    """A glob-shaped declaration that a changed path has since escaped.
+
+    Nothing new is invented to say this. `STALE` already means "AIQE measured
+    this, and the repository has moved since", and that is precisely the
+    situation: a green record was written while the declaration named nothing,
+    and a path it would have selected has appeared. The owned binding does not
+    move when an *unowned* file changes, so the ordinary staleness comparison
+    cannot see it, and without this branch the receipt would keep reporting
+    `CURRENT` until somebody happened to run `aiqe check` again.
+
+    The reason code is `aiqe check`'s own, so the two surfaces name one
+    condition once.
+    """
+    reasons = (OWNED_PATH_GLOB_AMBIGUITY,)
+
+    if stored is None and committed is None:
+        # Nothing was claimed, so nothing has to be withdrawn. The ambiguity
+        # is still reported: it is the reason a check has not produced
+        # evidence, and the user is about to ask why.
+        return {
+            "owned_scope": DECLARED,
+            "foreign_staged": OBSERVED,
+            "checked_content": NONE,
+            "commit": NONE,
+            "push": NOT_PERFORMED_BY_AIQE,
+            "evidence": NONE,
+            "verdict": INCOMPLETE,
+            "exit_code": exits.INCOMPLETE,
+            "reasons": (EVIDENCE_NONE,) + reasons,
+            "staleness": (),
+        }
+
+    return {
+        "owned_scope": CHECKED,
+        "foreign_staged": OBSERVED if committed is None else UNKNOWN,
+        "checked_content": CHECKED,
+        "commit": CREATED if committed is not None else NONE,
+        "push": NOT_PERFORMED_BY_AIQE,
+        "evidence": STALE,
+        "verdict": INCOMPLETE,
+        "exit_code": exits.INCOMPLETE,
+        "reasons": reasons,
+        "staleness": reasons,
     }
 
 

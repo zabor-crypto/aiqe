@@ -116,16 +116,21 @@ done < "$patterns"
 # incorrectly. They are written literally here because, by construction, they
 # are benign.
 #
-# The last entry is different in kind: it is not a narrowed pattern but the
-# recorded `GIT_SHA_40` exception for a pinned action reference, kept here so
-# that the exception is exercised rather than merely described. Its object id
-# is the same synthetic placeholder the positive corpus uses, so if the
-# exception were ever dropped this line would start being reported - which is
-# the regression worth catching. A *bare* id in a workflow is still a finding;
-# that narrowness is asserted in `tests/test_workflow_pinning.py`.
+# The pinned action reference is different in kind: it is not a narrowed
+# pattern but the recorded `GIT_SHA_40` exception, exercised here rather than
+# merely described. It is written into a real workflow path, because the
+# exception requires a workflow path *and* the pin line shape - section 3
+# below is what proves the file half is doing work.
+#
+# The object id is assembled from two halves at runtime. Written out as one
+# 40-character literal it would make this script itself a `GIT_SHA_40`
+# finding, which is the scanner working correctly on a file that is not a
+# workflow - so the fixture is built rather than pasted.
+pin_sha="0123456789abcdef0123""456789abcdef01234567"
+pin_line="      - uses: actions/checkout@${pin_sha} # v4.0.0"
 
 negative="$workdir/negative"
-mkdir -p "$negative/tools/public-scan" || exit 2
+mkdir -p "$negative/tools/public-scan" "$negative/.github/workflows" || exit 2
 cp "$scanner" "$negative/tools/public-scan/public-scan.sh"
 cp "$patterns" "$negative/tools/public-scan/patterns.txt"
 
@@ -135,8 +140,10 @@ Reading .claude/settings.json and .claude/settings.local.json is bounded.
 The relative path tools/public-scan/patterns.txt is not a hostname.
 The identifier receipt.LOCAL_REDACTION_POLICY is a dotted attribute reference.
 A local receipt names policy aiqe.receipt.local.v1 in its own output.
-      - uses: actions/checkout@0123456789abcdef0123456789abcdef01234567 # v4.0.0
 BENIGN
+
+printf 'name: example\njobs:\n  one:\n    steps:\n%s\n' "$pin_line" \
+  > "$negative/.github/workflows/pinned.yml"
 
 negative_output=$("$negative/tools/public-scan/public-scan.sh" 2>&1)
 negative_status=$?
@@ -147,11 +154,63 @@ if [ "$negative_status" -ne 0 ]; then
   failures=$((failures + 1))
 fi
 
+# --- 3. The action-pin exception must not apply outside a workflow. ---------
+#
+# The exception is scoped by two conditions - workflow path AND pin line shape
+# - and each one has to be shown to be load-bearing on its own. Without the
+# path condition a foreign object id reaches public content by being dressed
+# up as an action reference in a document or a source file; without the shape
+# condition a bare id anywhere in a workflow walks through. Each case below
+# must be *reported*, and a case that stops being reported is the regression.
+
+expect_finding() {
+  local label="$1" root="$2"
+  local output status
+  output=$("$root/tools/public-scan/public-scan.sh" 2>&1)
+  status=$?
+  if [ "$status" -eq 0 ]; then
+    echo "FAIL: scanner did not report $label"
+    printf '%s\n' "$output" | sed 's/^/    /'
+    failures=$((failures + 1))
+  fi
+}
+
+build_positive() {
+  local root="$1"
+  mkdir -p "$root/tools/public-scan" || exit 2
+  cp "$scanner" "$root/tools/public-scan/public-scan.sh"
+  cp "$patterns" "$root/tools/public-scan/patterns.txt"
+}
+
+# An action-shaped line in documentation is not a workflow pin.
+doc_case="$workdir/pin-in-doc"
+build_positive "$doc_case"
+mkdir -p "$doc_case/docs" || exit 2
+printf 'Pin actions like this:\n%s\n' "$pin_line" > "$doc_case/docs/architecture.md"
+expect_finding "an action-shaped pin line in docs/" "$doc_case"
+
+# Nor in a source file.
+src_case="$workdir/pin-in-source"
+build_positive "$src_case"
+mkdir -p "$src_case/src/aiqe" || exit 2
+printf '# %s\n' "$pin_line" > "$src_case/src/aiqe/thing.py"
+expect_finding "an action-shaped pin line in a source file" "$src_case"
+
+# A bare object id inside a real workflow is still a finding: the pin shape is
+# required, not merely the workflow path.
+bare_case="$workdir/bare-sha-in-workflow"
+build_positive "$bare_case"
+mkdir -p "$bare_case/.github/workflows" || exit 2
+printf 'name: example\n# rebuilt from %s\n' "$pin_sha" \
+  > "$bare_case/.github/workflows/checks.yml"
+expect_finding "a bare object id inside a workflow" "$bare_case"
+
 if [ "$failures" -gt 0 ]; then
   echo "self-test: FAIL - $failures problem(s)"
   exit 1
 fi
 
 echo "self-test: PASS - every pattern class fires on its control, and the"
-echo "self-test: recorded false positives stay negative."
+echo "self-test: recorded false positives stay negative, and the pinned-action"
+echo "self-test: exception applies only to a pin line inside a workflow file."
 exit 0

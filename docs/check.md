@@ -75,7 +75,14 @@ OWNED_PATH_GLOB_AMBIGUITY -> INCOMPLETE, exit 2
 and the previous evidence record is removed. That removal is load-bearing rather
 than tidy: the owned binding does not move when an *unowned* file changes, so a
 green record written before the change would still look current to `aiqe receipt`
-and would answer for it.
+and would answer for it. `aiqe receipt` applies the same rule for the same reason,
+so the two surfaces cannot disagree — see [receipt.md](receipt.md).
+
+The paths considered are the baseline commit's, the index's, and the untracked ones.
+The index is not an optional third source: a file that has been created and
+`git add`-ed is absent from the baseline tree and is no longer untracked, so leaving
+it out would miss precisely the file a caller has just staged. Names only are read
+from Git; whether a path changed is still AIQE's own byte comparison.
 
 The diagnostic names the declaration, one changed path that escaped it, and how
 many did. It does not expand anything — no matched path becomes owned, because

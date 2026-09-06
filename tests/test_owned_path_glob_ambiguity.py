@@ -22,7 +22,8 @@ import unittest
 
 from . import support
 
-from aiqe import check, exits, pathstate, scope
+from aiqe import check, evidence, exits, pathstate, scope
+from aiqe import task as task_module
 from aiqe.cli import main
 from aiqe.textsafe import is_safe
 
@@ -75,6 +76,10 @@ class GlobAmbiguityTestCase(unittest.TestCase):
 
     def git(self, *args):
         return support.check_builders.git(self.repo, *args, env=self.env)
+
+    def staged_names(self):
+        result = self.git("diff", "--cached", "--name-only")
+        return sorted(result.stdout.decode("utf-8").split())
 
 
 class ReproducesTheAuditCase(GlobAmbiguityTestCase):
@@ -267,6 +272,26 @@ class InvocationDirectoryDoesNotChangeTheAnswer(GlobAmbiguityTestCase):
         self.assertIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, out + err)
         self.assertIn("src/strategy/alpha.py", out)
 
+    def test_a_staged_new_file_is_found_from_every_invocation_depth(self):
+        """Root, one level down, and two levels down must agree.
+
+        `ls-files` reports paths relative to the invocation directory and
+        looks only inside it unless told otherwise, so the depth the command
+        was typed at is exactly what a regression here would depend on.
+        """
+        self.build(edit_owned=False)
+        builders.write(
+            os.path.join(self.repo, "src", "strategy", "beta.py"), "NEW = 1\n"
+        )
+        self.git("add", "src/strategy/beta.py")
+        self.start(GLOB_SHAPED)
+
+        for subdirectory in (".", "docs", os.path.join("src", "strategy")):
+            status, out, err = self.run_cli_in(subdirectory, ["check"])
+            self.assertEqual(status, exits.INCOMPLETE, subdirectory + out + err)
+            self.assertIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, out, subdirectory)
+            self.assertIn("src/strategy/beta.py", out, subdirectory)
+
     def test_an_untracked_file_elsewhere_is_found_from_a_subdirectory(self):
         self.build(edit_owned=False)
         builders.write(
@@ -306,6 +331,83 @@ class UntrackedFilesAreCandidates(GlobAmbiguityTestCase):
         builders.write(
             os.path.join(self.repo, "src", "strategy", "noise.log"), "noise\n"
         )
+        self.start(GLOB_SHAPED)
+
+        status, out, _err = self.run_cli(["check", "--allow", "unit"])
+
+        self.assertEqual(status, exits.OK, out)
+        self.assertNotIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, out)
+
+
+class TheIndexIsACandidateSource(GlobAmbiguityTestCase):
+    """A staged-new file is in neither the baseline tree nor `--others`.
+
+    It is absent from the baseline commit, and `git add` stops it being
+    *other*, so a candidate pathset built from those two sources alone omits
+    precisely the file a caller has just staged - and the sweep reports
+    nothing while the change sits in the index. Staging is the most ordinary
+    thing to do next after creating a file, which is what made this the worst
+    remaining shape of the same false green.
+    """
+
+    def stage_new(self, name="beta.py", text="NEW = 1\n"):
+        path = os.path.join(self.repo, "src", "strategy", name)
+        builders.write(path, text)
+        self.git("add", "src/strategy/" + name)
+        return path
+
+    def test_a_staged_new_matching_path_is_refused(self):
+        self.build(edit_owned=False)
+        self.stage_new()
+        self.start(GLOB_SHAPED)
+
+        status, out, err = self.run_cli(["check"])
+
+        self.assertEqual(status, exits.INCOMPLETE, out + err)
+        self.assertIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, out)
+        self.assertIn("src/strategy/beta.py", out)
+
+    def test_a_staged_new_path_stays_staged(self):
+        """The refusal reads the index. It does not write to it."""
+        self.build(edit_owned=False)
+        self.stage_new()
+        self.start(GLOB_SHAPED)
+
+        before = self.staged_names()
+        self.run_cli(["check"])
+
+        self.assertEqual(self.staged_names(), before)
+        self.assertEqual(before, ["src/strategy/beta.py"])
+
+    def test_an_exact_literal_staged_new_path_is_owned_normally(self):
+        """Declared literally, the same staged file is simply owned."""
+        self.build(edit_owned=False)
+        self.stage_new()
+        self.start("src/strategy/beta.py")
+
+        status, out, _err = self.run_cli(
+            ["check", "--allow", "unit", "--allow", "causality"]
+        )
+
+        self.assertEqual(status, exits.OK, out)
+        self.assertIn("1 changed", out)
+        self.assertNotIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, out)
+
+    def test_an_unrelated_staged_foreign_path_does_not_trigger_it(self):
+        """Foreign staged state is observed, never adopted."""
+        self.build(edit_owned=False)
+        builders.write(os.path.join(self.repo, "docs", "foreign.md"), "x\n")
+        self.git("add", "docs/foreign.md")
+        self.start(GLOB_SHAPED)
+
+        status, out, _err = self.run_cli(["check", "--allow", "unit"])
+
+        self.assertEqual(status, exits.OK, out)
+        self.assertNotIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, out)
+
+    def test_an_unrelated_untracked_foreign_path_does_not_trigger_it(self):
+        self.build(edit_owned=False)
+        builders.write(os.path.join(self.repo, "docs", "foreign.md"), "x\n")
         self.start(GLOB_SHAPED)
 
         status, out, _err = self.run_cli(["check", "--allow", "unit"])
@@ -392,6 +494,183 @@ class StaleEvidenceCannotSurviveTheRefusal(GlobAmbiguityTestCase):
 
         status, out, err = self.run_cli(["commit", "-m", "work"])
         self.assertNotEqual(status, exits.OK, out + err)
+
+
+class ReceiptFreshnessUnderAmbiguity(GlobAmbiguityTestCase):
+    """`aiqe receipt` must not answer from evidence the repository outran.
+
+    The ordering that matters, and the reason the ordinary staleness model
+    cannot see it: a green check is recorded while the glob-shaped declaration
+    names nothing, and *then* a path it would have selected appears. The owned
+    binding is a digest over the declared paths, and the declared path is
+    still absent - so nothing in the recorded authority moves, and the receipt
+    keeps reporting `CURRENT` until somebody happens to run `aiqe check`
+    again. Receipt therefore asks the same question check asks, on the same
+    inputs, and reads only.
+    """
+
+    def receipt(self):
+        stdout, stderr = io.StringIO(), io.StringIO()
+        status = main(
+            ["receipt", "--format", "json"], stdout, stderr,
+            self.repo, self.env, prompt=None,
+        )
+        text = stdout.getvalue()
+        return status, (json.loads(text) if text.strip() else None), stderr.getvalue()
+
+    def green_check(self):
+        status, out, err = self.run_cli(["check", "--allow", "unit"])
+        self.assertEqual(status, exits.OK, out + err)
+
+    def evidence_file(self):
+        directory = task_module._existing_state_directory(
+            task_module.discover(self.repo, self.env)[0], self.env
+        )
+        return os.path.join(directory, evidence.CHECK_FILE_NAME)
+
+    # --- A and B: a matching path appears after a green record -------------
+
+    def test_a_matching_untracked_path_makes_the_receipt_not_current(self):
+        self.build(edit_owned=False)
+        self.start(GLOB_SHAPED)
+        self.green_check()
+
+        builders.write(
+            os.path.join(self.repo, "src", "strategy", "beta.py"), "NEW = 1\n"
+        )
+
+        status, document, _err = self.receipt()
+
+        self.assertNotEqual(document["evidence"], "CURRENT")
+        self.assertIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, document["reasons"])
+        self.assertNotEqual(status, exits.OK)
+
+    def test_a_matching_staged_new_path_makes_the_receipt_not_current(self):
+        self.build(edit_owned=False)
+        self.start(GLOB_SHAPED)
+        self.green_check()
+
+        builders.write(
+            os.path.join(self.repo, "src", "strategy", "beta.py"), "NEW = 1\n"
+        )
+        self.git("add", "src/strategy/beta.py")
+
+        status, document, _err = self.receipt()
+
+        self.assertNotEqual(document["evidence"], "CURRENT")
+        self.assertIn(pathstate.OWNED_PATH_GLOB_AMBIGUITY, document["reasons"])
+        self.assertNotEqual(status, exits.OK)
+
+    # --- C and D: the frozen foreign-state contract is unchanged -----------
+
+    def test_an_unrelated_untracked_path_leaves_the_receipt_current(self):
+        """Foreign state is observed. It has never made a receipt stale."""
+        self.build(edit_owned=False)
+        self.start(GLOB_SHAPED)
+        self.green_check()
+
+        builders.write(os.path.join(self.repo, "docs", "foreign.md"), "x\n")
+
+        _status, document, _err = self.receipt()
+
+        self.assertEqual(document["evidence"], "CURRENT")
+        self.assertNotIn(
+            pathstate.OWNED_PATH_GLOB_AMBIGUITY, document["reasons"]
+        )
+
+    def test_an_unrelated_staged_path_leaves_the_receipt_current(self):
+        self.build(edit_owned=False)
+        self.start(GLOB_SHAPED)
+        self.green_check()
+
+        builders.write(os.path.join(self.repo, "docs", "foreign.md"), "x\n")
+        self.git("add", "docs/foreign.md")
+
+        _status, document, _err = self.receipt()
+
+        self.assertEqual(document["evidence"], "CURRENT")
+        self.assertNotIn(
+            pathstate.OWNED_PATH_GLOB_AMBIGUITY, document["reasons"]
+        )
+
+    # --- E and F: the staleness paths that already existed -----------------
+
+    def test_stale_owned_content_still_reports_as_before(self):
+        self.build(edit_owned=False)
+        self.start(builders.OWNED_TEXT)
+        status, out, err = self.run_cli(
+            ["check", "--allow", "unit", "--allow", "causality"]
+        )
+        self.assertEqual(status, exits.OK, out + err)
+
+        builders.write(
+            os.path.join(self.repo, "src", "strategy", "alpha.py"),
+            "SIGNAL = 1\nADJUSTED = 2\n",
+        )
+
+        _status, document, _err = self.receipt()
+
+        self.assertEqual(document["evidence"], "STALE")
+        self.assertIn(evidence.STALE_OWNED_CONTENT, document["reasons"])
+
+    def test_a_moved_head_still_reports_as_before(self):
+        self.build(edit_owned=False)
+        self.start(builders.OWNED_TEXT)
+        self.green_check()
+
+        builders.write(os.path.join(self.repo, "docs", "later.md"), "x\n")
+        builders.commit_all(self.repo, "a later commit", self.env)
+
+        _status, document, _err = self.receipt()
+
+        self.assertEqual(document["evidence"], "STALE")
+        self.assertIn(evidence.STALE_HEAD, document["reasons"])
+
+    # --- Receipt remains read-only ----------------------------------------
+
+    def test_the_receipt_does_not_remove_or_rewrite_the_evidence(self):
+        """`check` discards the record it invalidates. `receipt` never does.
+
+        Receipt is a reporting surface, and a reporting surface that deletes
+        the thing it reports on cannot be run twice.
+        """
+        self.build(edit_owned=False)
+        self.start(GLOB_SHAPED)
+        self.green_check()
+
+        path = self.evidence_file()
+        with open(path, "rb") as handle:
+            before = handle.read()
+
+        builders.write(
+            os.path.join(self.repo, "src", "strategy", "beta.py"), "NEW = 1\n"
+        )
+
+        first_status, first, _err = self.receipt()
+        second_status, second, _err = self.receipt()
+
+        with open(path, "rb") as handle:
+            self.assertEqual(handle.read(), before)
+        self.assertEqual(first_status, second_status)
+        self.assertEqual(first["evidence"], second["evidence"])
+        self.assertEqual(first["reasons"], second["reasons"])
+
+    def test_the_receipt_owns_nothing_new(self):
+        """No path is adopted, and no validator runs, to answer this."""
+        self.build(edit_owned=False)
+        self.start(GLOB_SHAPED)
+        self.green_check()
+        builders.write(
+            os.path.join(self.repo, "src", "strategy", "beta.py"), "NEW = 1\n"
+        )
+
+        _status, document, _err = self.receipt()
+
+        self.assertEqual(document["owned_declared_count"], 1)
+        self.assertEqual(document["owned_changed_count"], 0)
+        _status, out, _err = self.run_cli(["task"])
+        self.assertIn("1 exact path", out)
+        self.assertNotIn("beta.py", out)
 
 
 class ShapeDetection(unittest.TestCase):

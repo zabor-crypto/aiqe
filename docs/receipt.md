@@ -128,7 +128,8 @@ Full reference: [`commit.md`](commit.md).
 
 ## Staleness
 
-Freshness is recomputed, never re-run. Four things, and only these four:
+Freshness is recomputed, never re-run. Four things are compared against what the check
+recorded:
 
 ```
 the owned path binding          content, states and modes of the owned pathset
@@ -149,6 +150,23 @@ on running them again, which is the question it was supposed to settle. And ther
 no whole-worktree fingerprint: a foreign file changing is not a statement about this
 task's owned scope, and hashing somebody's whole repository to find that out would
 make a receipt cost more than the check did.
+
+One condition is not a comparison against the recorded evidence, because it cannot be.
+If a declared owned path is glob-shaped, names no file, and — read as a
+[surface pattern](config.md) — now selects a changed repository path the task does not
+own, the receipt reports `OWNED_PATH_GLOB_AMBIGUITY` and evidence that is not
+`CURRENT`. The four comparisons above cannot see this: the owned binding is a digest
+over the *declared* paths, the declared path is still absent, so nothing in the
+recorded authority moves while the file that should have been in scope appears beside
+it. Without this the receipt would keep reporting `CURRENT` until somebody happened to
+run `aiqe check` again — which is a green answer produced by not looking.
+
+This is the same detector `aiqe check` runs, on the same inputs, so the two surfaces
+cannot disagree about one condition. It still reads only: no validator runs, no stored
+evidence is rewritten or removed, and no path becomes owned. And it is still not a
+whole-worktree fingerprint — with no glob-shaped absent declaration it makes no Git
+calls at all, and where there is one it compares only the paths that declaration would
+have selected.
 
 ## The default receipt's privacy contract
 

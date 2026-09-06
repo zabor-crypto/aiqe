@@ -99,13 +99,23 @@ justified=0
 # The second exception is a pinned GitHub Actions reference. An action pinned
 # to a full commit id is the supply-chain control the release workflow is
 # required to carry, so the scan would otherwise punish exactly the thing it
-# wants. This exception is scoped to one class on one *line shape* rather than
-# to a file: the whole line must be a `uses:` pin and nothing else, so a bare
-# object id elsewhere in the same workflow is still a finding. The stronger
-# check that replaces it is `tests/test_workflow_pinning.py`, which asserts
-# that every `uses:` in every workflow is pinned to a 40-character object id,
-# carries a version comment, and names a canonical first-party action
-# repository - none of which the skipped class was checking.
+# wants.
+#
+# It is scoped by *two* independent conditions, and both are required. The
+# file must be a workflow - `.github/workflows/<name>.yml` or `.yaml`, and
+# nothing else - and the line must be a `uses:` pin and nothing else. A line
+# shape alone is not enough: a line of that shape is trivially writable in a
+# document, a source file or a test, and an exception keyed on shape alone
+# would let a foreign object id through anywhere in the tree by dressing it up
+# as an action reference. Neither condition is sufficient on its own, so a
+# bare object id in a workflow is still a finding, and an action-shaped line
+# in `docs/` is still a finding.
+#
+# The stronger check that replaces the skipped class is
+# `tests/test_workflow_pinning.py`, which holds the reviewed
+# owner/action/SHA/version tuples and asserts that every `uses:` matches one
+# of them exactly - identity, not shape, which is what the class could never
+# have checked.
 #
 # Nothing else is excepted. A third entry here needs the same treatment: a
 # named reason and a check that is stronger than the one being skipped.
@@ -130,6 +140,12 @@ done
 #: exists for.
 action_pin_line='^[[:space:]]*-?[[:space:]]*uses:[[:space:]]+[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{40}([[:space:]]+#[[:space:]]*[^[:space:]].*)?$'
 
+#: A workflow file, and only a workflow file. Relative to the scan root, with
+#: an optional `./` because that is how the file list is built. No nesting is
+#: allowed below `workflows/`, and no other directory may end in the same
+#: two segments, so a `docs/.github/workflows/` cannot borrow the exception.
+workflow_path='^(\./)?\.github/workflows/[^/]+\.(yml|yaml)$'
+
 justified_match() {
   local class="$1" line="$2" file="${2%%:*}" rest content
   [ "$class" = "GIT_SHA_40" ] || return 1
@@ -137,6 +153,10 @@ justified_match() {
   case $'\n'"$manifest_files" in
     *$'\n'"$file"$'\n'*) return 0 ;;
   esac
+
+  # Both conditions, and the file is checked first because it is the cheaper
+  # one and the one that bounds where the exception can apply at all.
+  printf '%s' "$file" | LC_ALL=C grep -qE -- "$workflow_path" || return 1
 
   # `path:lineno:content` - drop the path, then the line number.
   rest="${line#*:}"
