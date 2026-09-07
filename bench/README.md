@@ -1,7 +1,21 @@
-# Benchmarks
+# Conformance evidence
 
-This directory holds the benchmark protocol and, for each implemented product
+This directory holds the conformance protocol and, for each implemented product
 surface, the fixture builders and the retained results.
+
+Two things are deliberately kept apart, and only the first exists today:
+
+```
+CONFORMANCE EVIDENCE   deterministic fixtures, regressions and adversarial
+                       negative controls proving how AIQE behaves     PRESENT
+USER-EFFECT BENCHMARK  a comparative experiment measuring what changes
+                       for someone using it                           NONE YET
+```
+
+Nothing here measures speed, productivity, defect-prevention rates or model
+behaviour, and no number below should be read as doing so. The directory keeps
+the name `bench/` because that is its filesystem and package namespace; the
+category it publishes under is conformance evidence.
 
 ```
 protocol/           the method, the families, and the release gates      PRESENT

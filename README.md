@@ -40,7 +40,8 @@ nothing: no path, no repository, no branch, no commit id, no username. It came f
 synthetic benchmark case `commit-owned-modification`, copied from the retained result
 artifact. **No terminal output in this repository was typed by hand.**
 
-**Status: the whole v1 workflow is implemented, tested and benchmarked, end to end.**
+**Status: the whole v1 workflow is implemented, tested, and validated end to end
+against retained conformance fixtures.**
 `aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check`, `aiqe commit` and `aiqe receipt`
 are real, and their safety contracts are measured from outside the process rather than
 self-reported. Nothing is released and no version is tagged.
@@ -590,7 +591,12 @@ Working guidance, including what to put in `CLAUDE.md` or `AGENTS.md` and why th
 must never be the thing that decides its own scope:
 [`docs/agents.md`](docs/agents.md).
 
-## Benchmarks
+## Conformance evidence
+
+These are conformance families: deterministic fixtures, regressions and adversarial
+negative controls that measure whether AIQE behaves as specified. They say nothing
+about how fast anything is, or about anyone's productivity — no user-effect benchmark
+exists yet.
 
 <!-- benchmarks:begin -->
 Rendered from the retained result artifacts under
@@ -652,8 +658,10 @@ the method is [`docs/support.md`](docs/support.md), and a test fails if this sec
 claims a Python version the manifest does not.
 
 <!-- support:begin -->
-**PROVEN** — the installed artifact runs the whole workflow to `REVIEWABLE` on
-every claimed OS family, and the full behavioural suite passes:
+**PROVEN** — by the retained full-lane release-proof manifest, at the source commit
+that manifest itself names, which is **not** the current HEAD. On that evidence the
+installed artifact runs the whole workflow to `REVIEWABLE` on every claimed OS family,
+and the full behavioural suite passes:
 
 ```
 Python 3.11 · 3.12 · 3.13 · 3.14        macOS and Linux
@@ -730,6 +738,22 @@ carry a support claim, and no complete CI run has attested the current HEAD, so 
 here claims one has. The gap, and the condition that closes it, are recorded in
 [`docs/support.md`](docs/support.md#11-the-attestation-this-manifest-does-not-carry).
 
+What the current HEAD *has* had is a fast-lane run, and it passed. Every job it
+executed succeeded, which establishes by execution:
+
+```
+Ubuntu 22.04  x86_64    full suite · installed artifact
+Ubuntu 24.04  x86_64    full suite · installed artifact
+Ubuntu 24.04  arm64     full suite · installed artifact
+Debian 11     x86_64    artifact builds and installs; AIQE refuses to run
+```
+
+The macOS matrix did not run in that lane, so it is not evidence about macOS at this
+commit, and the manifest it produced records every claimed Python minor as
+`NOT_PROVEN` — naming the missing observation rather than rounding up. That manifest is
+kept as a fast-lane artifact and is deliberately not interchangeable with the retained
+one above.
+
 A green run on the fast lane is not a support claim, and the gate says so rather than
 leaving it to be assumed: with no macOS surface record, every claimed Python minor comes
 back `NOT_PROVEN`, naming the observation it did not get. There is no CI badge on this
@@ -805,13 +829,13 @@ no hooks and runs nothing in the background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | `doctor`, `init`, `task`, `check`, `commit` and `receipt` implemented, tested and benchmarked. The v1 command surface is complete. Installable artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs). The failure-first demo is materialised and retained. Nothing released or tagged. |
+| *(current)* | `doctor`, `init`, `task`, `check`, `commit` and `receipt` implemented, tested, and validated against retained conformance fixtures. The v1 command surface is complete. Installable artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs). The failure-first demo is materialised and retained. Nothing released or tagged. |
 | `v0.1.0` | First installable alpha: `doctor`, `init`, `task`, `check`, `receipt` on macOS. Real tests in real CI. |
 | `v0.2.0` | `commit` with checked-content binding, all six contracts, benchmark fixtures and retained results. |
 | `v0.3.0` | Rendered visual assets, from the retained terminal captures. |
 | `v1.0.0` | Every release gate green against retained artifacts. Command surface stable. Every public claim traced to evidence. |
 
-No benchmark number appears in this README unless it is generated from a retained result
+No conformance number appears in this README unless it is generated from a retained result
 artifact. No result is hidden, including failures and cases that were never run.
 
 Every claim on this page is classified — proven, observed, not proven, design intent or
