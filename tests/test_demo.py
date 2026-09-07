@@ -96,6 +96,153 @@ class DemoRunTests(unittest.TestCase):
             self.assertRegex(right, TIMESTAMP, "transcript line %d" % (index + 1,))
 
 
+def load_run_module():
+    """Import `run.py` as a module, to test what it renders directly.
+
+    Run as a script its own directory is on `sys.path` and `import build`
+    resolves; imported by path it is not, so the loader supplies it.
+    """
+    import importlib.util
+
+    if DEMO not in sys.path:
+        sys.path.insert(0, DEMO)
+    spec = importlib.util.spec_from_file_location(
+        "lookahead_demo_run", os.path.join(DEMO, "run.py")
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class DemoOutputLocationTests(unittest.TestCase):
+    """An ordinary run of the demo must not dirty the repository.
+
+    The retained artifacts are tracked, and the transcript legitimately
+    carries a task start timestamp that differs between runs - so a default
+    that wrote there would leave every reader with an uncommitted diff in the
+    one repository that argues nobody should accept unexplained changes.
+    """
+
+    def test_the_regeneration_path_is_the_tracked_results_directory(self):
+        module = load_run_module()
+        self.assertEqual(
+            os.path.realpath(module.RETAINED), os.path.realpath(RETAINED)
+        )
+
+    def test_the_help_states_the_default_and_the_regeneration_path(self):
+        """`--help` is where a reader learns whether running this will touch
+        their tree, so it has to say so."""
+        proc = subprocess.run(
+            [sys.executable, os.path.join(DEMO, "run.py"), "--help"],
+            cwd=support.ROOT,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=60,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr.decode("utf-8", "replace"))
+        helptext = proc.stdout.decode("utf-8", "replace")
+        self.assertIn("temporary directory", helptext)
+        self.assertIn("examples/lookahead-demo/results", helptext)
+
+    def test_a_default_run_writes_nothing_into_the_repository(self):
+        """Asserted against the run `setUpModule` already made: it was given
+        an explicit output, and the tracked results are byte-unchanged."""
+        proc = subprocess.run(
+            ["git", "status", "--porcelain", "--", "examples/lookahead-demo/results"],
+            cwd=support.ROOT,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=60,
+        )
+        self.assertEqual(
+            proc.stdout.decode("utf-8", "replace").strip(),
+            "",
+            "running the demo left the retained artifacts modified",
+        )
+
+
+class DemoSummaryTests(unittest.TestCase):
+    """The demo has to show its payoff without being opened.
+
+    Everything the summary prints is read out of the record that
+    `expected.json` gates, so these assertions are about *provenance* as much
+    as wording: a value that stopped coming from the record would stop
+    matching the record.
+    """
+
+    def setUp(self):
+        self.module = load_run_module()
+        self.record = json.loads(read(os.path.join(RETAINED, "demo.json")))
+        self.acts = {act["act"]: act for act in self.record["acts"]}
+
+    def render(self, record=None):
+        import io
+
+        out = io.StringIO()
+        self.module.summarise(
+            record if record is not None else self.record,
+            out,
+            "/tmp/example/transcript.txt",
+            "/tmp/example/demo.json",
+        )
+        return out.getvalue()
+
+    def test_every_act_appears_with_its_measured_verdict(self):
+        rendered = self.render()
+        for act in self.record["acts"]:
+            with self.subTest(act=act["act"]):
+                self.assertIn(act["title"], rendered)
+                self.assertIn(act["receipt_verdict"], rendered)
+
+    def test_act_two_is_the_dominant_result(self):
+        """Act 2 is the product's one unique claim: every check the
+        repository has can pass because nobody wrote the applicable one."""
+        rendered = self.render()
+        self.assertIn("THE ONE THAT MATTERS", rendered)
+        self.assertIn("COVERAGE_GAP", rendered)
+        self.assertIn("The absence of a check is not a pass.", rendered)
+        self.assertIn(self.module.RULE, rendered)
+
+    def test_the_coverage_gap_row_is_lifted_from_the_rendered_check(self):
+        """Not described, quoted. The row in the summary is a row the product
+        actually printed."""
+        rendered = self.render()
+        rows = self.module.contract_rows(
+            self.acts["nobody_looked"]["check_output"]
+        )
+        self.assertTrue(rows, "the retained act-2 check declared no contract")
+        for row in rows:
+            self.assertIn(row, rendered)
+
+    def test_the_summary_reads_values_rather_than_restating_them(self):
+        """Perturb the record and the rendering must follow it. This is what
+        separates a summary from a caption."""
+        import copy
+
+        mutated = copy.deepcopy(self.record)
+        for act in mutated["acts"]:
+            if act["act"] == "stale_evidence":
+                act["aiqe_commits_created"] = 7
+        self.assertIn("commits AIQE created  0", self.render())
+        self.assertIn("commits AIQE created  7", self.render(mutated))
+
+    def test_the_pathset_contrast_is_the_retained_pathsets(self):
+        act = self.acts["unrelated_staged_work"]
+        rendered = self.render()
+        self.assertIn(" · ".join(act["reference_changed_paths"]), rendered)
+        self.assertIn(" · ".join(act["aiqe_changed_paths"]), rendered)
+
+    def test_a_real_run_prints_the_summary_and_the_transcript_path(self):
+        """Asserted against the run `setUpModule` actually made."""
+        stdout = _fresh.stdout.decode("utf-8", "replace")
+        self.assertIn("THE ONE THAT MATTERS", stdout)
+        self.assertIn("COVERAGE_GAP", stdout)
+        self.assertIn("transcript  ", stdout)
+        self.assertIn(_directory, stdout)
+
+
 class DemoContentTests(unittest.TestCase):
     """What the demo asserts about the product, asserted here too.
 

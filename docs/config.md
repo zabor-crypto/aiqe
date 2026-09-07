@@ -191,6 +191,19 @@ Until a surface is declared, a changed owned path is `UNCLASSIFIED` and `aiqe ch
 reports a classification gap rather than a pass. That is the honest state, and it is
 visible rather than silent.
 
+### What you would grow it into
+
+[`examples/aiqe.toml`](../examples/aiqe.toml) is a worked illustration of the same
+scaffold filled in: five surfaces across a research repository, all six launch
+contracts declared, and a required validator bound to each.
+
+It is an illustration and not a starting point, which is the useful part. Every
+validator in it names a command that does not exist until you write it, so copying it
+unchanged produces `UNAVAILABLE` validators, `CONTRACT_UNKNOWN` contracts and a refused
+completion — never a pass. An example that shipped commands which trivially succeeded
+would be a green result nobody earned, and `tests/test_documentation.py` asserts that
+none of them can be.
+
 ## Exit status
 
 ```

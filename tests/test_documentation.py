@@ -7,6 +7,7 @@ that stopped being true when the implementation landed.
 """
 
 import os
+import shutil
 import unittest
 
 from . import support
@@ -702,6 +703,66 @@ class ProductPackageTests(unittest.TestCase):
                         % (os.path.basename(page),),
                     )
         self.assertTrue(found, "no documented configuration was found to check")
+
+    def test_the_starter_example_is_a_configuration_the_product_accepts(self):
+        """`examples/aiqe.toml` is the one configuration a reader is most
+        likely to copy wholesale, and it is not a fenced block on a page, so
+        the check above does not reach it. A key renamed in the parser would
+        otherwise leave a worked example that silently no longer works."""
+        import tempfile
+
+        from aiqe import config as config_module
+        from aiqe import contracts as contracts_module
+
+        example = os.path.join(support.ROOT, "examples", "aiqe.toml")
+        directory = tempfile.mkdtemp(prefix="aiqe-example-config-")
+        shutil.copy(example, os.path.join(directory, "aiqe.toml"))
+        parsed = config_module.load(os.fsencode(directory))
+        self.assertTrue(parsed.surfaces, "the starter example declares no surface")
+        self.assertTrue(parsed.validators, "the starter example declares no validator")
+
+        # It is the six-family illustration, so it has to illustrate six.
+        declared = set()
+        for surface in parsed.surfaces:
+            declared.update(surface.contracts or ())
+        bound = set()
+        for validator in parsed.validators:
+            bound.update(validator.contracts or ())
+        for contract in contracts_module.LAUNCH_CONTRACTS:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, declared, "%s is on no surface" % (contract,))
+                self.assertIn(contract, bound, "%s has no validator" % (contract,))
+
+    def test_the_starter_example_cannot_hand_anyone_an_unearned_pass(self):
+        """The file's own header makes this claim, so it is checked rather
+        than trusted: no validator may be a command that trivially succeeds.
+
+        A starter configuration whose checks pass out of the box is worse than
+        no starter configuration - it is a green result nobody earned, from
+        the one tool that exists to say that green is not evidence.
+        """
+        import tempfile
+
+        from aiqe import config as config_module
+
+        directory = tempfile.mkdtemp(prefix="aiqe-example-config-")
+        shutil.copy(
+            os.path.join(support.ROOT, "examples", "aiqe.toml"),
+            os.path.join(directory, "aiqe.toml"),
+        )
+        parsed = config_module.load(os.fsencode(directory))
+        trivial = {"true", ":", "echo", "exit", "cat"}
+        for validator in parsed.validators:
+            argv = [
+                part.decode("utf-8", "replace") if isinstance(part, bytes) else part
+                for part in validator.argv
+            ]
+            with self.subTest(validator=validator.id):
+                self.assertNotIn(
+                    os.path.basename(argv[0]),
+                    trivial,
+                    "%s would succeed without checking anything" % (argv[0],),
+                )
 
     def test_every_launch_contract_is_explained_rather_than_only_listed(self):
         """Six names in a code block is a list. The README has to say what

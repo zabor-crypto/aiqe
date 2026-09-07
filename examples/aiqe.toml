@@ -1,0 +1,145 @@
+# An illustrative `aiqe.toml`, showing the shape of a six-contract
+# configuration for a research repository.
+#
+# THIS FILE IS AN EXAMPLE, NOT A STARTING CONFIGURATION THAT WORKS.
+#
+# Every validator below names a command that does not exist until you write
+# it. That is deliberate, and it is the whole point of the file. Copy this in
+# unchanged and `aiqe check` reports those validators UNAVAILABLE with
+# EXECUTABLE_NOT_FOUND, every contract they were bound to CONTRACT_UNKNOWN,
+# and refuses completion. Under no arrangement does it report a pass. A file
+# that shipped commands which trivially succeeded would hand you a green
+# result you had not earned, which is the exact failure this product exists
+# to refuse.
+#
+# AIQE ships no validators. It cannot: a check AIQE wrote would be a check
+# that has never seen your data, your venue, your accounting identity or your
+# resampling rules. Declaring the surfaces is a job only you can do, and
+# writing the commands that check them is the work this file is asking you to
+# do rather than pretending to have done for you.
+#
+# `aiqe init` writes a scaffold that declares no surfaces and no validators at
+# all, for the same reason: a guess that happened to be wrong would be a
+# configuration nobody wrote and everybody trusts. This file is the worked
+# illustration of what you would grow that scaffold into.
+#
+# Reference: docs/config.md
+
+schema = 1
+
+
+# --- Surfaces ---------------------------------------------------------------
+#
+# A surface says which paths are quant-critical and which contract families
+# apply to them. Every matching surface is evaluated and their obligations
+# union, so a path may pick up contracts from more than one entry.
+#
+# `paths` are AIQE's own byte patterns, never Git pathspec. `**` is a whole
+# component: `src/strategy/**` matches `src/strategy` and everything under it.
+
+# Signal construction. Anything that decides at a point in time carries
+# CAUSALITY, and joining series to make that decision carries DATA_ALIGNMENT.
+[[surface]]
+paths = ["src/strategy/**", "src/signals/**"]
+quant = true
+contracts = ["CAUSALITY", "DATA_ALIGNMENT", "TRAIN_TEST_SEPARATION"]
+
+# The simulator: what a fill would have cost, and whether the books balance
+# afterwards. DETERMINISM sits here because a backtest that does not reproduce
+# cannot be evidence of anything.
+[[surface]]
+paths = ["src/backtest/**", "src/execution/**"]
+quant = true
+contracts = ["EXECUTION_REALISM", "ACCOUNTING", "DETERMINISM"]
+
+# Ingestion and resampling. Where timezone, index and resample-boundary
+# defects are introduced, usually invisibly.
+[[surface]]
+paths = ["src/data/**"]
+quant = true
+contracts = ["DATA_ALIGNMENT", "DETERMINISM"]
+
+# Model fitting and selection. Declared separately because
+# TRAIN_TEST_SEPARATION is the family a shared preprocessing step defeats.
+[[surface]]
+paths = ["src/models/**", "src/features/**"]
+quant = true
+contracts = ["TRAIN_TEST_SEPARATION", "CAUSALITY"]
+
+# Explicitly not quant-critical. Stating this is not decoration: an
+# unclassified path is reported as unclassified, and declaring a path both
+# quant and non-quant is a configuration conflict that fails closed.
+[[surface]]
+paths = ["tests/**", "docs/**", "scripts/**"]
+quant = false
+
+
+# --- Validators -------------------------------------------------------------
+#
+# A validator is a command your repository defines. AIQE runs it and records
+# what it said; it does not interpret the result, and `PASS` means only that
+# the command exited zero.
+#
+# `contracts` is what binds a validator to a family. A validator with no
+# `contracts` key — like the unit suite below — is a general check: it runs,
+# and its outcome is reported, but it closes no contract. That is why a
+# repository whose only check is a green test suite still reports
+# COVERAGE_GAP on every applicable family.
+#
+# `required = true` is what makes coverage real. An optional validator does
+# not close a gap, and neither does a generic suite.
+#
+# NONE OF THE COMMANDS BELOW EXIST. Replace each one with the command in your
+# repository that actually asks that question, and delete any family you have
+# not written a check for — leaving it declared and uncovered is the honest
+# state, and AIQE will keep saying so.
+
+# The general suite. Bound to no contract on purpose: it is evidence that the
+# tests that exist passed, and nothing more.
+[[validator]]
+id = "unit"
+run = ["pytest", "-q", "tests/unit"]
+required = true
+timeout = 600
+
+[[validator]]
+id = "causality"
+run = ["python", "checks/no_lookahead.py"]
+required = true
+timeout = 300
+contracts = ["CAUSALITY"]
+
+[[validator]]
+id = "alignment"
+run = ["python", "checks/index_alignment.py"]
+required = true
+timeout = 300
+contracts = ["DATA_ALIGNMENT"]
+
+[[validator]]
+id = "execution-realism"
+run = ["python", "checks/fill_model.py", "--strict"]
+required = true
+timeout = 300
+contracts = ["EXECUTION_REALISM"]
+
+[[validator]]
+id = "accounting"
+run = ["python", "checks/reconcile_pnl.py"]
+required = true
+timeout = 300
+contracts = ["ACCOUNTING"]
+
+[[validator]]
+id = "train-test-separation"
+run = ["python", "checks/no_leakage.py"]
+required = true
+timeout = 600
+contracts = ["TRAIN_TEST_SEPARATION"]
+
+[[validator]]
+id = "determinism"
+run = ["python", "checks/reproduce.py", "--runs", "2"]
+required = true
+timeout = 900
+contracts = ["DETERMINISM"]

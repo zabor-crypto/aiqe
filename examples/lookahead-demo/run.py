@@ -2,7 +2,7 @@
 """Run the lookahead demonstration and retain everything it produced.
 
     python3 examples/lookahead-demo/run.py
-    python3 examples/lookahead-demo/run.py --output /tmp/demo
+    python3 examples/lookahead-demo/run.py --output examples/lookahead-demo/results
 
 Four acts, each in its own repository built from nothing by `build.py`, each
 driving the real `aiqe` entry point as a subprocess in an isolated environment.
@@ -14,8 +14,15 @@ and a transcript of the commands and the output they actually produced. The
 record is compared against `expected.json`, which was written before the run,
 and the exit status is non-zero if any act disagreed with it.
 
+Without `--output` both artifacts go to a fresh temporary directory, whose path
+is printed at the end. That is deliberate: the retained copies under `results/`
+are tracked evidence, and an ordinary run of the demo must not leave the
+repository dirty. The second invocation above is the regeneration path, and is
+the only way the retained artifacts are rewritten.
+
 Nothing here is rendered by hand. If a line appears in the transcript, a
-process printed it.
+process printed it, and every value in the summary printed to stdout is read
+from the same record that is compared against `expected.json`.
 """
 
 import argparse
@@ -46,7 +53,11 @@ UNRELATED = "src/foreign.py"
 #: A demo that has not finished in this long is a broken demo, not a slow one.
 TIMEOUT_SECONDS = 300
 
-RESULTS = os.path.join(HERE, "results")
+#: The tracked, retained copies. Not the default output: writing here on an
+#: ordinary run would dirty the repository with a timestamp that legitimately
+#: differs between runs. Passing this path explicitly is the regeneration path.
+RETAINED = os.path.join(HERE, "results")
+
 EXPECTED_FILE = os.path.join(HERE, "expected.json")
 
 
@@ -443,6 +454,118 @@ def verdict(receipt_output):
     return None
 
 
+# --- The summary ------------------------------------------------------------
+#
+# A demo whose payoff lives on line 210 of a transcript nobody opens has not
+# demonstrated anything. So the run prints what it measured.
+#
+# Every value below is read out of `record` - the same structure that is
+# compared against `expected.json` a few lines later. Nothing is re-derived,
+# re-worded or restated from memory: if the product's behaviour changed, this
+# summary changes with it, and the comparison fails in the same run. The only
+# literal text is the framing, and the one paragraph of interpretation under
+# act 2, which says what the demo's own README says.
+
+RULE = "  " + "-" * 70
+
+
+def contract_rows(check_output):
+    """The contract rows of a rendered `AIQE CHECK`, exactly as it printed them.
+
+    Act 2's whole point is one line of real output, so it is lifted from the
+    output rather than described. Rows run from the `Contracts` heading to the
+    blank line that ends the block.
+    """
+    rows = []
+    inside = False
+    for line in check_output.splitlines():
+        if line.strip() == "Contracts":
+            inside = True
+            continue
+        if inside:
+            if not line.strip():
+                break
+            rows.append(line.strip())
+    return rows
+
+
+def reasons(check_output):
+    """The `Reasons` line of a rendered check, as a single string."""
+    for line in check_output.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Reasons"):
+            return stripped.split(None, 1)[1]
+    return ""
+
+
+def summarise(record, out, transcript_path, record_path):
+    """Print what the four acts measured, act 2 first among equals."""
+    acts = {act["act"]: act for act in record["acts"]}
+    write = out.write
+
+    write(
+        "\nlookahead demo · AIQE %s · %d acts, every declared outcome "
+        "reproduced\n" % (record["aiqe_version"], len(record["acts"]))
+    )
+
+    one = acts["defect_is_caught"]
+    write("\n  ACT 1  %s\n" % (one["title"],))
+    write(
+        "         generic suite  exit %d  ·  causality validator  exit %d\n"
+        % (one["generic_suite_exit"], one["causality_validator_exit"])
+    )
+    write("         verdict  %s\n" % (one["receipt_verdict"],))
+
+    # Act 2 is the product's one unique claim, so it gets the room. Every
+    # other act is a supporting proof.
+    two = acts["nobody_looked"]
+    write("\n%s\n" % (RULE,))
+    write("  ACT 2  %s\n" % (two["title"],))
+    write("         THE ONE THAT MATTERS\n")
+    write(
+        "\n         generic suite  exit %d  ·  every check the repository "
+        "declares passed\n" % (two["generic_suite_exit"],)
+    )
+    write("\n")
+    for row in contract_rows(two["check_output"]):
+        write("             %s\n" % (row,))
+    write(
+        "\n         verdict  %s  ·  %s\n"
+        % (two["receipt_verdict"], reasons(two["check_output"]))
+    )
+    write(
+        "\n         Nothing in this repository was written to ask the "
+        "causality\n"
+        "         question. The absence of a check is not a pass.\n"
+    )
+    write("%s\n" % (RULE,))
+
+    three = acts["unrelated_staged_work"]
+    write("\n  ACT 3  %s\n" % (three["title"],))
+    write(
+        "         git commit   %s\n"
+        % (" · ".join(three["reference_changed_paths"]),)
+    )
+    write(
+        "         aiqe commit  %s\n" % (" · ".join(three["aiqe_changed_paths"]),)
+    )
+    write("         verdict  %s\n" % (three["receipt_verdict"],))
+
+    four = acts["stale_evidence"]
+    write("\n  ACT 4  %s\n" % (four["title"],))
+    write(
+        "         reference workflow committed content its own check fails  %s\n"
+        % ("yes" if four["reference_committed_unchecked_content"] else "no",)
+    )
+    write(
+        "         commits AIQE created  %d\n" % (four["aiqe_commits_created"],)
+    )
+    write("         verdict  %s\n" % (four["receipt_verdict"],))
+
+    write("\n  transcript  %s\n" % (transcript_path,))
+    write("  record      %s\n" % (record_path,))
+
+
 # --- Comparison ------------------------------------------------------------
 
 #: Fields compared against `expected.json`. Rendered output is retained in
@@ -491,8 +614,13 @@ def main(argv):
     parser = argparse.ArgumentParser(description="Run the lookahead demo.")
     parser.add_argument(
         "--output",
-        default=RESULTS,
-        help="directory the retained artifacts are written to",
+        default=None,
+        help=(
+            "directory the artifacts are written to. Default: a fresh "
+            "temporary directory, so that running the demo leaves the "
+            "repository clean. Pass %s to regenerate the retained evidence."
+            % (os.path.relpath(RETAINED, ROOT),)
+        ),
     )
     parser.add_argument(
         "--keep",
@@ -520,12 +648,22 @@ def main(argv):
         "acts": acts,
     }
 
-    if not os.path.isdir(options.output):
-        os.makedirs(options.output)
-    with open(os.path.join(options.output, "demo.json"), "w") as handle:
+    # A run that was not told where to write does not write into the tracked
+    # tree. The directory is kept rather than cleaned up: the transcript is
+    # the evidence, and printing a path to something already deleted would be
+    # worse than useless.
+    output = options.output
+    if output is None:
+        output = tempfile.mkdtemp(prefix="aiqe-lookahead-demo-out-")
+    if not os.path.isdir(output):
+        os.makedirs(output)
+
+    record_path = os.path.join(output, "demo.json")
+    transcript_path = os.path.join(output, "transcript.txt")
+    with open(record_path, "w") as handle:
         json.dump(record, handle, indent=2, sort_keys=True)
         handle.write("\n")
-    with open(os.path.join(options.output, "transcript.txt"), "w") as handle:
+    with open(transcript_path, "w") as handle:
         handle.write(transcript.render())
 
     with open(EXPECTED_FILE) as handle:
@@ -538,16 +676,11 @@ def main(argv):
         sys.stderr.write(
             "The demo did not reproduce what `expected.json` declared.\n"
         )
+        sys.stderr.write("transcript  %s\n" % (transcript_path,))
+        sys.stderr.write("record      %s\n" % (record_path,))
         return 1
 
-    sys.stdout.write(
-        "lookahead demo: %d acts, every declared outcome reproduced\n"
-        % (len(acts),)
-    )
-    sys.stdout.write("wrote %s\n" % (os.path.join(options.output, "demo.json"),))
-    sys.stdout.write(
-        "wrote %s\n" % (os.path.join(options.output, "transcript.txt"),)
-    )
+    summarise(record, sys.stdout, transcript_path, record_path)
     return 0
 
 
