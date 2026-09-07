@@ -89,7 +89,7 @@ makes the change, not at release time.
   other commit. A reader who stops at the fold is no longer left holding a claim about
   the current `HEAD`.
 
-- **The README is about a third shorter**, 5,326 words to 3,688, with no generated
+- **The README is about a third shorter**, 5,326 words to 3,727, with no generated
   evidence block, retained terminal output or gated claim removed. Reasoning that a
   reference document already owns is now a pointer rather than a second copy, and two
   sections were merged into the ones that carried them: `how it works` restated the
