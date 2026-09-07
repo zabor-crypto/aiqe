@@ -11,11 +11,11 @@
 ## Checks
 
 - [ ] **Tests** — deterministic test added or updated, or N/A with a reason.
-- [ ] **Benchmarks** — affected case IDs listed and results regenerated, or no
-      benchmarked behaviour changed.
+- [ ] **Conformance** — affected case IDs listed and results regenerated, or no
+      covered behaviour changed.
 - [ ] **Security boundary** — does this touch Doctor's boundaries, commit preflight,
       effective config resolution, or checked-content binding? If yes, name the
-      benchmark case that covers it and request maintainer review.
+      conformance case that covers it and request maintainer review.
 - [ ] **Quant-contract semantics** — does this change what a contract asserts?
 - [ ] **Public-data safety** — no private paths, hostnames, usernames, credentials,
       real market data, or private identifiers, including inside generated assets.

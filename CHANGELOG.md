@@ -12,6 +12,27 @@ makes the change, not at release time.
 
 ### Added
 
+- **[`examples/aiqe.toml`](examples/aiqe.toml), a worked six-contract configuration.**
+  `aiqe init` deliberately scaffolds no surfaces and no validators, and the README
+  illustrated one contract of six, so a reader had nothing to copy for the other five.
+  This is an illustration, not a starting point: every validator in it names a command
+  that does not exist until you write it, so copying it unchanged reports those
+  validators `UNAVAILABLE` with `EXECUTABLE_NOT_FOUND`, their contracts
+  `CONTRACT_UNKNOWN`, and a refused completion — never a pass. An example whose checks
+  passed out of the box would be a green result nobody earned, from the one tool that
+  exists to say green is not evidence. Two tests keep it honest: one parses it through
+  the real fail-closed parser and requires all six families both declared on a surface
+  and bound to a required validator, the other refuses any validator that would succeed
+  without checking anything.
+
+- **A demo summary on standard output.** `python3 examples/lookahead-demo/run.py` printed
+  three lines while the argument sat on line 210 of a transcript nobody opened. It now
+  prints what the four acts measured, with act 2 given the room — the state where every
+  check the repository declares passes because nobody wrote the applicable one. The
+  `COVERAGE_GAP` row is lifted out of the rendered `AIQE CHECK` rather than described,
+  and every other value is read from the same record that `expected.json` gates, so a
+  summary disagreeing with the product fails the run that printed it.
+
 - **`aiqe --help`, `aiqe -h` and `aiqe help`.** All three print the canonical usage
   text on standard output and exit `0`. The surface previously had no help spelling at
   all: `--help` fell through to the unknown-argument path, printing usage to standard
@@ -39,6 +60,46 @@ makes the change, not at release time.
   The class now matches any single trailing letter, the corpus carries the shape that
   got through, and both instances are sanitised. Widening what a class *detects* is not
   widening it into an ignore, which stays forbidden.
+
+### Changed
+
+- **The lookahead demo no longer writes into the repository.** `--output` defaulted to
+  the tracked `examples/lookahead-demo/results/`, and the transcript legitimately carries
+  a task start timestamp that differs between runs, so an ordinary run of the demo left
+  the reader an uncommitted diff in the repository that argues nobody should accept an
+  unexplained change. Output now defaults to a fresh temporary directory whose path is
+  printed; `--output examples/lookahead-demo/results` is the regeneration path and the
+  only way the retained evidence is rewritten. The timestamps are untouched: rewriting
+  process output to make a diff go away is the failure this product exists to refuse.
+
+- **The README's first fold answers who it is for, and what it cannot prove.** The ICP —
+  quant developers and research engineers running Claude Code, Codex or a similar agent
+  against real strategy, backtest and research repositories — is now named rather than
+  implied, alongside what a passing suite does not tell you, the boundary that `PASS`
+  means only that a declared validator exited zero, and a one-command way to see the
+  argument without installing anything. The platform line carries its provenance into
+  the fold: proven on macOS and Linux by a retained full-lane release proof at the commit
+  that manifest names, not this one, which has had a Linux-only fast lane. A reader who
+  stops at the fold is no longer left holding a claim about the current `HEAD`.
+
+- **The README is about a third shorter**, 5,326 words to 3,688, with no generated
+  evidence block, retained terminal output or gated claim removed. Reasoning that a
+  reference document already owns is now a pointer rather than a second copy, and two
+  sections were merged into the ones that carried them: `how it works` restated the
+  workflow chain directly above it, and `evidence integrity` is the same boundary as
+  `change integrity`. [`docs/product-spec.md`](docs/product-spec.md) freezes the
+  resulting information architecture and the new above-the-fold order.
+
+- **Evidence vocabulary is fixed on every public surface.** `CONFORMANCE EVIDENCE`
+  (deterministic fixtures, regressions and adversarial negative controls),
+  `PLATFORM ATTESTATION` (executed OS, Python, install-path and CI evidence) and
+  `USER-EFFECT BENCHMARK` (a controlled comparison of what changes for the people using
+  it) are three categories, and "benchmark" is no longer the generic word for the first.
+  `USER-EFFECT BENCHMARK = NOT PUBLISHED`, stated compactly in the README so that no
+  reader infers a productivity, development-time, token, context, model-performance or
+  defect-prevention claim from conformance evidence. The `bench/` filesystem namespace
+  and the CI job identifiers are unchanged, and historical entries in this file were not
+  rewritten: a record of what was said at the time is worth more than a consistent one.
 
 ### Fixed
 

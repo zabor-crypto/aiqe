@@ -71,6 +71,6 @@
       "results": "bench/results/commit/results.json"
     }
   ],
-  "note": "Every capture is the exact rendered output of a synthetic benchmark case, copied from the retained result artifact named in its row. Nothing here was typed, and nothing was recorded against a real repository.",
+  "note": "Every capture is the exact rendered output of a synthetic conformance case, copied from the retained result artifact named in its row. Nothing here was typed, and nothing was recorded against a real repository.",
   "schema_version": 1
 }

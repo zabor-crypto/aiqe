@@ -60,7 +60,7 @@ and `receipt` write only AIQE's own machine-local state.
 That claim is scoped, and the scope matters: it is about **AIQE core's own writes**. It
 is not a claim that a validator cannot modify your worktree, that Git cannot mutate its
 own internal state, or that another process cannot change files while AIQE runs. The
-benchmark attributes every observed repository change to one cause — an authorised
+conformance corpus attributes every observed repository change to one cause — an authorised
 `init` write, a validator, the fixture, or AIQE core — and only the last is
 zero-tolerance.
 
@@ -75,7 +75,7 @@ is the strictest in the product.
 - Its configuration inspection is a bounded, static, first-contact inspection. It does
   **not** follow arbitrary configuration include chains.
 
-These are benchmark gates with zero tolerance, not aspirations.
+These are conformance gates with zero tolerance, not aspirations.
 
 ## Validator execution boundary
 
@@ -93,7 +93,7 @@ never as authorization. Consent is:
   reports `UNKNOWN` / `CONSENT_REQUIRED` rather than running anything.
 
 `--allow <id>` authorises one run and records nothing. The measured invariant is
-`UNCONSENTED_VALIDATOR_EXECUTIONS = 0`, and it is a benchmark gate with zero tolerance.
+`UNCONSENTED_VALIDATOR_EXECUTIONS = 0`, and it is a conformance gate with zero tolerance.
 
 Timeouts are mandatory, and a timeout is a `FAIL`. On timeout AIQE terminates **the
 process group it created** for that validator, so a script's ordinary children go with
@@ -101,7 +101,7 @@ it.
 
 That claim stops exactly there. AIQE does not bound every descendant and does not
 supervise a process tree: a child that calls `setsid` is in a different session and
-survives, and the benchmark keeps a fixture that demonstrates it rather than wording
+survives, and the corpus keeps a fixture that demonstrates it rather than wording
 around it. Delivering containment would mean building the sandbox this document says
 AIQE is not.
 

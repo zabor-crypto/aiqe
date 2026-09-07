@@ -225,7 +225,7 @@ a one-second timeout took thirty seconds before the group existed.
 
 AIQE does **not** bound every descendant, does not contain a process tree, and does not
 supervise one. A child that calls `setsid` is in a different session and outlives the
-kill. The benchmark keeps a fixture that demonstrates exactly that, so the stronger and
+kill. The conformance corpus keeps a fixture that demonstrates exactly that, so the stronger and
 false claim cannot quietly return to this page. Delivering containment would mean
 building the sandbox AIQE says it is not.
 
@@ -239,7 +239,7 @@ Output is **drained into a fixed-size tail as it arrives** — never read whole 
 truncated afterwards. A validator may be buggy or hostile and emit gigabytes, and the
 memory AIQE spends on it must not be a function of how much it decided to print. What
 is held is the budget plus one read buffer per stream, whatever the validator emits;
-the benchmark measures peak allocation across a thirty-two-fold change in output volume
+the corpus measures peak allocation across a thirty-two-fold change in output volume
 to keep that honest.
 
 The drain is also what stops the child deadlocking on a full pipe, so it runs for the

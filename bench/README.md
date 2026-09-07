@@ -3,13 +3,15 @@
 This directory holds the conformance protocol and, for each implemented product
 surface, the fixture builders and the retained results.
 
-Two things are deliberately kept apart, and only the first exists today:
+Three categories are deliberately kept apart, and the last does not exist:
 
 ```
 CONFORMANCE EVIDENCE   deterministic fixtures, regressions and adversarial
                        negative controls proving how AIQE behaves     PRESENT
+PLATFORM ATTESTATION   executed OS, Python, install-path and CI evidence;
+                       aggregated into the release-proof manifest      PRESENT
 USER-EFFECT BENCHMARK  a comparative experiment measuring what changes
-                       for someone using it                           NONE YET
+                       for someone using it                      NOT PUBLISHED
 ```
 
 Nothing here measures speed, productivity, defect-prevention rates or model

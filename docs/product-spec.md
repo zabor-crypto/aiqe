@@ -73,16 +73,14 @@ These bind every public surface — README, documentation, assets, and release n
 Frozen section order:
 
 ```
-hero / status / first command
-AIQE in 30 seconds — the chain, before/after, the three unknowns
+first fold — see below
+AIQE in 30 seconds — before/after, and what the product is
 failure-first demo
 five-minute quickstart
-how it works
-change integrity
-evidence integrity
+change integrity — bounded pathset, and the check-to-commit binding
 numerical integrity
 working with Claude Code and Codex
-benchmarks
+conformance evidence
 where it runs — support, packaging, external CI
 security and trust model
 what AIQE does not do — and cannot prove
@@ -92,15 +90,62 @@ license
 ```
 
 Sections without substance yet are omitted or reduced to a single pointer line. Empty
-headings are not shipped.
+headings are not shipped. A section whose reasoning is fully owned by a reference
+document is a pointer, not a second copy: the README states the load-bearing sentence and
+links, and the document carries the mechanism.
 
-Above the fold, in order: wordmark, hero statement, one-sentence explanation, the Task
-Receipt, one paragraph reading it, the status line, the first command, and the support
-line. Nothing else.
+Above the fold, in order:
+
+```
+wordmark
+hero statement
+WHO and WHAT      the ICP named explicitly, then one sentence on what AIQE does
+WHY               what a passing suite does not tell you: what changed, which check
+                  was never written, and whether a number is real
+the artifact      the post-commit Task Receipt
+reading it        one paragraph
+WHAT IT CANNOT PROVE   one line, linking to the boundary section
+status            released / tagged state
+first command     install
+try it now        the lookahead demo, which needs no install
+platform line     with the provenance of the evidence behind it
+the no-list       no telemetry, no network, no model calls, no daemon, never pushes
+```
+
+Nothing else. The ICP is named rather than implied: a reader who is not a quant
+engineer should be able to tell that in the first two lines, and one who is should see
+their own repository described.
 
 The Task Receipt in the hero is the **post-commit** one — the only place `REVIEWABLE`
 appears. A pre-commit receipt above the fold would put the product's central refusal in
 the position a reader takes for its result.
+
+## Evidence vocabulary
+
+Three categories, kept apart on every public surface. They are not synonyms and one may
+never be presented as another:
+
+```
+CONFORMANCE EVIDENCE    deterministic fixtures, regressions and adversarial negative
+                        controls measuring whether AIQE behaves as specified
+PLATFORM ATTESTATION    executed OS, Python, install-path and CI evidence — which
+                        surfaces actually ran, and at what level
+USER-EFFECT BENCHMARK   a controlled comparison of what changes for the people and
+                        agents using AIQE
+```
+
+`bench/` stays the filesystem namespace for the conformance corpus; the rename is
+vocabulary on public surfaces, not on disk. Historical `CHANGELOG.md` entries are not
+rewritten to match — a record of what was said at the time is worth more than a
+consistent one.
+
+**USER-EFFECT BENCHMARK = NOT PUBLISHED.** No controlled comparison exists. Until one
+does, no public surface may claim or imply a productivity gain, a development-time
+reduction, a token or context saving, an improvement in model or agent performance, or a
+general defect-prevention rate. Conformance evidence measures AIQE's behaviour and says
+nothing about any of those. The README states the absence in one compact paragraph rather
+than reserving space for numbers that do not exist: an empty metric card would make a
+product that is honestly scoped look unfinished instead.
 
 ## Visual system
 

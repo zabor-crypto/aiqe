@@ -6,13 +6,13 @@ specific about the few things that genuinely matter for this project.
 ## Before you start
 
 AIQE has no released artifact yet. The v1 workflow — `doctor`, `init`, `task`, `check`,
-`receipt` and `commit` — is implemented and tested, and the benchmark materialises four
+`receipt` and `commit` — is implemented and tested, and the conformance corpus materialises four
 families over it: Doctor, task, check and commit. Useful contributions are to any of
-those commands, to the benchmark fixtures, to the specification, and to the
+those commands, to the conformance fixtures, to the specification, and to the
 documentation.
 
-The architecture and the benchmark protocol are **frozen**. That is deliberate: the
-product was specified before it was built so that the benchmark tests the design rather
+The architecture and the conformance protocol are **frozen**. That is deliberate: the
+product was specified before it was built so that the corpus tests the design rather
 than discovering one. A change to frozen material needs a demonstrated contradiction,
 not a preference.
 
@@ -47,7 +47,7 @@ python3 bench/render-assets.py
 ```
 
 `render-assets.py` checks rather than writes: it fails if the captures or the README
-benchmark block have drifted from the retained result artifacts.
+conformance block have drifted from the retained result artifacts.
 
 Two cases are restricted to Linux: the arbitrary-byte path fixtures need a filesystem
 that accepts non-UTF-8 filenames, and APFS does not. They are reported as skipped
@@ -64,9 +64,9 @@ that depends on wall-clock time, network access, or the contents of the machine 
 on. If a behaviour cannot be tested deterministically, say so in the pull request and
 explain why.
 
-## Benchmark expectations
+## Conformance expectations
 
-If a change affects behaviour that the benchmark covers:
+If a change affects behaviour the conformance corpus covers:
 
 - name the affected case IDs in the pull request;
 - regenerate the result artifacts;
@@ -110,7 +110,7 @@ conversation to have.
 
 Anything touching Doctor's boundaries, commit preflight, effective configuration
 resolution, or checked-content binding requires explicit maintainer review and must name
-the benchmark case that covers it. Flag it in the pull request checklist.
+the conformance case that covers it. Flag it in the pull request checklist.
 
 For vulnerabilities, follow [`SECURITY.md`](SECURITY.md) — not a public issue.
 

@@ -165,7 +165,7 @@ def render_captures():
                 "schema_version": 1,
                 "note": (
                     "Every capture is the exact rendered output of a synthetic "
-                    "benchmark case, copied from the retained result artifact "
+                    "conformance case, copied from the retained result artifact "
                     "named in its row. Nothing here was typed, and nothing was "
                     "recorded against a real repository."
                 ),

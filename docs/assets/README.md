@@ -5,7 +5,7 @@ Terminal captures, and the rules any later visual asset has to follow.
 ## What is here
 
 [`captures/`](captures/) holds one plain-text file per screenshotable surface, each the
-exact rendered output of a synthetic benchmark case, plus
+exact rendered output of a synthetic conformance case, plus
 [`captures/index.json`](captures/index.json) naming the family, the result artifact, the
 case and the field every capture was taken from.
 
@@ -20,7 +20,7 @@ commit-reviewable.txt             the bounded completion commit
 receipt-postcommit-reviewable.txt the post-commit receipt — the only REVIEWABLE
 ```
 
-Regenerate them, and the README's benchmark block, from the retained results:
+Regenerate them, and the README's conformance block, from the retained results:
 
 ```bash
 python3 bench/render-assets.py --write
@@ -36,7 +36,7 @@ An SVG contains live text. A terminal cast recorded on a working machine embeds 
 machine's absolute paths, its username, and often the repository's real name — and it
 will pass any review that only reads the Markdown. So no asset is ever recorded against
 a real repository. These captures come from synthetic fixtures built from nothing by
-the benchmark builders, and any later visual asset is rendered from a capture here
+the conformance builders, and any later visual asset is rendered from a capture here
 rather than from somebody's terminal.
 
 ## Rules for a rendered asset
