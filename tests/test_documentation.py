@@ -8,6 +8,8 @@ that stopped being true when the implementation landed.
 
 import os
 import shutil
+import sys
+import tempfile
 import unittest
 
 from . import support
@@ -733,13 +735,16 @@ class ProductPackageTests(unittest.TestCase):
                 self.assertIn(contract, declared, "%s is on no surface" % (contract,))
                 self.assertIn(contract, bound, "%s has no validator" % (contract,))
 
-    def test_the_starter_example_cannot_hand_anyone_an_unearned_pass(self):
-        """The file's own header makes this claim, so it is checked rather
-        than trusted: no validator may be a command that trivially succeeds.
+    def test_no_placeholder_validator_is_a_command_that_trivially_succeeds(self):
+        """A shape check on the example, and only that.
 
-        A starter configuration whose checks pass out of the box is worse than
-        no starter configuration - it is a green result nobody earned, from
-        the one tool that exists to say that green is not evidence.
+        It catches an edit that replaced a placeholder with `true` or `echo`,
+        which would let a copied configuration close a contract without
+        checking anything. It does **not** establish what the copied file
+        reports - a denylist of command names cannot, and reading it as
+        though it could is how this example came to carry an absolute claim
+        that execution disproved. The end-to-end pair in
+        `StarterExampleBoundaryTests` is what covers the behaviour.
         """
         import tempfile
 
@@ -837,6 +842,165 @@ class ProductPackageTests(unittest.TestCase):
             "not yet implemented",
         ):
             self.assertNotIn(stale, lowered, stale)
+
+
+class StarterExampleBoundaryTests(unittest.TestCase):
+    """What copying `examples/aiqe.toml` unchanged does, and does not, establish.
+
+    Both cases below copy the published file byte-for-byte and drive the real
+    `aiqe` entry point against a repository built from nothing. Both also put
+    a `pytest` on PATH that succeeds, so the example's one generic validator
+    passes in each - which leaves exactly one variable between them, the
+    surface the change landed on.
+
+    The pair exists because the documentation once said the copied file could
+    not produce a pass "under no arrangement". That was false, and no unit
+    test caught it: the assertion in place tested a denylist of command names,
+    which is a property of the file rather than of what AIQE does with it. A
+    claim about behaviour needs the behaviour executed.
+    """
+
+    EXAMPLE = os.path.join(support.ROOT, "examples", "aiqe.toml")
+    TIMEOUT_SECONDS = 300
+
+    def build(self, case, owned, seed):
+        """A repository carrying the published example, unchanged.
+
+        `owned` is created and committed, then modified, so the task owns one
+        changed path. Nothing else is declared.
+        """
+        from fixtures.repobuild import git
+
+        env = case.env()
+        root = case.repo_path
+
+        # A `pytest` that succeeds: the repository-native command the example
+        # tells the adopter to supply. Supplying it is the adopter's job, and
+        # supplying it here is what makes the two cases comparable.
+        binaries = os.path.join(case.root, "bin")
+        os.makedirs(binaries)
+        stub = os.path.join(binaries, "pytest")
+        with open(stub, "w") as handle:
+            handle.write("#!/bin/sh\nexit 0\n")
+        os.chmod(stub, 0o755)
+        env["PATH"] = binaries + os.pathsep + env["PATH"]
+
+        os.makedirs(root)
+        git(root, "init", "--quiet", ".", env=env)
+        git(root, "config", "user.email", "fixture@example.invalid", env=env)
+        git(root, "config", "user.name", "AIQE Fixture", env=env)
+
+        shutil.copy(self.EXAMPLE, os.path.join(root, "aiqe.toml"))
+        with open(self.EXAMPLE, "rb") as handle:
+            published = handle.read()
+        with open(os.path.join(root, "aiqe.toml"), "rb") as handle:
+            self.assertEqual(
+                handle.read(), published, "the example was not copied unchanged"
+            )
+
+        target = os.path.join(root, owned)
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        with open(target, "w") as handle:
+            handle.write(seed + "\n")
+        git(root, "add", "--all", env=env)
+        git(root, "commit", "--quiet", "--message", "initial", env=env)
+        with open(target, "w") as handle:
+            handle.write(seed + " changed\n")
+        return root, env
+
+    def aiqe(self, root, env, *arguments):
+        import subprocess
+
+        child = dict(env)
+        child["PYTHONPATH"] = support.SOURCE
+        child["PYTHONDONTWRITEBYTECODE"] = "1"
+        return subprocess.run(
+            [sys.executable, "-m", "aiqe"] + list(arguments),
+            cwd=root,
+            env=child,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=self.TIMEOUT_SECONDS,
+        )
+
+    def verdict(self, output):
+        for line in output.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("Verdict"):
+                return stripped.split()[-1]
+        return None
+
+    def run_case(self, name, owned, allow):
+        directory = tempfile.mkdtemp(prefix="aiqe-starter-%s-" % (name,))
+        self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
+        case = support.measurement.Case(name, os.path.join(directory, name))
+        root, env = self.build(case, owned, "value = 1")
+
+        started = self.aiqe(root, env, "task", "start", "--own", owned)
+        self.assertEqual(started.returncode, 0, started.stderr.decode("utf-8", "replace"))
+
+        arguments = ["check"]
+        for identifier in allow:
+            arguments += ["--allow", identifier]
+        check = self.aiqe(root, env, *arguments)
+        commit = self.aiqe(root, env, "commit", "-m", "bounded completion")
+        receipt = self.aiqe(root, env, "receipt")
+        return {
+            "check": check.stdout.decode("utf-8", "replace"),
+            "check_exit": check.returncode,
+            "commit_exit": commit.returncode,
+            "receipt": receipt.stdout.decode("utf-8", "replace"),
+            "verdict": self.verdict(receipt.stdout.decode("utf-8", "replace")),
+        }
+
+    def test_a_quant_change_is_refused_while_the_placeholders_are_unwritten(self):
+        """The guarantee the example actually carries.
+
+        A change under one of its `quant = true` surfaces, with the
+        placeholder quant commands still unwritten. The generic suite passes;
+        the contracts bound to those commands are unmeasured, and an
+        unmeasured contract is not a covered one.
+        """
+        result = self.run_case(
+            "quant",
+            "src/strategy/momentum.py",
+            ("unit", "causality", "alignment", "train-test-separation"),
+        )
+        self.assertIn("EXECUTABLE_NOT_FOUND", result["check"])
+        self.assertIn("CONTRACT_UNKNOWN", result["check"])
+        self.assertIn("unit", result["check"])
+        self.assertIn("PASS", result["check"], "the generic suite should have passed")
+        self.assertNotEqual(
+            result["verdict"],
+            "REVIEWABLE",
+            "a quant change reached REVIEWABLE with no quant validator run",
+        )
+        self.assertEqual(result["verdict"], "INCOMPLETE")
+        self.assertNotEqual(result["commit_exit"], 0, "a commit was created")
+
+    def test_a_non_quant_change_can_legitimately_reach_reviewable(self):
+        """The limit of that guarantee, kept in the suite on purpose.
+
+        `scripts/**` is declared `quant = false` by the example, so no quant
+        contract applies to a change there. With the one applicable declared
+        check present and passing, `REVIEWABLE` is the correct answer, and the
+        documentation may not say otherwise. This test is what stops the
+        wording drifting back to "never a pass".
+        """
+        result = self.run_case("nonquant", "scripts/report.py", ("unit",))
+        self.assertEqual(
+            result["verdict"],
+            "REVIEWABLE",
+            "a non-quant change with every applicable check passing was refused",
+        )
+        self.assertEqual(result["commit_exit"], 0)
+        self.assertIn("0 quant · 1 non-quant", result["receipt"])
+        self.assertIn(
+            "0 applicable",
+            result["receipt"],
+            "the receipt should record that no contract applied",
+        )
 
 
 class AgentReferenceTests(unittest.TestCase):

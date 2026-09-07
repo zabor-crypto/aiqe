@@ -197,12 +197,24 @@ visible rather than silent.
 scaffold filled in: five surfaces across a research repository, all six launch
 contracts declared, and a required validator bound to each.
 
-It is an illustration and not a starting point, which is the useful part. Every
-validator in it names a command that does not exist until you write it, so copying it
-unchanged produces `UNAVAILABLE` validators, `CONTRACT_UNKNOWN` contracts and a refused
-completion — never a pass. An example that shipped commands which trivially succeeded
-would be a green result nobody earned, and `tests/test_documentation.py` asserts that
-none of them can be.
+It is an illustration and not a starting point, which is the useful part. Its validator
+commands are placeholders: AIQE ships no validators, so implementing or replacing them is
+the adopter's work, and what a copied configuration reports depends on which declared
+surface changed and on which of those commands actually exist and succeed.
+
+Change a path under one of its `quant = true` surfaces with the placeholders still
+unwritten and the bound validators come back `UNAVAILABLE`, their contracts
+`CONTRACT_UNKNOWN`, and the completion is refused. Change a path the example declares
+non-quant — `scripts/**`, say — and no quant contract applies at all; if every applicable
+declared check exists and passes, the result can legitimately be `REVIEWABLE`. That is the
+verdict describing the checks that applied to the change that was made, which is what a
+verdict is for.
+
+So copying the file establishes nothing about whether your numerical work is adequately
+checked. Contract evidence exists only for validators actually bound to an applicable
+contract and actually executed. `tests/test_documentation.py` drives both paths end to
+end against the real check path, so neither the guarantee nor its limit can quietly
+change.
 
 ## Exit status
 

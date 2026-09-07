@@ -62,8 +62,8 @@ python3 examples/lookahead-demo/run.py
 ```
 
 Proven on macOS and Linux by a retained full-lane release proof — at the commit that
-manifest names, not this one; this commit has had a Linux-only fast lane. Windows is out
-of scope. [Where it runs](#where-it-runs).
+manifest names, which is not this one. No macOS evidence is claimed for any other commit.
+Windows is out of scope. [Where it runs](#where-it-runs).
 
 No telemetry. No network calls. No model calls. No daemon. AIQE never pushes.
 
@@ -200,8 +200,8 @@ says so rather than print a confident zero. [`docs/doctor.md`](docs/doctor.md).
 `init` writes exactly one repository path — `./aiqe.toml` — after showing you the file and
 asking. It declares **no** surfaces and **no** validators: a wrong guess about what is
 quant-critical would be a configuration nobody wrote and everybody trusts.
-[`examples/aiqe.toml`](examples/aiqe.toml) illustrates all six contracts, naming commands
-that deliberately do not exist so copying it yields a refusal, not a pass.
+[`examples/aiqe.toml`](examples/aiqe.toml) illustrates all six contracts; its validator
+commands are placeholders, and writing them is yours.
 [`docs/config.md`](docs/config.md).
 
 **4 · Declare what this piece of work owns, before doing it.**
@@ -567,8 +567,7 @@ manual dispatch. Only the full lane produces a manifest that can carry a support
 and no complete CI run has attested the current HEAD, so nothing claims one has:
 [`docs/support.md`](docs/support.md#11-the-attestation-this-manifest-does-not-carry).
 
-The current HEAD has had a fast-lane run and it passed — every job it executed succeeded,
-establishing by execution:
+A push to `main` runs the fast lane, over these surfaces:
 
 ```
 Ubuntu 22.04  x86_64    full suite · installed artifact
@@ -577,11 +576,15 @@ Ubuntu 24.04  arm64     full suite · installed artifact
 Debian 11     x86_64    artifact builds and installs; AIQE refuses to run
 ```
 
-The macOS matrix did not run in that lane, so it is no evidence about macOS at this
-commit, and the manifest records every claimed Python minor as `NOT_PROVEN` — naming the
-missing observation rather than rounding up. There is no CI badge here for the same reason
-there is no safety score: one from a lane that never touched half the matrix would be a
-false maturity claim.
+What that establishes is bound to the run that produced it and to the commit that run
+names — not to the branch, and not to whatever `main` points at when you read this. The
+fast lane touches no macOS surface, so the manifest it produces records every claimed
+Python minor as `NOT_PROVEN`, naming the missing observation rather than rounding up, and
+the retained full-lane evidence above applies only to the commit its own manifest names.
+
+There is no CI badge here for the same reason there is no safety score: a badge asserts a
+branch is green, while the thing worth knowing is which commit was measured and on what.
+A run's own record answers that; a badge cannot.
 
 ## Security and trust model
 

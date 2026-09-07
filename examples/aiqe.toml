@@ -3,20 +3,37 @@
 #
 # THIS FILE IS AN EXAMPLE, NOT A STARTING CONFIGURATION THAT WORKS.
 #
-# Every validator below names a command that does not exist until you write
-# it. That is deliberate, and it is the whole point of the file. Copy this in
-# unchanged and `aiqe check` reports those validators UNAVAILABLE with
-# EXECUTABLE_NOT_FOUND, every contract they were bound to CONTRACT_UNKNOWN,
-# and refuses completion. Under no arrangement does it report a pass. A file
-# that shipped commands which trivially succeeded would hand you a green
-# result you had not earned, which is the exact failure this product exists
-# to refuse.
+# What it demonstrates: the shape of a configuration that declares all six
+# contract families across a research repository, and binds a required
+# validator to each. That is all it demonstrates.
 #
-# AIQE ships no validators. It cannot: a check AIQE wrote would be a check
-# that has never seen your data, your venue, your accounting identity or your
-# resampling rules. Declaring the surfaces is a job only you can do, and
-# writing the commands that check them is the work this file is asking you to
-# do rather than pretending to have done for you.
+# The validator commands below are placeholders. AIQE ships no validators and
+# cannot: a check AIQE wrote would be a check that has never seen your data,
+# your venue, your accounting identity or your resampling rules. Every command
+# here is yours to review, implement or replace.
+#
+# What you get from copying this unchanged depends on two things, and it is
+# worth being precise about them, because the file cannot decide either:
+#
+#   * which declared surface your change touched. A change under a `quant =
+#     true` surface pulls in that surface's contracts; a change under the
+#     non-quant surface pulls in none of them.
+#   * which of the configured commands actually exist and succeed on your
+#     machine.
+#
+# So a change to a quant surface, with these placeholder commands still
+# unwritten, gets you UNAVAILABLE validators, CONTRACT_UNKNOWN contracts and a
+# refused completion — the state this file is built to produce. But a change
+# to a path this example declares non-quant, such as `scripts/**`, applies no
+# quant contract at all, and if every applicable declared check does exist and
+# passes, AIQE can legitimately report REVIEWABLE. That is correct behaviour,
+# not a loophole: the verdict is about the checks that applied to the change
+# that was made, and none of the quant contracts applied to it.
+#
+# Which is the point worth carrying away: copying this file tells you nothing
+# about whether your repository's numerical work is adequately checked.
+# Contract evidence exists only for validators that were actually bound to an
+# applicable contract and actually ran. Until you write them, this is a shape.
 #
 # `aiqe init` writes a scaffold that declares no surfaces and no validators at
 # all, for the same reason: a guess that happened to be wrong would be a
@@ -89,10 +106,11 @@ quant = false
 # `required = true` is what makes coverage real. An optional validator does
 # not close a gap, and neither does a generic suite.
 #
-# NONE OF THE COMMANDS BELOW EXIST. Replace each one with the command in your
-# repository that actually asks that question, and delete any family you have
-# not written a check for — leaving it declared and uncovered is the honest
-# state, and AIQE will keep saying so.
+# THE COMMANDS BELOW ARE PLACEHOLDERS, chosen to be unlikely to exist rather
+# than guaranteed not to — this file cannot know what is on your machine.
+# Replace each one with the command in your repository that actually asks that
+# question, and delete any family you have not written a check for: leaving it
+# declared and uncovered is the honest state, and AIQE will keep saying so.
 
 # The general suite. Bound to no contract on purpose: it is evidence that the
 # tests that exist passed, and nothing more.

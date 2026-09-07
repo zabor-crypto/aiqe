@@ -15,15 +15,21 @@ makes the change, not at release time.
 - **[`examples/aiqe.toml`](examples/aiqe.toml), a worked six-contract configuration.**
   `aiqe init` deliberately scaffolds no surfaces and no validators, and the README
   illustrated one contract of six, so a reader had nothing to copy for the other five.
-  This is an illustration, not a starting point: every validator in it names a command
-  that does not exist until you write it, so copying it unchanged reports those
-  validators `UNAVAILABLE` with `EXECUTABLE_NOT_FOUND`, their contracts
-  `CONTRACT_UNKNOWN`, and a refused completion — never a pass. An example whose checks
-  passed out of the box would be a green result nobody earned, from the one tool that
-  exists to say green is not evidence. Two tests keep it honest: one parses it through
-  the real fail-closed parser and requires all six families both declared on a surface
-  and bound to a required validator, the other refuses any validator that would succeed
-  without checking anything.
+  This is an illustration, not a starting point. Its validator commands are
+  placeholders: AIQE ships none, so implementing or replacing them is the adopter's
+  work, and what a copied configuration reports depends on which declared surface the
+  change touched and on which of those commands exist and succeed. Change a path under
+  one of its `quant = true` surfaces with the placeholders unwritten and the bound
+  validators come back `UNAVAILABLE` with `EXECUTABLE_NOT_FOUND`, their contracts
+  `CONTRACT_UNKNOWN`, and the completion is refused — even when the generic suite
+  passes. Change a path it declares non-quant, such as `scripts/**`, and no quant
+  contract applies at all; with every applicable declared check passing, `REVIEWABLE`
+  is the correct answer. So copying the file establishes nothing about whether a
+  repository's numerical work is adequately checked. Three tests hold that boundary:
+  the file is parsed by the real fail-closed parser with all six families declared on a
+  surface and bound to a required validator, and both paths above are driven end to end
+  against the real check path — the second one deliberately, so the wording cannot drift
+  back toward an absolute.
 
 - **A demo summary on standard output.** `python3 examples/lookahead-demo/run.py` printed
   three lines while the argument sat on line 210 of a transcript nobody opened. It now
@@ -79,8 +85,9 @@ makes the change, not at release time.
   means only that a declared validator exited zero, and a one-command way to see the
   argument without installing anything. The platform line carries its provenance into
   the fold: proven on macOS and Linux by a retained full-lane release proof at the commit
-  that manifest names, not this one, which has had a Linux-only fast lane. A reader who
-  stops at the fold is no longer left holding a claim about the current `HEAD`.
+  that manifest names, which is not this one, and no macOS evidence is claimed for any
+  other commit. A reader who stops at the fold is no longer left holding a claim about
+  the current `HEAD`.
 
 - **The README is about a third shorter**, 5,326 words to 3,688, with no generated
   evidence block, retained terminal output or gated claim removed. Reasoning that a
@@ -89,6 +96,15 @@ makes the change, not at release time.
   workflow chain directly above it, and `evidence integrity` is the same boundary as
   `change integrity`. [`docs/product-spec.md`](docs/product-spec.md) freezes the
   resulting information architecture and the new above-the-fold order.
+
+- **CI evidence is described by lane rather than by branch state.** The External CI
+  section said the current `HEAD` had had a passing fast-lane run, which is a sentence
+  that is false on an unlanded candidate, stale the moment anything else lands, and
+  unverifiable by a reader either way. It now says what the lanes are and what binds a
+  result: a push to `main` runs the fast lane over the Linux surfaces listed, and what
+  that establishes belongs to the run that produced it and the commit that run names —
+  not to the branch. The absence of a badge is explained the same way, since a badge
+  asserts a branch is green when the thing worth knowing is which commit was measured.
 
 - **Evidence vocabulary is fixed on every public surface.** `CONFORMANCE EVIDENCE`
   (deterministic fixtures, regressions and adversarial negative controls),
