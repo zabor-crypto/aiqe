@@ -932,6 +932,8 @@ class StarterExampleBoundaryTests(unittest.TestCase):
         return None
 
     def run_case(self, name, owned, allow):
+        import json
+
         directory = tempfile.mkdtemp(prefix="aiqe-starter-%s-" % (name,))
         self.addCleanup(shutil.rmtree, directory, ignore_errors=True)
         case = support.measurement.Case(name, os.path.join(directory, name))
@@ -946,38 +948,69 @@ class StarterExampleBoundaryTests(unittest.TestCase):
         check = self.aiqe(root, env, *arguments)
         commit = self.aiqe(root, env, "commit", "-m", "bounded completion")
         receipt = self.aiqe(root, env, "receipt")
+        document = self.aiqe(root, env, "receipt", "--format", "json")
         return {
             "check": check.stdout.decode("utf-8", "replace"),
             "check_exit": check.returncode,
             "commit_exit": commit.returncode,
             "receipt": receipt.stdout.decode("utf-8", "replace"),
             "verdict": self.verdict(receipt.stdout.decode("utf-8", "replace")),
+            "document": json.loads(document.stdout.decode("utf-8", "replace")),
         }
 
-    def test_a_quant_change_is_refused_while_the_placeholders_are_unwritten(self):
+    def test_a_quant_change_is_refused_when_required_quant_validation_does_not_pass(
+        self,
+    ):
         """The guarantee the example actually carries.
 
-        A change under one of its `quant = true` surfaces, with the
-        placeholder quant commands still unwritten. The generic suite passes;
-        the contracts bound to those commands are unmeasured, and an
-        unmeasured contract is not a covered one.
+        A change under one of its `quant = true` surfaces, with the placeholder
+        quant commands still the reader's to write.
+
+        *How* an unwritten placeholder fails is the environment's business. A
+        machine with no `python` on `PATH` cannot run the command; one that has
+        it runs the command and the command fails. The example says as much
+        itself - its commands are "chosen to be unlikely to exist rather than
+        guaranteed not to". An earlier version of this test asserted one of
+        those two reports, passed here and failed on every Linux surface. So it
+        asserts the contract instead, from the structured receipt: the quant
+        contracts applied, none was established, and nothing was committed.
         """
         result = self.run_case(
             "quant",
             "src/strategy/momentum.py",
             ("unit", "causality", "alignment", "train-test-separation"),
         )
-        self.assertIn("EXECUTABLE_NOT_FOUND", result["check"])
-        self.assertIn("CONTRACT_UNKNOWN", result["check"])
-        self.assertIn("unit", result["check"])
-        self.assertIn("PASS", result["check"], "the generic suite should have passed")
-        self.assertNotEqual(
-            result["verdict"],
-            "REVIEWABLE",
-            "a quant change reached REVIEWABLE with no quant validator run",
+        document = result["document"]
+
+        # The precondition that makes the case worth measuring: the repository's
+        # own generic check is green, so nothing below is refused for want of it.
+        self.assertEqual(document["validators"]["outcomes"]["PASS"], 1)
+
+        # Quant contracts applied, and not one of them was established.
+        self.assertGreater(
+            document["classification"]["applicable_contracts"],
+            0,
+            "no quant contract applied, so this case proves nothing",
         )
-        self.assertEqual(result["verdict"], "INCOMPLETE")
-        self.assertNotEqual(result["commit_exit"], 0, "a commit was created")
+        self.assertEqual(
+            document["coverage"]["COVERED"],
+            0,
+            "a contract was established with no quant validator passing",
+        )
+        self.assertLess(
+            document["validators"]["required_passed"],
+            document["validators"]["required_total"],
+        )
+
+        # And therefore: no unearned outcome, and nothing committed.
+        self.assertNotEqual(
+            document["verdict"],
+            "REVIEWABLE",
+            "a quant change reached REVIEWABLE with no quant contract covered",
+        )
+        self.assertEqual(document["commit"], "NONE", "a commit was created")
+        self.assertNotEqual(result["check_exit"], 0, "check reported success")
+        self.assertNotEqual(result["commit_exit"], 0, "commit reported success")
 
     def test_a_non_quant_change_can_legitimately_reach_reviewable(self):
         """The limit of that guarantee, kept in the suite on purpose.
