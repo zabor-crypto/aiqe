@@ -22,8 +22,11 @@
 #     machine.
 #
 # So a change to a quant surface, with these placeholder commands still
-# unwritten, gets you UNAVAILABLE validators, CONTRACT_UNKNOWN contracts and a
-# refused completion — the state this file is built to produce. But a change
+# unwritten, does not establish the required quant contracts, and the
+# completion is refused — the state this file is built to produce. Exactly
+# how that is reported is the machine's business, not this file's: a command
+# that cannot be found and one that runs and fails are different
+# observations, and neither of them is coverage. But a change
 # to a path this example declares non-quant, such as `scripts/**`, applies no
 # quant contract at all, and if every applicable declared check does exist and
 # passes, AIQE can legitimately report REVIEWABLE. That is correct behaviour,

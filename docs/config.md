@@ -203,8 +203,10 @@ the adopter's work, and what a copied configuration reports depends on which dec
 surface changed and on which of those commands actually exist and succeed.
 
 Change a path under one of its `quant = true` surfaces with the placeholders still
-unwritten and the bound validators come back `UNAVAILABLE`, their contracts
-`CONTRACT_UNKNOWN`, and the completion is refused. Change a path the example declares
+unwritten and the required quant contracts are not established, so the completion is
+refused. How that is reported depends on the machine — a command that cannot be found
+and a command that runs and fails are different observations, and neither is coverage.
+Change a path the example declares
 non-quant — `scripts/**`, say — and no quant contract applies at all; if every applicable
 declared check exists and passes, the result can legitimately be `REVIEWABLE`. That is the
 verdict describing the checks that applied to the change that was made, which is what a

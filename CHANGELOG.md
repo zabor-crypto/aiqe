@@ -19,17 +19,18 @@ makes the change, not at release time.
   placeholders: AIQE ships none, so implementing or replacing them is the adopter's
   work, and what a copied configuration reports depends on which declared surface the
   change touched and on which of those commands exist and succeed. Change a path under
-  one of its `quant = true` surfaces with the placeholders unwritten and the bound
-  validators come back `UNAVAILABLE` with `EXECUTABLE_NOT_FOUND`, their contracts
-  `CONTRACT_UNKNOWN`, and the completion is refused — even when the generic suite
-  passes. Change a path it declares non-quant, such as `scripts/**`, and no quant
-  contract applies at all; with every applicable declared check passing, `REVIEWABLE`
-  is the correct answer. So copying the file establishes nothing about whether a
-  repository's numerical work is adequately checked. Three tests hold that boundary:
-  the file is parsed by the real fail-closed parser with all six families declared on a
-  surface and bound to a required validator, and both paths above are driven end to end
-  against the real check path — the second one deliberately, so the wording cannot drift
-  back toward an absolute.
+  one of its `quant = true` surfaces with the placeholders unwritten and the required
+  quant contracts are not established, so the completion is refused — even when the
+  generic suite passes, and whatever the machine reports about commands it could not
+  find or could not run successfully. Change a path it declares non-quant, such as
+  `scripts/**`, and no quant contract applies at all; with every applicable declared
+  check passing, `REVIEWABLE` is the correct answer. So copying the file establishes
+  nothing about whether a repository's numerical work is adequately checked. Three
+  tests hold that boundary: the file is parsed by the real fail-closed parser with all
+  six families declared on a surface and bound to a required validator, and both paths
+  above are driven end to end against the real check path, reading the structured
+  receipt rather than a rendered reason — the second one deliberately, so the wording
+  cannot drift back toward an absolute.
 
 - **A demo summary on standard output.** `python3 examples/lookahead-demo/run.py` printed
   three lines while the argument sat on line 210 of a transcript nobody opened. It now
