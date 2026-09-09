@@ -318,6 +318,31 @@ AIQE runs nothing until you give explicit local consent to that **exact** defini
 bound by a digest and never stored in `aiqe.toml` or `.git`. A non-interactive check never
 prompts — the outcome is `UNKNOWN` with `CONSENT_REQUIRED`, neither pass nor failure.
 
+Conformance case `consent_withheld`:
+
+```
+AIQE CHECK
+
+  Owned paths     1 declared · 1 changed
+  Classification  1 quant · 0 non-quant · 0 unclassified
+
+  Contracts
+      CAUSALITY              CONTRACT_UNKNOWN causality
+
+  Validators
+      unit                   required  UNKNOWN      CONSENT_REQUIRED
+      causality              required  UNKNOWN      CONSENT_REQUIRED
+
+  Evidence        CURRENT
+  Completion      INCOMPLETE
+  Reasons         REQUIRED_VALIDATOR_UNKNOWN · CONTRACT_UNKNOWN
+```
+
+`UNKNOWN` is a third answer rather than a soft failure. The validators did not run, so
+the contract they were bound to is `CONTRACT_UNKNOWN` — not covered, and not failed
+either. A tool that resolved this to a pass would be guessing, and one that resolved it
+to a failure would be reporting a defect nobody measured.
+
 ## Change integrity
 
 AIQE bounds what a completion commit may contain. Foreign staged state is captured as a

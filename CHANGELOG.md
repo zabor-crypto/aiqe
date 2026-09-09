@@ -12,6 +12,19 @@ makes the change, not at release time.
 
 ### Added
 
+- **The fail-closed `UNKNOWN` check, shown rather than described.** The README asserted
+  in one sentence that a non-interactive check resolves to `UNKNOWN` with
+  `CONSENT_REQUIRED`, while the retained artifact for that exact case sat unpublished in
+  `bench/results/check/results.json` and in `docs/assets/captures/check-unknown.txt`.
+  Five of the page's terminal blocks were copied from retained output and this state —
+  the one the frozen visual system calls the signature state, and the one the product
+  exists to surface — was the reader's to take on trust. It is now the `consent_withheld`
+  case, copied from the artifact, and two tests hold it there: one comparing the block to
+  the retained `check_output`, one asserting the page shows the outcome codes rather than
+  only naming the behaviour. No claim changed class; `check-consent` already carried
+  README as a surface. The block is deliberately the weaker-looking one — it is AIQE
+  declining to answer.
+
 - **[`examples/aiqe.toml`](examples/aiqe.toml), a worked six-contract configuration.**
   `aiqe init` deliberately scaffolds no surfaces and no validators, and the README
   illustrated one contract of six, so a reader had nothing to copy for the other five.

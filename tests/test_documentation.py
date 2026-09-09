@@ -507,6 +507,40 @@ class ReadmeClaimTests(unittest.TestCase):
             "the README receipt example is not the retained output for its case",
         )
 
+    def test_readme_consent_withheld_output_matches_the_retained_artifact(self):
+        """The fail-closed block is copied, not typed.
+
+        It is the one the page has the least incentive to get right: it shows
+        the product declining to answer, and a hand-written approximation
+        could quietly soften `UNKNOWN` into something closer to a pass.
+        """
+        import json
+
+        artifact = os.path.join(
+            support.ROOT, "bench", "results", "check", "results.json"
+        )
+        with open(artifact) as handle:
+            results = json.load(handle)
+        retained = {case["case"]: case for case in results["cases"]}
+
+        readme = read(README)
+        case = retained["consent_withheld"]
+        self.assertIn(
+            case["check_output"].strip(),
+            readme,
+            "the README consent-withheld example is not the retained output",
+        )
+
+    def test_readme_shows_the_fail_closed_unknown_rather_than_only_asserting_it(self):
+        """`UNKNOWN` is the product's signature state, and the page's own
+        argument is that a statement is not an artifact. Stating this one in
+        prose while a retained artifact for it existed was the page holding
+        itself to a lower standard than it asks of its reader."""
+        readme = read(README)
+        self.assertIn("CONSENT_REQUIRED", readme)
+        self.assertIn("CONTRACT_UNKNOWN", readme)
+        self.assertIn("REQUIRED_VALIDATOR_UNKNOWN", readme)
+
     def test_readme_states_that_a_green_check_is_still_incomplete(self):
         readme = read(README)
         self.assertIn("BOUNDED_COMMIT_NOT_CREATED", readme)
