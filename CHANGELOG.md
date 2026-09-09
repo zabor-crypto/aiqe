@@ -16,12 +16,12 @@ makes the change, not at release time.
   in one sentence that a non-interactive check resolves to `UNKNOWN` with
   `CONSENT_REQUIRED`, while the retained artifact for that exact case sat unpublished in
   `bench/results/check/results.json` and in `docs/assets/captures/check-unknown.txt`.
-  Five of the page's terminal blocks were copied from retained output and this state —
+  Six of the page's terminal blocks were copied from retained output and this state —
   the one the frozen visual system calls the signature state, and the one the product
   exists to surface — was the reader's to take on trust. It is now the `consent_withheld`
-  case, copied from the artifact, and two tests hold it there: one comparing the block to
-  the retained `check_output`, one asserting the page shows the outcome codes rather than
-  only naming the behaviour. No claim changed class; `check-consent` already carried
+  case, copied from the artifact, making seven, and one test holds it there: it compares
+  the block to the retained `check_output`, and perturbing that block's `UNKNOWN` toward
+  `PASS` fails it. No claim changed class; `check-consent` already carried
   README as a surface. The block is deliberately the weaker-looking one — it is AIQE
   declining to answer.
 
@@ -103,7 +103,7 @@ makes the change, not at release time.
   other commit. A reader who stops at the fold is no longer left holding a claim about
   the current `HEAD`.
 
-- **The README is about a third shorter**, 5,326 words to 3,727, with no generated
+- **The README is about a third shorter**, 5,326 words to 3,828, with no generated
   evidence block, retained terminal output or gated claim removed. Reasoning that a
   reference document already owns is now a pointer rather than a second copy, and two
   sections were merged into the ones that carried them: `how it works` restated the
