@@ -1,0 +1,605 @@
+name: publish-pypi
+
+# Publishes one existing, already-proven release tag to PyPI through Trusted
+# Publishing. Nothing else in this repository can publish, and nothing here
+# runs by itself.
+#
+# Manual only. A tag push already runs the full evidence lane in `checks.yml`,
+# and publication is a separate decision taken after that evidence is read -
+# so there is deliberately no `push: tags` and no `release:` trigger here. A
+# package index accepts a version exactly once, which makes an accidental
+# publication the one mistake in this repository that cannot be taken back.
+#
+# The dispatch names the release four ways, and each is checked against the
+# others before anything is built or frozen:
+#
+#   tag                              the annotated release tag, e.g. v1.2.3a0
+#   expected_commit                  the full commit id that tag must peel to
+#   expected_wheel_sha256            the SHA-256 the wheel must have
+#   expected_sdist_canonical_sha256  the canonical identity the sdist must have
+#
+# The package source is the tag, never this workflow's own checkout of main.
+# The wheel is bitwise reproducible under the documented procedure (a tracked-
+# only export built with SOURCE_DATE_EPOCH, see `bench/release/harness.py`),
+# so its raw hash is known before the run. The sdist is not: its tar headers
+# carry build-time modification times, and the owner of whatever account ran
+# the build. So it is held to a canonical identity instead - every member's
+# path, type, size, mode, link target, device numbers, PAX headers and content
+# hash - with the modification time and the build account's ownership left
+# out (see AIQE_SDIST_CANONICAL below). Both are declared by the owner before
+# the run, and a mismatch in either stops the run before anything is frozen.
+# The ownership is still recorded: the archive must have exactly one owner,
+# and the manifest names it.
+#
+# Two jobs, so the publishing credential never exists where the build runs:
+#
+#   build    contents: read, no id-token. Builds once, validates the exact
+#            files with the repository's own release-proof code, and freezes
+#            the pair and a small provenance manifest as one Actions artifact.
+#   publish  contents: read and id-token: write, in the `pypi` environment.
+#            Downloads that artifact, re-verifies every byte and the sdist's
+#            canonical identity against the dispatch itself, and publishes
+#            those files. It never builds.
+#
+# The manifest names the run that built it, and the publish job refuses a
+# manifest from any other run or attempt. A failed publication is therefore
+# retried with a new dispatch, not by re-running one job.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing annotated release tag to publish, e.g. v1.2.3a0"
+        required: true
+        type: string
+      expected_commit:
+        description: "Full 40-character commit id the tag must peel to"
+        required: true
+        type: string
+      expected_wheel_sha256:
+        description: "SHA-256 the reproducible wheel built from that commit must have"
+        required: true
+        type: string
+      expected_sdist_canonical_sha256:
+        description: "Canonical sdist identity (aiqe-sdist-canonical-v2) the sdist must have"
+        required: true
+        type: string
+
+# Two publications must never race each other, and one in flight is never
+# cancelled half-way by a second dispatch.
+concurrency:
+  group: publish-pypi
+  cancel-in-progress: false
+
+permissions: {}
+
+env:
+  # The canonical sdist identity, defined once and executed by both jobs: the
+  # build job before it freezes the pair, the publish job on the bytes it
+  # downloaded. Workflow text, not input; it contains no expression.
+  AIQE_SDIST_CANONICAL: |
+    import hashlib
+    import json
+    import tarfile
+
+    SDIST_CANONICAL_SCHEME = "aiqe-sdist-canonical-v2"
+
+    #: The only tar member types a publishable sdist may contain.
+    SDIST_MEMBER_TYPES = {
+        tarfile.REGTYPE: "file",
+        tarfile.AREGTYPE: "file",
+        tarfile.DIRTYPE: "directory",
+    }
+
+    #: PAX records left out of the identity: the modification time, and the
+    #: standard ownership keywords that duplicate the ustar owner fields.
+    SDIST_PAX_EXCLUDED = frozenset({"mtime", "uid", "gid", "uname", "gname"})
+
+
+    def sdist_canonical_sha256(path):
+        """Every member's path, type, size, mode, link target, device numbers,
+        PAX headers and, for a file, content SHA-256, in path order, one JSON
+        line per member. Left out: the modification time, which a rebuild of
+        the same commit changes, and the owner - uid, gid, uname and gname, in
+        the ustar header and as PAX records - which is whatever account ran the
+        build, and which pip discards on extraction. `v1` bound the owner and
+        so could not be declared before a build on another machine. The gzip
+        wrapper, which carries its own timestamp, is not part of the identity.
+
+        Refuses a member that is not a regular file or a directory, a repeated
+        path, and a path that is absolute or climbs out of the archive."""
+        lines = [SDIST_CANONICAL_SCHEME]
+        seen = set()
+        with tarfile.open(path, "r:gz") as archive:
+            for member in sorted(archive.getmembers(), key=lambda m: m.name):
+                kind = SDIST_MEMBER_TYPES.get(member.type)
+                if kind is None:
+                    raise ValueError(
+                        "sdist member %r has tar type %r; only regular files and "
+                        "directories may be published" % (member.name, member.type)
+                    )
+                if member.name.startswith("/") or ".." in member.name.split("/"):
+                    raise ValueError("sdist member path %r leaves the archive" % (member.name,))
+                if member.name in seen:
+                    raise ValueError("sdist member %r appears twice" % (member.name,))
+                seen.add(member.name)
+                content = ""
+                if kind == "file":
+                    digest = hashlib.sha256()
+                    handle = archive.extractfile(member)
+                    for block in iter(lambda: handle.read(1024 * 1024), b""):
+                        digest.update(block)
+                    content = digest.hexdigest()
+                pax = sorted(
+                    (key, value)
+                    for key, value in member.pax_headers.items()
+                    if key not in SDIST_PAX_EXCLUDED
+                )
+                lines.append(json.dumps(
+                    [member.name, kind, member.size, "%o" % (member.mode,),
+                     member.linkname, member.devmajor, member.devminor, pax, content],
+                    ensure_ascii=True, separators=(",", ":"),
+                ))
+        return hashlib.sha256(("\n".join(lines) + "\n").encode("ascii")).hexdigest()
+
+
+    def sdist_archive_owner(path):
+        """The one (uid, gid, uname, gname) every member of the sdist carries.
+
+        Not identity, but provenance: recorded in the manifest and re-checked
+        on the downloaded bytes. More than one owner in a single archive is not
+        something a build produces, and it is refused."""
+        with tarfile.open(path, "r:gz") as archive:
+            owners = sorted(
+                {(m.uid, m.gid, m.uname, m.gname) for m in archive.getmembers()},
+                key=repr,
+            )
+        if len(owners) != 1:
+            raise ValueError("sdist members carry %d owners, expected exactly one: %r"
+                             % (len(owners), owners))
+        uid, gid, uname, gname = owners[0]
+        return {"uid": uid, "gid": gid, "uname": uname, "gname": gname}
+
+jobs:
+  build:
+    name: build, validate and freeze one distribution pair
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ inputs.tag }}
+      EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+      EXPECTED_WHEEL_SHA256: ${{ inputs.expected_wheel_sha256 }}
+      EXPECTED_SDIST_CANONICAL_SHA256: ${{ inputs.expected_sdist_canonical_sha256 }}
+    steps:
+      # Inputs reach code as environment variables only, never through
+      # expression interpolation inside a script, and each must match its
+      # shape as a whole string: a valid first line followed by anything
+      # else is refused, which a line-oriented `grep -x` would not do.
+      - name: Refuse malformed inputs and a dispatch from anywhere but main
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          shapes = {
+              "TAG": r"v[0-9]+\.[0-9]+\.[0-9]+(?:(?:a|b|rc)[0-9]+)?",
+              "EXPECTED_COMMIT": r"[0-9a-f]{40}",
+              "EXPECTED_WHEEL_SHA256": r"[0-9a-f]{64}",
+              "EXPECTED_SDIST_CANONICAL_SHA256": r"[0-9a-f]{64}",
+          }
+          refused = [
+              "%s=%r" % (name, os.environ.get(name, ""))
+              for name, shape in shapes.items()
+              if re.fullmatch(shape, os.environ.get(name, ""), re.ASCII) is None
+          ]
+          if os.environ.get("GITHUB_REF") != "refs/heads/main":
+              refused.append("dispatched from %r; publication runs only from refs/heads/main"
+                             % (os.environ.get("GITHUB_REF"),))
+          if refused:
+              sys.exit("STOP: refused input: " + "; ".join(refused))
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.14"
+      # The checkout above resolved a name. This proves what the name means,
+      # against the remote rather than a local ref a checkout may have
+      # rewritten: an annotated tag object whose own name is the tag, which
+      # peels to the expected commit, which is exactly what is checked out.
+      - name: Prove the tag identity
+        run: |
+          set -euo pipefail
+          fail() { echo "STOP: $*" >&2; exit 1; }
+          remote=$(git ls-remote origin "refs/tags/$TAG" "refs/tags/$TAG^{}")
+          tag_object=$(printf '%s\n' "$remote" | awk -v r="refs/tags/$TAG" '$2 == r { print $1 }')
+          peeled=$(printf '%s\n' "$remote" | awk -v r="refs/tags/$TAG^{}" '$2 == r { print $1 }')
+          [ -n "$tag_object" ] || fail "tag $TAG does not exist on origin"
+          [ -n "$peeled" ] || fail "tag $TAG is not an annotated tag"
+          [ "$peeled" = "$EXPECTED_COMMIT" ] || fail "tag $TAG peels to $peeled, not $EXPECTED_COMMIT"
+          git fetch --quiet --no-tags --depth=1 origin "+refs/tags/$TAG:refs/tags/$TAG"
+          [ "$(git cat-file -t "refs/tags/$TAG")" = "tag" ] || fail "fetched $TAG is not a tag object"
+          [ "$(git rev-parse "refs/tags/$TAG")" = "$tag_object" ] || fail "fetched tag object differs from origin"
+          [ "$(git for-each-ref --format='%(tag)' "refs/tags/$TAG")" = "$TAG" ] \
+            || fail "the tag object names a different tag"
+          [ "$(git rev-parse "refs/tags/$TAG^{commit}")" = "$EXPECTED_COMMIT" ] \
+            || fail "fetched tag does not peel to $EXPECTED_COMMIT"
+          [ "$(git rev-parse HEAD)" = "$EXPECTED_COMMIT" ] || fail "checked-out HEAD is not $EXPECTED_COMMIT"
+          [ -z "$(git status --porcelain)" ] || fail "the checkout is not clean"
+          echo "TAG_OBJECT=$tag_object" >> "$GITHUB_ENV"
+          echo "tag $TAG: annotated object $tag_object, peels to $EXPECTED_COMMIT, checked out"
+      # One build, then every check on those exact files, using the release
+      # proof's own code from the tag being published: the export and build
+      # in `harness`, the allowlist in `artifacts`, the public scanner, and a
+      # clean install of each file. Any failure stops here, before anything
+      # is frozen and before the credentialled job exists.
+      - name: Build once, validate the exact files, freeze the pair
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          import shutil
+          import sys
+
+          exec(compile(os.environ["AIQE_SDIST_CANONICAL"], "AIQE_SDIST_CANONICAL", "exec"))
+
+          root = os.environ["GITHUB_WORKSPACE"]
+          sys.path.insert(0, os.path.join(root, "bench"))
+          from release import artifacts, harness
+
+          tag = os.environ["TAG"]
+          commit = os.environ["EXPECTED_COMMIT"]
+          expected_wheel = os.environ["EXPECTED_WHEEL_SHA256"]
+          expected_sdist = os.environ["EXPECTED_SDIST_CANONICAL_SHA256"]
+          work = os.path.join(os.environ["RUNNER_TEMP"], "publication")
+          bundle = os.path.join(os.environ["RUNNER_TEMP"], "bundle")
+          problems = []
+
+
+          def stop(message):
+              sys.exit("STOP: " + message)
+
+
+          def same_bytes(first, second):
+              with open(first, "rb") as one, open(second, "rb") as two:
+                  return one.read() == two.read()
+
+
+          build_python = harness.create_venv(os.path.join(work, "buildenv"))
+          front_end = harness.run(
+              [build_python, "-m", "pip", "install", "--quiet", "build"], timeout=600
+          )
+          if front_end["returncode"] != 0:
+              stop("could not install the build front end:\n" + front_end["stderr"][-2000:])
+          build_tools = [
+              entry
+              for entry in harness.frozen_packages(build_python)
+              if entry.split("==")[0].lower().replace("_", "-")
+              in {"build", "packaging", "pyproject-hooks", "pip", "setuptools", "wheel"}
+          ]
+          source = os.path.join(work, "source")
+          harness.export_source(root, source)
+          dist = os.path.join(work, "dist")
+          os.makedirs(dist)
+          built = harness.build_artifacts(
+              source, dist, python=build_python, source_date_epoch=harness.SOURCE_DATE_EPOCH
+          )
+          wheel = artifacts.inspect_wheel(built["wheel"])
+          sdist = artifacts.inspect_sdist(built["sdist"])
+          version = wheel["version"]
+
+          # The two predeclared identities. Either mismatch is fail-closed, and
+          # the canonical pass is also the member-type gate: a symlink, a
+          # hardlink, a device or a FIFO in the sdist stops the run here. The
+          # archive's single owner is provenance, recorded rather than declared.
+          try:
+              sdist_canonical = sdist_canonical_sha256(built["sdist"])
+              sdist_owner = sdist_archive_owner(built["sdist"])
+          except (ValueError, OSError) as exc:
+              stop("the sdist cannot be published: %s" % (exc,))
+          if wheel["sha256"] != expected_wheel:
+              problems.append("wheel sha256 %s is not the expected %s" % (wheel["sha256"], expected_wheel))
+          if sdist_canonical != expected_sdist:
+              problems.append("sdist canonical sha256 %s is not the expected %s" % (sdist_canonical, expected_sdist))
+
+          # Identity and metadata.
+          for ok, message in (
+              (wheel["name"] == "aiqe" and sdist["name"] == "aiqe", "distribution name is not aiqe"),
+              (tag == "v%s" % (version,), "tag %s does not name package version %s" % (tag, version)),
+              (sdist["version"] == version, "sdist version %s differs from wheel" % (sdist["version"],)),
+              (wheel["filename"] == "aiqe-%s-py3-none-any.whl" % (version,),
+               "unexpected wheel filename " + wheel["filename"]),
+              (sdist["filename"] == "aiqe-%s.tar.gz" % (version,),
+               "unexpected sdist filename " + sdist["filename"]),
+              (wheel["wheel_tags"] == ["py3-none-any"], "wheel tag is %r" % (wheel["wheel_tags"],)),
+              (wheel["root_is_purelib"] == "true", "wheel is not pure-lib"),
+              (wheel["console_scripts"] == {"aiqe": "aiqe.cli:main_entry"},
+               "console scripts are %r" % (wheel["console_scripts"],)),
+              (not wheel["requires_dist"] and not sdist["requires_dist"],
+               "a runtime dependency is declared"),
+              (not wheel["disallowed_members"],
+               "disallowed wheel members %r" % (wheel["disallowed_members"],)),
+              (not sdist["disallowed_members"],
+               "disallowed sdist members %r" % (sdist["disallowed_members"],)),
+          ):
+              if not ok:
+                  problems.append(message)
+          if problems:
+              stop("; ".join(problems))
+
+          # Content. Every packaged file that is a tracked file of the tag must
+          # be that file, byte for byte, compared with the clean checkout - not
+          # with the build directory, which the backend writes metadata into.
+          # The rest are the generated metadata the allowlist above names.
+          listing = harness.run(["git", "-C", root, "ls-files", "-z"])
+          if listing["returncode"] != 0:
+              stop("could not list the tag's tracked files")
+          tracked = set(name for name in listing["stdout"].split("\0") if name)
+          x_wheel = artifacts.extract_wheel(built["wheel"], os.path.join(work, "x-wheel"))
+          x_sdist = artifacts.extract_sdist(built["sdist"], os.path.join(work, "x-sdist"))
+          compared = 0
+          for member in wheel["members"]:
+              if member.startswith("aiqe/"):
+                  compared += 1
+                  if "src/" + member not in tracked or not same_bytes(
+                      os.path.join(root, "src", member), os.path.join(x_wheel, member)
+                  ):
+                      problems.append("wheel member %s is not the tagged file" % (member,))
+          for member in sdist["members"]:
+              if member in tracked:
+                  compared += 1
+                  if not same_bytes(
+                      os.path.join(root, member), os.path.join(x_sdist, sdist["root"], member)
+                  ):
+                      problems.append("sdist member %s is not the tagged file" % (member,))
+
+          # The public scanner, tested before it is trusted, on both trees.
+          scanner = os.path.join(root, "tools", "public-scan")
+          for argv in (
+              [os.path.join(scanner, "self-test.sh")],
+              [os.path.join(scanner, "public-scan.sh"), x_wheel],
+              [os.path.join(scanner, "public-scan.sh"), x_sdist],
+          ):
+              result = harness.run(argv, timeout=600)
+              print("\n".join(result["stdout"].strip().splitlines()[-2:]))
+              if result["returncode"] != 0:
+                  problems.append("%s failed:\n%s" % (" ".join(argv), result["stdout"][-2000:]))
+
+          # A clean install of each file, and the installed command answering.
+          for kind in ("wheel", "sdist"):
+              env_dir = os.path.join(work, "venv-" + kind)
+              python = harness.create_venv(env_dir)
+              harness.install_artifact(python, built[kind])
+              extra = harness.third_party_dependencies(python)
+              location = harness.installed_location(python)
+              cli = harness.venv_script(env_dir, "aiqe")
+              answered = harness.run([cli, "--version"], cwd=work)
+              helped = harness.run([cli, "--help"], cwd=work)
+              for ok, message in (
+                  (not extra, "third-party distributions installed: %r" % (extra,)),
+                  (location["version"] == version, "installed version is %s" % (location["version"],)),
+                  (os.path.realpath(location["prefix"]) == os.path.realpath(env_dir),
+                   "aiqe resolved outside the clean environment"),
+                  (answered["returncode"] == 0 and answered["stdout"].strip() == "aiqe " + version,
+                   "aiqe --version answered %r" % (answered["stdout"].strip(),)),
+                  (helped["returncode"] == 0, "aiqe --help exited %d" % (helped["returncode"],)),
+              ):
+                  if not ok:
+                      problems.append("%s install: %s" % (kind, message))
+          if problems:
+              stop("; ".join(problems))
+
+          # Freeze: the two files and the manifest that names them and this run.
+          os.makedirs(bundle)
+          for kind in ("wheel", "sdist"):
+              shutil.copy2(built[kind], bundle)
+          manifest = {
+              "record_type": "AIQE_PYPI_PUBLICATION_PAIR",
+              "schema_version": 3,
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "workflow_ref": os.environ["GITHUB_REF"],
+              "workflow_commit": os.environ["GITHUB_SHA"],
+              "workflow_run_id": os.environ["GITHUB_RUN_ID"],
+              "workflow_run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "tag": tag,
+              "tag_object": os.environ["TAG_OBJECT"],
+              "peeled_commit": commit,
+              "package_name": "aiqe",
+              "package_version": version,
+              "wheel_filename": wheel["filename"],
+              "wheel_sha256": wheel["sha256"],
+              "wheel_size_bytes": wheel["size_bytes"],
+              "sdist_filename": sdist["filename"],
+              "sdist_sha256": sdist["sha256"],
+              "sdist_size_bytes": sdist["size_bytes"],
+              "sdist_canonical_scheme": SDIST_CANONICAL_SCHEME,
+              "sdist_canonical_sha256": sdist_canonical,
+              "sdist_archive_owner": sdist_owner,
+              "source_date_epoch": harness.SOURCE_DATE_EPOCH,
+              "build_frontend": build_tools,
+              "build_backend": wheel["generator"],
+          }
+          for kind in ("wheel", "sdist"):
+              if artifacts.sha256(os.path.join(bundle, manifest[kind + "_filename"])) != manifest[kind + "_sha256"]:
+                  stop("the frozen %s is not the validated file" % (kind,))
+          with open(os.path.join(bundle, "publication.json"), "w", encoding="utf-8") as handle:
+              json.dump(manifest, handle, indent=2, sort_keys=True)
+              handle.write("\n")
+
+          summary = [
+              "## Frozen publication pair for %s" % (tag,),
+              "",
+              "| file | sha256 | %s |" % (SDIST_CANONICAL_SCHEME,),
+              "| --- | --- | --- |",
+              "| `%s` | `%s` | |" % (manifest["wheel_filename"], manifest["wheel_sha256"]),
+              "| `%s` | `%s` | `%s` |" % (manifest["sdist_filename"], manifest["sdist_sha256"], sdist_canonical),
+              "",
+              "%d packaged files matched the tag byte for byte. Built with %s; backend %s."
+              % (compared, ", ".join(build_tools), wheel["generator"]),
+              "sdist archive owner (provenance, not identity): %s" % (json.dumps(sdist_owner, sort_keys=True),),
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
+              handle.write("\n".join(summary) + "\n")
+          print(json.dumps(manifest, indent=2, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pypi-publication-${{ inputs.tag }}
+          path: ${{ runner.temp }}/bundle/
+          if-no-files-found: error
+
+  # Three steps where PyPI's guidance prefers the fewest possible in an
+  # OIDC-capable job. The verification step stays here deliberately: it has
+  # to run on the same filesystem, immediately before the upload, over the
+  # exact files the publish action then reads, and moving it to another job
+  # would add an artifact hand-off after the check rather than remove one.
+  # It uses the standard library and `git ls-remote` only, and requests no
+  # token.
+  publish:
+    name: publish the frozen pair to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TAG: ${{ inputs.tag }}
+      EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+      EXPECTED_WHEEL_SHA256: ${{ inputs.expected_wheel_sha256 }}
+      EXPECTED_SDIST_CANONICAL_SHA256: ${{ inputs.expected_sdist_canonical_sha256 }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: pypi-publication-${{ inputs.tag }}
+          path: ${{ runner.temp }}/bundle
+      # The same bytes, or nothing. The downloaded set must be exactly the two
+      # files and the manifest; the manifest must have been written by this
+      # run and name this dispatch; the wheel's raw hash and the sdist's
+      # canonical identity are recomputed here and held to the dispatch
+      # itself, not to the manifest; the sdist's single owner must be the one
+      # the manifest recorded; and the tag must still peel where it did when
+      # the pair was built. Only then are the two files staged where the
+      # publish action reads them. The manifest itself is never uploaded.
+      - name: Verify the downloaded pair against the dispatch
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import shutil
+          import subprocess
+          import sys
+
+          exec(compile(os.environ["AIQE_SDIST_CANONICAL"], "AIQE_SDIST_CANONICAL", "exec"))
+
+          bundle = os.path.join(os.environ["RUNNER_TEMP"], "bundle")
+          dist = os.path.join(os.environ["GITHUB_WORKSPACE"], "dist")
+          tag = os.environ["TAG"]
+
+
+          def stop(message):
+              sys.exit("STOP: " + message)
+
+
+          def sha256(path):
+              digest = hashlib.sha256()
+              with open(path, "rb") as handle:
+                  for block in iter(lambda: handle.read(1024 * 1024), b""):
+                      digest.update(block)
+              return digest.hexdigest()
+
+
+          try:
+              with open(os.path.join(bundle, "publication.json"), encoding="utf-8") as handle:
+                  manifest = json.load(handle)
+              version = manifest["package_version"]
+              expected_names = sorted(
+                  ["publication.json", manifest["wheel_filename"], manifest["sdist_filename"]]
+              )
+          except (OSError, ValueError, KeyError, TypeError) as exc:
+              stop("the publication manifest is unreadable: %r" % (exc,))
+          if sorted(os.listdir(bundle)) != expected_names:
+              stop("downloaded %r, expected exactly %r" % (sorted(os.listdir(bundle)), expected_names))
+
+          # Written by this run, this attempt, from this workflow commit.
+          for key, variable in (
+              ("repository", "GITHUB_REPOSITORY"),
+              ("workflow_ref", "GITHUB_REF"),
+              ("workflow_commit", "GITHUB_SHA"),
+              ("workflow_run_id", "GITHUB_RUN_ID"),
+              ("workflow_run_attempt", "GITHUB_RUN_ATTEMPT"),
+          ):
+              if manifest.get(key) != os.environ[variable]:
+                  stop("manifest %s is %r, this run's %s is %r"
+                       % (key, manifest.get(key), variable, os.environ[variable]))
+
+          # Names this dispatch.
+          for ok, message in (
+              (manifest.get("tag") == tag, "manifest names tag %r" % (manifest.get("tag"),)),
+              (manifest.get("peeled_commit") == os.environ["EXPECTED_COMMIT"], "manifest names another commit"),
+              (manifest.get("wheel_sha256") == os.environ["EXPECTED_WHEEL_SHA256"],
+               "manifest wheel hash is not the expected one"),
+              (manifest.get("sdist_canonical_scheme") == SDIST_CANONICAL_SCHEME,
+               "manifest canonical scheme is %r" % (manifest.get("sdist_canonical_scheme"),)),
+              (manifest.get("sdist_canonical_sha256") == os.environ["EXPECTED_SDIST_CANONICAL_SHA256"],
+               "manifest sdist canonical hash is not the expected one"),
+              (tag == "v%s" % (version,), "tag %s does not name version %s" % (tag, version)),
+              (manifest["wheel_filename"] == "aiqe-%s-py3-none-any.whl" % (version,), "unexpected wheel filename"),
+              (manifest["sdist_filename"] == "aiqe-%s.tar.gz" % (version,), "unexpected sdist filename"),
+          ):
+              if not ok:
+                  stop(message)
+
+          # The bytes themselves, against the manifest and against the dispatch.
+          wheel_path = os.path.join(bundle, manifest["wheel_filename"])
+          sdist_path = os.path.join(bundle, manifest["sdist_filename"])
+          for kind, path in (("wheel", wheel_path), ("sdist", sdist_path)):
+              actual = sha256(path)
+              if actual != manifest[kind + "_sha256"]:
+                  stop("downloaded %s hashes to %s, manifest says %s" % (kind, actual, manifest[kind + "_sha256"]))
+          if sha256(wheel_path) != os.environ["EXPECTED_WHEEL_SHA256"]:
+              stop("downloaded wheel is not the expected wheel")
+          try:
+              canonical = sdist_canonical_sha256(sdist_path)
+              owner = sdist_archive_owner(sdist_path)
+          except (ValueError, OSError) as exc:
+              stop("the downloaded sdist cannot be published: %s" % (exc,))
+          if canonical != os.environ["EXPECTED_SDIST_CANONICAL_SHA256"]:
+              stop("downloaded sdist canonical identity is %s, not the expected %s"
+                   % (canonical, os.environ["EXPECTED_SDIST_CANONICAL_SHA256"]))
+          if owner != manifest.get("sdist_archive_owner"):
+              stop("downloaded sdist owner is %r, manifest recorded %r"
+                   % (owner, manifest.get("sdist_archive_owner")))
+
+          # The tag still means what it meant when the pair was built.
+          remote = "%s/%s" % (os.environ["GITHUB_SERVER_URL"], os.environ["GITHUB_REPOSITORY"])
+          listing = subprocess.run(
+              ["git", "ls-remote", remote, "refs/tags/" + tag, "refs/tags/%s^{}" % (tag,)],
+              stdout=subprocess.PIPE, check=True, timeout=120,
+          ).stdout.decode("ascii")
+          refs = {name: value for value, name in (line.split("\t") for line in listing.splitlines())}
+          if refs.get("refs/tags/" + tag) != manifest["tag_object"]:
+              stop("tag %s no longer names the tag object the pair was built from" % (tag,))
+          if refs.get("refs/tags/%s^{}" % (tag,)) != manifest["peeled_commit"]:
+              stop("tag %s no longer peels to the commit the pair was built from" % (tag,))
+
+          os.makedirs(dist)
+          for path in (wheel_path, sdist_path):
+              shutil.copy2(path, dist)
+          print("%s  %s" % (manifest["wheel_sha256"], manifest["wheel_filename"]))
+          print("%s  %s  (%s %s)" % (manifest["sdist_sha256"], manifest["sdist_filename"],
+                                     SDIST_CANONICAL_SCHEME, canonical))
+          PY
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: dist/
+          print-hash: true

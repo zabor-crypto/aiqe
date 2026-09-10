@@ -134,7 +134,7 @@ workflow. `self-test.sh` builds all three of those cases and requires the scanne
 report them, so relaxing either half fails the self-test rather than passing quietly.
 
 The stronger check that replaces the skipped class is `tests/test_workflow_pinning.py`,
-and it checks identity rather than shape. It holds the four reviewed
+and it checks identity rather than shape. It holds the five reviewed
 owner/action/object-id/version tuples and requires every `uses:` to match one of them
 exactly. Shape checking would accept `actions/checkout@<any 40 hex>` — a typo, a commit
 from a fork, an id an attacker chose — which is most of what pinning exists to prevent.

@@ -1,4 +1,4 @@
-"""Every action in every workflow is one of four reviewed identities.
+"""Every action in every workflow is one of five reviewed identities.
 
 This is the check that replaces a scanner exception rather than merely
 accompanying it. `tools/public-scan/public-scan.sh` skips its `GIT_SHA_40`
@@ -11,7 +11,7 @@ reference is *some* 40-character object id accepts
 `actions/checkout@<any 40 hex>` - including a typo, a commit from a fork, and
 an id an attacker chose - which is most of what pinning exists to prevent. So
 what is asserted here is the exact tuple: which action, which object id, which
-released version. The four below were resolved from the canonical upstream
+released version. The five below were resolved from the canonical upstream
 repositories and verified there; re-establishing that is a review step taken
 when a pin changes, not a network call made at validation time. These tests
 are offline and deterministic.
@@ -54,6 +54,10 @@ APPROVED = {
     "actions/download-artifact": (
         "d3f86a106a0bac45b974a6" "28896c90dbdf5c8093",
         "v4.3.0",
+    ),
+    "pypa/gh-action-pypi-publish": (
+        "dc37677b2e1c63e2034f94" "d8a5b11f265b73ba33",
+        "v1.14.2",
     ),
 }
 
@@ -103,11 +107,14 @@ def references(text):
     return found
 
 
-def violations(text):
+def violations(text, require_every_approved=True):
     """Every way this workflow text departs from the approved identities.
 
     Returns a list of `(line number, code)`. Empty means every reference is an
-    exact reviewed tuple and every reviewed action is present.
+    exact reviewed tuple and, with `require_every_approved`, every reviewed
+    action is present. The real workflows are checked without it one file at
+    a time, because no single workflow uses every action; their union is held
+    to the whole set in `test_every_approved_action_is_still_used`.
     """
     problems = []
     seen = set()
@@ -141,8 +148,9 @@ def violations(text):
             # than none: it tells a reviewer the pin is something it is not.
             problems.append((number, "VERSION_COMMENT_MISMATCH"))
 
-    for action in sorted(set(APPROVED) - seen):
-        problems.append((0, "APPROVED_ACTION_MISSING:" + action))
+    if require_every_approved:
+        for action in sorted(set(APPROVED) - seen):
+            problems.append((0, "APPROVED_ACTION_MISSING:" + action))
 
     return problems
 
@@ -192,7 +200,9 @@ class TheRealWorkflows(unittest.TestCase):
     def test_every_reference_is_an_approved_identity(self):
         for path in workflow_files():
             self.assertEqual(
-                violations(read(path)), [], os.path.basename(path)
+                violations(read(path), require_every_approved=False),
+                [],
+                os.path.basename(path),
             )
 
     def test_every_approved_action_is_still_used(self):
@@ -210,7 +220,7 @@ class TheRealWorkflows(unittest.TestCase):
         asserted rather than assumed.
         """
         total = sum(len(references(read(p))) for p in workflow_files())
-        self.assertEqual(total, 30)
+        self.assertEqual(total, 35)
 
 
 class RejectedIdentities(unittest.TestCase):
