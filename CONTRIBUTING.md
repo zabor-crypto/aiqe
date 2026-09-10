@@ -5,9 +5,9 @@ specific about the few things that genuinely matter for this project.
 
 ## Before you start
 
-AIQE has no released artifact yet. The v1 workflow — `doctor`, `init`, `task`, `check`,
-`receipt` and `commit` — is implemented and tested, and the conformance corpus materialises four
-families over it: Doctor, task, check and commit. Useful contributions are to any of
+The v1 workflow — `doctor`, `init`, `task`, `check`, `receipt` and `commit` — is
+implemented and tested, and the conformance corpus materialises four families over it:
+Doctor, task, check and commit. Useful contributions are to any of
 those commands, to the conformance fixtures, to the specification, and to the
 documentation.
 

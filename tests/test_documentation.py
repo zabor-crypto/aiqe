@@ -829,8 +829,8 @@ class ProductPackageTests(unittest.TestCase):
         self.assertIn("or as root", lowered)
 
     def test_no_badge_appears_anywhere_on_the_page(self):
-        """A badge above the fold is a maturity claim, and the exact-HEAD CI
-        run that would justify one has not happened."""
+        """A badge asserts that a branch is green. No retained manifest names
+        the commit being read, so nothing here may imply one does."""
         lowered = self.readme.lower()
         for shape in ("shields.io", "badge.svg", "img.shields", "/badge)"):
             self.assertNotIn(shape, lowered, shape)
@@ -841,14 +841,151 @@ class ProductPackageTests(unittest.TestCase):
         vocabulary and does not belong in product copy."""
         lowered = self.readme.lower()
         self.assertIn("not** the current head", lowered)
-        self.assertIn("no complete ci run has attested", lowered)
+        self.assertIn("aggregated at an earlier commit", lowered)
+        self.assertIn("the run's own head and run identity", lowered)
 
         reference = read(os.path.join(support.ROOT, "docs", "support.md"))
         self.assertIn("OSS7_FINAL_HEAD_GITHUB_CI_ATTESTATION", reference)
-        self.assertIn("PENDING_EXTERNAL_BILLING_CAPACITY", reference)
+        self.assertIn("NOT_CARRIED_IN_TRACKED_CONTENT", reference)
         self.assertIn("source_commit", reference)
         for forbidden in ("shields.io", "badge.svg"):
             self.assertNotIn(forbidden, reference, forbidden)
+
+    def test_external_release_state_is_learned_from_the_external_object(self):
+        """A Git tag, a GitHub Release, a package-index entry and a CI run are
+        all created outside the source tree, after the commit that would have
+        to describe them. A surface that asserts their absence turns false the
+        moment one is made at that exact commit, without the commit changing.
+        So every surface that names the package version defers to those
+        objects instead, and names the tag in the version's own spelling."""
+        from aiqe import __version__
+
+        def prose(text):
+            # Line wraps and comment markers are not meaning.
+            lines = (line.strip().lstrip("#:").strip() for line in text.splitlines())
+            return " ".join(" ".join(lines).lower().split())
+
+        init = read(os.path.join(support.ROOT, "src", "aiqe", "__init__.py"))
+        deferring = {
+            "README.md": self.readme,
+            "docs/support.md": read(os.path.join(support.ROOT, "docs", "support.md")),
+            "src/aiqe/__init__.py": init,
+        }
+        for name, text in deferring.items():
+            with self.subTest(surface=name):
+                flat = prose(text)
+                # Membership without the file in the message: a failure names
+                # the missing wording, not the whole surface.
+                for required in (
+                    __version__,
+                    "whether a git tag, a github release or a package-index "
+                    "entry exists",
+                    "is established from that object",
+                ):
+                    self.assertTrue(
+                        required in flat, "%s does not say %r" % (name, required)
+                    )
+
+        tag = "`v%s`" % (__version__,)
+        with self.subTest(tag=tag):
+            self.assertTrue(tag in init, "the version comment does not name %s" % tag)
+
+        # Every current-state surface, not only the ones naming the version.
+        # CHANGELOG.md is history and is held to its release shape instead.
+        current = dict(deferring)
+        for relative in (
+            "docs/claims.md",
+            "SECURITY.md",
+            "CONTRIBUTING.md",
+            "docs/architecture.md",
+            "docs/product-spec.md",
+            "bench/README.md",
+        ):
+            current[relative] = read(os.path.join(support.ROOT, *relative.split("/")))
+        for name, text in current.items():
+            flat = prose(text)
+            for stale in (
+                "nothing is released",
+                "no version is tagged",
+                "nothing released or tagged",
+                "not on any index",
+                "not published to any index",
+                "no git tag exists",
+                "no git tag and no release exist",
+                "has not yet published",
+                "there is no supported version",
+                "once releases begin",
+                "no released artifact",
+                "no public release exists",
+                "on an unreleased project",
+                "no complete ci run has attested",
+                "pending_external_billing_capacity",
+                "v0.1.0-alpha",
+            ):
+                with self.subTest(surface=name, stale=stale):
+                    self.assertFalse(stale in flat, "%s says %r" % (name, stale))
+
+    def test_the_changelog_release_shape_is_future_stable(self):
+        """The changelog groups content by package version without claiming
+        that the version was released. `Unreleased` always comes first; the
+        current package version has its own section, which owns the entry that
+        introduced it; the corpus before it is not left under `Unreleased`; no
+        version heading carries a date, which would be a statement about an
+        external release the commit cannot know; and no Semantic Versioning
+        adherence is claimed, since a PEP 440 pre-release such as `0.1.0a0`
+        is not SemVer's spelling of one."""
+        import re
+
+        from aiqe import __version__
+
+        changelog = read(os.path.join(support.ROOT, "CHANGELOG.md"))
+        headings = [
+            (match.start(), match.group(1), match.group(2))
+            for match in re.finditer(r"^## \[([^\]]+)\](.*)$", changelog, re.M)
+        ]
+        names = [name for _, name, _ in headings]
+        self.assertTrue(
+            names and names[0] == "Unreleased", "the first section is not [Unreleased]"
+        )
+        self.assertTrue(
+            __version__ in names, "no section for package version %s" % __version__
+        )
+        for _, name, rest in headings:
+            with self.subTest(section=name):
+                self.assertEqual(
+                    rest.strip(), "", "the [%s] heading carries more than a name" % name
+                )
+
+        def section(name):
+            index = names.index(name)
+            end = headings[index + 1][0] if index + 1 < len(headings) else None
+            return changelog[headings[index][0] : end]
+
+        unreleased = section("Unreleased")
+        introduced = "The package version is now `%s`" % (__version__,)
+        self.assertTrue(
+            introduced in section(__version__),
+            "the entry introducing %s is not in its section" % __version__,
+        )
+        for entry in (introduced, "### Added (bootstrap)"):
+            with self.subTest(entry=entry):
+                self.assertFalse(
+                    entry in unreleased, "%r is still under [Unreleased]" % entry
+                )
+
+        header = " ".join(changelog[: headings[0][0]].lower().split())
+        self.assertFalse(
+            "semantic versioning" in header or "semver.org" in header,
+            "the changelog claims Semantic Versioning",
+        )
+        for required in (
+            "pep 440",
+            "does not assert that a matching git tag, github release or "
+            "package-index entry exists",
+        ):
+            self.assertTrue(
+                required in header, "the changelog header does not say %r" % required
+            )
 
     def test_the_packaging_facts_are_stated(self):
         for fact in (">= 3.11", "wheel and sdist", "uvx --from", "DEFERRED"):

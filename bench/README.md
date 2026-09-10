@@ -274,7 +274,7 @@ Check / receipt /
 Numerical routing     RUN       (six contract families, in the check family)
 Bounded commit        RUN       (results retained here)
 Release proof         RUN       (manifest retained in results/release/)
-Product friction      NOT_RUN   (no public release exists)
+Product friction      NOT_RUN   (no retained product-friction measurement)
 Context efficiency    NOT_RUN   (deferred; methodology not yet defensible)
 
 macOS baseline        observed

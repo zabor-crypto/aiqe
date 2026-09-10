@@ -5,7 +5,7 @@ what the product does and where its guarantees stop.
 
 All of it is now implemented. `aiqe doctor`, `aiqe init`, `aiqe task`, `aiqe check`,
 `aiqe commit` and `aiqe receipt` exist and are tested, and the v1 command surface has
-no remaining design target. Nothing here is released and no version is tagged.
+no remaining design target.
 
 ## Product
 

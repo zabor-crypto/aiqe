@@ -6,11 +6,11 @@ requests, and installs nothing into a repository.
 
 #: The one place AIQE's version is written.
 #:
-#: `0.1.0a0` is PEP 440's spelling of the frozen milestone `v0.1.0-alpha`:
-#: the first installable real product. It is a *package* version and nothing
-#: more. No Git tag exists, no release exists, and nothing is published to any
-#: index - a version string is what an artifact calls itself, not a claim that
-#: anybody can obtain it.
+#: `0.1.0a0` is the package version, in PEP 440's spelling; a Git tag for this
+#: version, if one is made, is `v0.1.0a0`. It is a *package* version and
+#: nothing more - what an artifact calls itself, not a claim that anybody can
+#: obtain it. Whether a Git tag, a GitHub Release or a package-index entry
+#: exists for it is established from that object, not from this string.
 __version__ = "0.1.0a0"
 
 __all__ = ["__version__"]

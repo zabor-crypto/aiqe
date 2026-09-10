@@ -49,7 +49,8 @@ repository declared exited zero, and nothing more — [the full
 boundary](#what-aiqe-does-not-do--and-cannot-prove).
 
 The v1 workflow is implemented, tested and validated against retained conformance
-fixtures. Nothing is released, and no version is tagged.
+fixtures. The package version is `0.1.0a0`. Whether a Git tag, a GitHub Release or a
+package-index entry exists for it is established from that object, not from this page.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install . && .venv/bin/aiqe doctor
@@ -139,7 +140,8 @@ everything it produced — failures included, and the failures are the demo:
 
 ## Five-minute quickstart
 
-No third-party dependencies, Python 3.11 or newer, not on any index yet.
+No third-party dependencies, Python 3.11 or newer, installed from this checkout — no
+package index involved.
 
 **1 · Install.**
 
@@ -560,7 +562,8 @@ Reproducible sdist      the wheel is, under a fixed SOURCE_DATE_EPOCH; the
 
 ```
 Windows                 no implementation work, and no metadata claims it
-Publication             no tag, no release, nothing on any index
+Publication             not covered by this evidence: a tag, a release or an
+                        index entry is established from that object
 Standalone executable   DEFERRED - no measured install friction justifies it
 ```
 
@@ -589,7 +592,9 @@ executable, so none is planned, promised or dated.
 
 CI runs in two lanes: a push exercises Linux only, the full matrix runs on a tag or
 manual dispatch. Only the full lane produces a manifest that can carry a support claim,
-and no complete CI run has attested the current HEAD, so nothing claims one has:
+and the manifest retained here was aggregated at an earlier commit, so nothing on this
+page attests the commit you are reading. Whether a full-lane run exists for that exact
+commit is answered by the run's own head and run identity, never by a tracked file:
 [`docs/support.md`](docs/support.md#11-the-attestation-this-manifest-does-not-carry).
 
 A push to `main` runs the fast lane, over these surfaces:
@@ -659,8 +664,7 @@ background.
 
 | Milestone | Meaning |
 |---|---|
-| *(current)* | v1 command surface complete, tested, validated against retained conformance fixtures. Artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs). Nothing released or tagged. |
-| `v0.1.0` | First installable alpha. |
+| `v0.1.0a0` | First alpha candidate, and the package version this source carries: v1 command surface complete, tested, validated against retained conformance fixtures. Artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs). A tag, release or index entry for it is established from that object, not from this table. |
 | `v1.0.0` | Every release gate green against retained artifacts. Command surface stable. |
 
 No conformance number appears here unless generated from a retained artifact, and no

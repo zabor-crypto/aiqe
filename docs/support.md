@@ -8,9 +8,16 @@ because a verdict written in prose cannot fail a build and a verdict written in
 a manifest can.
 
 ```
-aiqe is not published to any index. No Git tag and no release exist.
-The artifacts described here are private release-proof artifacts.
+The package version is 0.1.0a0. The artifacts described here are
+release-proof artifacts, not release assets.
 ```
+
+Retained release-proof evidence records what was built and what was executed
+against it. It does not, by itself, establish whether a Git tag, a GitHub
+Release or a package-index entry exists: those are created outside the source
+tree, after any commit that could describe them. Whether a Git tag, a GitHub
+Release or a package-index entry exists is established from that object —
+the tag, the release, the index — not from this repository.
 
 ## 1. How a support claim is decided
 
@@ -345,8 +352,9 @@ No reproducible-build claim is made beyond what those hashes show.
 ## 9. Installing it
 
 AIQE is a Python package with no third-party dependencies, needing Python 3.11
-or newer. It is not published to any index, so it is installed from a local
-artifact or a clone.
+or newer. Every path below installs it from a local artifact or a clone and
+needs no package index; whether an index also carries it is established from
+that index, not from this document.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install .
@@ -404,24 +412,46 @@ gated on runs against the earlier commit. They are not a claim that every
 required CI job started and passed at the current `HEAD`.
 
 ```
-OSS7_FINAL_HEAD_GITHUB_CI_ATTESTATION = PENDING_EXTERNAL_BILLING_CAPACITY
+OSS7_FINAL_HEAD_GITHUB_CI_ATTESTATION = NOT_CARRIED_IN_TRACKED_CONTENT
 ```
 
-Two separate things keep that field behind `HEAD`.
+That field is scoped to what this repository tracks, and it does not move on
+its own. A workflow run is an external object, created and read outside the
+working tree, so no committed file can record whether one exists for the
+commit you are reading. This document therefore states what the retained
+evidence covers, and does not deny a run it cannot see.
 
-Hosted CI minutes for this private repository were exhausted account-wide. A
-workflow run that fails in seconds without starting a step is a billing
-refusal, not a regression, and is not evidence about the code. Reruns and
-workflow edits intended only to manufacture a green result are forbidden here:
-they would produce a badge rather than an attestation.
+Two structural things keep the tracked manifest behind `HEAD`.
 
-And the full matrix is now dispatch-gated rather than automatic — see
+The full matrix is dispatch-gated rather than automatic — see
 [1.1](#11-two-evidence-lanes-and-what-a-green-run-means). An ordinary push
 exercises the fast lane, which produces no macOS surface record and therefore
-no support claim, by design. So the manifest advances only when somebody runs
-the full lane deliberately.
+no support claim, by design. So the tracked manifest advances only when
+somebody runs the full lane deliberately.
 
-The condition that closes this, and the only thing that does:
+And a full-lane run that is never aggregated back into
+[`bench/results/release/release-proof.json`](../bench/results/release/release-proof.json)
+leaves the tracked manifest exactly where it was. A green run and an in-tree
+support claim are two different objects; only the second is what a reader of
+this repository is shown.
+
+### 11.1 Reading an exact-head full-lane run
+
+If you have been pointed at a run and want to know what it attests, the run
+identifies itself. Four things have to hold, and a green tick is not a
+substitute for checking them:
+
+```
+HEAD       the run's head SHA equals the commit you are reading, exactly
+LANE       the run is the FULL matrix, not the fast lane — a fast run carries
+           no macOS surface record and no support claim, whatever its colour
+GATE       the manifest aggregation ran with --require-all-claims
+OUTCOME    every required job started and every required job passed
+```
+
+The fast lane is never the full lane, however complete it looks.
+
+### 11.2 The condition that moves the tracked manifest
 
 ```
 EVENT      the full lane is dispatched at the then-current release-proof HEAD,
@@ -434,5 +464,17 @@ REQUIRED   every required job starts, every required job passes, and the
 That dispatch is an owner action. Nothing in a documentation task may trigger
 it, retry it, or edit the workflow to make it cheaper to pass.
 
-Until then, nothing in this repository may show a CI badge, claim a green run
-at the current `HEAD`, or present a support statement that depends on one.
+Nothing in this repository may show a CI badge, claim a green run at the
+current `HEAD`, or present a support statement resting on anything weaker than
+a retained manifest that names that commit.
+
+### 11.3 Historical provenance
+
+While this repository was private, hosted CI minutes were exhausted
+account-wide and dispatches failed in seconds without starting a step. That
+was a billing refusal rather than a regression, and it was never evidence
+about the code. It is recorded here as the provenance of how the manifest fell
+behind `HEAD`; it is not a statement about current capacity, and it is not the
+reason any present claim is scoped the way it is. Reruns and workflow edits
+intended only to manufacture a green result remain forbidden: they would
+produce a badge rather than an attestation.

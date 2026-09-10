@@ -2,13 +2,22 @@
 
 All notable changes to this project are documented in this file.
 
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this
-project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Package
+versions follow [PEP 440](https://peps.python.org/pep-0440/), and a Git tag for a version
+is that version with a `v` prefix. The support policy for versions before `1.0.0` is in
+[`SECURITY.md`](SECURITY.md).
 
 An `Unreleased` section is always present. Entries are added in the pull request that
 makes the change, not at release time.
 
+A version section records the content assigned to that package version. Its presence
+does not assert that a matching Git tag, GitHub Release or package-index entry exists;
+each of those is established from its own object, and no section carries a date for the
+same reason.
+
 ## [Unreleased]
+
+## [0.1.0a0]
 
 ### Added
 
@@ -373,11 +382,12 @@ makes the change, not at release time.
   changed, and it is a refusal added at the entry point rather than a change to any
   command's semantics.
 
-- **The package version is now `0.1.0a0`** — PEP 440's spelling of the frozen
-  milestone `v0.1.0-alpha`, the first installable real product. It is a package
-  version and nothing else: no Git tag exists, no release exists, and nothing is
-  published to any index. The retained benchmark artifacts were regenerated at the new
-  version; every case outcome, every family count and every zero-tolerance total is
+- **The package version is now `0.1.0a0`**, in PEP 440's spelling: the first alpha
+  candidate, whose tag, if one is made, is `v0.1.0a0` (the milestone was then written
+  `v0.1.0-alpha`). It is a package version and nothing else — what an artifact calls
+  itself, which does not establish whether a Git tag, a GitHub Release or a
+  package-index entry exists. The retained benchmark artifacts were regenerated at the
+  new version; every case outcome, every family count and every zero-tolerance total is
   unchanged.
 - **`tools/public-scan/public-scan.sh` takes an optional root**, so the extracted
   sdist, the extracted wheel and the release-proof manifest are scanned as trees in
@@ -780,7 +790,7 @@ makes the change, not at release time.
 - Public sanitisation tooling (`tools/public-scan/`) and the bootstrap CI workflow.
 - Apache-2.0 licence, security policy, and contribution guidelines.
 
-### Notes
+### Notes (when only `doctor` and `task` existed)
 
 - No version has been released and no tag has been created. `doctor` and `task` are
   implemented; `init`, `check`, `commit` and `receipt` remain design targets and are not

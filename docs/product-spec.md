@@ -62,8 +62,10 @@ These bind every public surface — README, documentation, assets, and release n
    from real recorded output or they do not ship.
 5. No CI badge until CI runs a real test suite against a real implementation. A green
    badge on a documentation workflow reads as "tests pass" and is therefore misleading.
-   CI now runs a real suite; a badge still waits for a released artifact, because a
-   badge above the fold on an unreleased project reads as a maturity claim.
+   A real suite in CI is necessary and not sufficient: a badge above the fold reads as
+   a maturity claim, so publishing one is a separate, release-gated product decision,
+   taken only once its prerequisites are established from the external objects they
+   depend on.
 6. No coverage, download, or star badges.
 7. Failed, unsupported, and not-run cases are always shown. Nothing is filtered out of a
    result view to make it look better.

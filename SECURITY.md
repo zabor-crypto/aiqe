@@ -5,9 +5,9 @@ are part of the product, not an appendix to it. This document states both.
 
 ## Supported versions
 
-AIQE has not yet published an installable artifact. There is no supported version.
-
-Once releases begin, the policy before `v1.0.0` is:
+Support applies to released versions. Whether a version has been released is
+established from its GitHub Release and the package index, not from this file; where no
+release exists, no version is supported. Before `v1.0.0` the policy is:
 
 | Version | Supported |
 |---|---|
