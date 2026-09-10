@@ -2,17 +2,46 @@
 
 > **DONE ISN'T EVIDENCE.**
 
-For quant developers and research engineers running Claude Code, Codex or a similar agent
-against real strategy, backtest and research repositories. AIQE bounds the change, keeps
-unrelated Git state out of the commit, runs your project-native checks, and shows what
-remains unknown.
+Claude Code, Codex and their peers can write the code. What is left is the question of
+what their "done" rests on: what exactly changed, what was actually checked, whether the
+bytes that were checked are the bytes being committed — and what nobody checked at all.
+"The tests pass" answers none of those, because an absent check and a passing one look
+identical to every other tool.
 
-Your agent says the tests pass. That does not bound what changed; it says nothing about
-the check nobody wrote, because absent and passing look identical to every other tool; and
-it proves nothing numerically — one shifted index leaks a future bar into a signal, every
-test still passes, and the equity curve becomes fiction.
+AIQE is a deterministic, local assurance layer that turns those claims into evidence. It
+bounds a change to the paths the task declared, runs your repository's own checks, binds
+what they checked to the commit, keeps unrelated Git state out of it, and says what
+remains unknown. It was built for quant research, where one shifted index leaks a future
+bar into a signal, every test still passes, and the equity curve becomes fiction.
+Quant-first, with a domain-agnostic change-integrity core.
 
-Here is what it leaves behind instead — not a summary of a run, the artifact:
+```bash
+python3 -m venv .venv && . .venv/bin/activate
+python3 -m pip install "aiqe==0.1.0a0"
+aiqe doctor
+```
+
+Run `doctor` inside a Git repository: it needs no configuration and writes nothing.
+Or run it ephemerally with `uvx --from "aiqe==0.1.0a0" aiqe doctor`.
+Python 3.11 or newer, no third-party runtime dependencies.
+
+## What it does
+
+```
+agent claim        "done — the tests pass"
+     ↓
+declared scope     aiqe task start --own <path>     fixed before the work starts
+     ↓
+project checks     aiqe check                       your validators, with your consent
+     ↓
+content binding    checked content is bound to the completion evidence
+     ↓
+bounded commit     aiqe commit                      exactly the owned changed paths
+     ↓
+verdict            aiqe receipt                     REVIEWABLE · INCOMPLETE · NOT_REVIEWABLE
+```
+
+The last step leaves an artifact rather than a summary of a run:
 
 ```
 AIQE RECEIPT
@@ -48,15 +77,14 @@ hand.**
 repository declared exited zero, and nothing more — [the full
 boundary](#what-aiqe-does-not-do--and-cannot-prove).
 
-The v1 workflow is implemented, tested and validated against retained conformance
-fixtures. The package version is `0.1.0a0`. Whether a Git tag, a GitHub Release or a
-package-index entry exists for it is established from that object, not from this page.
+`0.1.0a0` is the first public alpha: tagged, released on GitHub as a prerelease, and
+published to [PyPI](https://pypi.org/project/aiqe/0.1.0a0/). The v1 workflow is
+implemented, tested and validated against retained conformance fixtures. The tag, the
+release and the index entry are external objects: whether a Git tag, a GitHub Release or a
+package-index entry exists for a version is established from that object, not from this
+page.
 
-```bash
-python3 -m venv .venv && .venv/bin/pip install . && .venv/bin/aiqe doctor
-```
-
-Or see the argument first — no install, no network, about ten seconds:
+Or see the argument first — from a clone, no install, no network, about ten seconds:
 
 ```bash
 python3 examples/lookahead-demo/run.py
@@ -92,6 +120,33 @@ receipt reports `REVIEWABLE`, `INCOMPLETE` or `NOT_REVIEWABLE` — never a fourt
 verdict. [`docs/architecture.md`](docs/architecture.md), and per command:
 [`doctor`](docs/doctor.md), [`init`](docs/config.md), [`task`](docs/task.md),
 [`check`](docs/check.md), [`commit`](docs/commit.md), [`receipt`](docs/receipt.md).
+
+## Outside quant research
+
+The six contract families below are quant semantics. The rest of AIQE is not: declaring
+what a task owns, keeping staged work it did not own out of the commit, binding checked
+content to that commit and naming what is unknown are properties of a Git change, not of
+a trading strategy. A validator that declares no contract applies to every checked task
+([`check`](docs/check.md)), so any repository's own commands can stand behind a bounded
+completion:
+
+```
+backend and service code   the task's exact paths; the repository's own pytest,
+                           type checker, linter or security scanner as validators;
+                           unrelated staged work kept out of the commit
+infrastructure and config  an IaC or configuration change bounded to its files,
+                           checked by the repository's own validation, committed
+                           as the content that was checked
+ML and data pipelines      the schema, data and pipeline checks the project
+                           already has, bound to the exact task state
+audit-sensitive work       a deterministic receipt naming the scope, the checks, the
+                           gaps and the unknowns
+```
+
+That is an assurance envelope around your repository's validation, not a replacement
+for it. AIQE does not know whether backend logic is correct, an infrastructure change is
+safe, a model is valid, or a system is secure or compliant. It knows which of your checks
+ran, against which content, and what they said.
 
 ## Failure-first demo
 
@@ -140,17 +195,18 @@ everything it produced — failures included, and the failures are the demo:
 
 ## Five-minute quickstart
 
-No third-party dependencies, Python 3.11 or newer, installed from this checkout — no
-package index involved.
+No third-party dependencies, Python 3.11 or newer.
 
 **1 · Install.**
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install .
+python3 -m venv .venv && .venv/bin/pip install "aiqe==0.1.0a0"
 ```
 
-Wheel, sdist and uv installs are exercised by the release proof too — see
-[Packaging](#packaging).
+That is the published alpha, pinned. To run the source you are reading instead, install
+from a clone of this repository with `.venv/bin/pip install .` — the path for
+development, and for anything newer than `0.1.0a0`. Wheel, sdist and uv installs are
+exercised by the release proof too — see [Packaging](#packaging).
 
 **2 · Look at the repository before changing anything.**
 
@@ -588,6 +644,13 @@ STANDALONE BINARY DEFERRED
 `DEFERRED` is not a roadmap entry: no measured install friction justifies a standalone
 executable, so none is planned, promised or dated.
 
+`0.1.0a0` is on [PyPI](https://pypi.org/project/aiqe/0.1.0a0/) as a wheel and an sdist,
+built from the `v0.1.0a0` tag and uploaded by a manually dispatched Trusted Publishing
+workflow, [`publish-pypi.yml`](.github/workflows/publish-pypi.yml); PyPI records a
+provenance attestation for each file naming that workflow. The retained release-proof
+manifest measures the artifact on the surfaces above, not the index: publication is
+established by the PyPI project itself, not by anything tracked here.
+
 ### External CI
 
 CI runs in two lanes: a push exercises Linux only, the full matrix runs on a tag or
@@ -664,7 +727,7 @@ background.
 
 | Milestone | Meaning |
 |---|---|
-| `v0.1.0a0` | First alpha candidate, and the package version this source carries: v1 command surface complete, tested, validated against retained conformance fixtures. Artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs). A tag, release or index entry for it is established from that object, not from this table. |
+| `v0.1.0a0` | First public alpha release, and the package version this source carries: v1 command surface complete, tested, validated against retained conformance fixtures. Artifacts build, install and run on the surfaces in [Where it runs](#where-it-runs), on the retained evidence. Its tag, GitHub prerelease and PyPI release are established from those objects, not from this table. |
 | `v1.0.0` | Every release gate green against retained artifacts. Command surface stable. |
 
 No conformance number appears here unless generated from a retained artifact, and no
